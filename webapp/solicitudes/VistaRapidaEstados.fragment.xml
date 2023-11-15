@@ -1,0 +1,23 @@
+<core:FragmentDefinition 
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+    <ResponsivePopover
+        id="idVistaRapidaEstados"
+        placement="Bottom"
+        showHeader="false">
+        <VBox class="sapUiTinyMargin" alignContent="Center" justifyContent="Center">
+            <Label text="{
+                path: 'estadoFactura',
+                formatter: '.formatEstadoFactura'
+            }" />
+            <ObjectStatus
+                inverted="true"
+                text="{fechaEmision}"
+                state="{
+                    path: '/estadoFactura',
+                    formatter: '.formatter.formatValueStateEstadoFactura'
+                }"/>
+
+        </VBox>
+    </ResponsivePopover>
+</core:FragmentDefinition>

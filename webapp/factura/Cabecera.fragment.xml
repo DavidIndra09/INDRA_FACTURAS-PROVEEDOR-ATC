@@ -1,0 +1,213 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.ui.unified"
+    xmlns:l="sap.ui.layout"
+    xmlns:upload="sap.m.upload">
+    <VBox >
+        <form:Form
+            editable="true">
+            <form:formContainers>
+                <form:FormContainer>
+                    <form:formElements>
+                        <form:FormElement>
+                            <form:fields>
+                                <u:FileUploader
+                                    id="fileUploader"
+                                    name="myFileUpload"
+                                    icon=""
+                                    uploadUrl="upload/"
+                                    tooltip="Validar archivo xml"
+                                    uploadComplete="handleUploadComplete"
+                                    change="onImportarArchivoXml"
+                                    typeMissmatch="handleTypeMissmatch"
+                                    style="Accept"
+                                    width="100%"
+                                    fileType="xml" 
+                                    buttonText="{= ${device>/system/phone} ? 'Importar' : 'Importar xml'}"
+                                    buttonOnly="{device>/system/phone}">
+                                </u:FileUploader>
+                            </form:fields>
+                            <form:label>
+                                <Label text="Fact. Electrónica" design="Bold"/>
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                                
+                                <Button  id="btnFactElect"
+                                    text="Validar"
+                                    press="onValidarArchivoXml"
+                                    type="Attention">
+                                    <!-- <layoutData>
+                                        <l:GridData span="XL4 L1 M3 S4" />
+                                    </layoutData> -->
+                                </Button>
+                                <Button  id="btnFactElectClear"
+                                    icon="sap-icon://clear-filter"
+                                    press="onClearArchivoXml"
+                                    tooltip="Limpiar"
+                                    text="Limpiar"
+                                    type="Ghost">
+                                    <!-- <layoutData>
+                                        <l:GridData span="XL4 L1 M3 S4" />
+                                    </layoutData> -->
+                                </Button>
+                            </form:fields>
+                            <form:label> 
+                            </form:label>
+                        </form:FormElement>
+                    </form:formElements>
+                    <form:formElements>
+                        <form:FormElement>
+                            <form:fields>
+                                <Input 
+                                    value="{codigoFactura}" 
+                                    placeholder="Ingrese Nro. factura" 
+                                    enabled="{facturaView>/isEnabledCabecera}" 
+                                    change="onIngresarCodigoFactura"/>
+                                
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>factura}"/>
+                            </form:label>
+                        </form:FormElement>
+                      <!--  <form:FormElement>
+                            <form:fields>
+                            <Input value="{sociedad}" placeholder="Ingrese Sociedad" enabled="{facturaView>/isEnabledCabecera}" /> 
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>sociedad}"/>
+                            </form:label>
+                        </form:FormElement> -->
+                        
+                        <form:FormElement>
+                            <form:fields>
+                                <DatePicker 
+                                    placeholder="Ingrese fecha de emisión" 
+                                    value="{
+                                        path: 'fechaEmision',
+                                        formatter: '.formatter.formatDateView'
+                                    }"
+                                    displayFormat="dd.MM.yyyy"
+                                    enabled="{facturaView>/isEnabledCabecera}" 
+                                    change="onSeleccionarFecha"/>
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>fechaEmision}"/>
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                                <Input 
+                                    value="{importe}" 
+                                    placeholder="Ingrese importe" 
+                                    enabled="{facturaView>/isEnabledCabecera}" 
+                                    liveChange="onCalcularImpuestoTotal"/>
+                                <Select
+                                    change="onSeleccionarTipoImpuesto"
+                                    selectedKey="{tipoImpuesto}"
+                                    forceSelection="false"
+                                    enabled="{facturaView>/isEnabledCabecera}">
+                                    <!--<core:Item key= "1" text="IGV"/> -->
+                                    <core:Item key= "1" text="Retención"/>
+                                </Select>
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>importe}"/>
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                                <Input value="{
+                                    path: 'total',
+                                    formatter: '.formatter.formatCurrency'
+                                }" enabled="false"/>
+                                <ObjectStatus
+                                    class="sapUiSmallMarginBottom"
+                                    title="Estado"
+                                    text="{estado}"
+                                    active="true"
+                                    state="{estadoState}"
+                                    press="handleStatusPressed"
+                                    icon="{estadoIcon}" />
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>importeTotal}"/>
+                            </form:label>
+                        </form:FormElement>
+                    </form:formElements>
+                </form:FormContainer>
+
+            </form:formContainers> 
+            <form:layout>
+                <form:ColumnLayout
+                    columnsL="3"
+                    columnsM="2"
+                    columnsXL="5"
+                    emptyCellsLarge="0"
+                    labelCellsLarge="4"
+                >
+                    
+                </form:ColumnLayout>
+            </form:layout>
+        </form:Form>
+  
+
+        <Panel headerText="Adjuntar" expand="false" expandable="true" class="sapUiSmallMarginTop">
+            <Table 
+                items="{
+                    path:'/Adjuntos'
+                }"
+                updateFinished="onUpdateFinishedAdjuntos"
+                noDataText="Actualmente no hay archivos">
+                <headerToolbar>
+                    <OverflowToolbar >
+                        <Title text="{facturaView>/tituloListaAdjuntos}" />
+                        <ToolbarSpacer />
+                        <u:FileUploader
+                            name="myFileUpload"
+                            placeholder="Seleccione archivos"
+                            uploadUrl="upload/"
+                            buttonText="Seleccionar Adjunto"
+                            style="Emphasized"
+                            tooltip="Adjunte sus archivos"
+                            change="onCargaAdjuntos"
+                            buttonOnly="{device>/system/phone}"
+                            icon="sap-icon://attachment"
+                            iconOnly="{device>/system/phone}"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column >
+                        <Label text="Nombre" />
+                    </Column>
+                    <Column demandPopin="true" minScreenWidth="Tablet">
+                        <Label text="Fecha de modificación" />
+                    </Column>
+                    <Column demandPopin="true" minScreenWidth="Tablet">
+                        <Label text="Tipo de Archivo" />
+                    </Column>
+                    <Column width="3rem">
+                        <Label text="" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem >
+                        <Text text="{name}" />
+                        <Text text="{
+                            path: 'lastModifiedDate',
+                            formatter: '.formatter.formatDateView'    
+                        }" />
+
+                        <ObjectStatus
+                            text="{type}" 
+                            state="Indication07"/>
+                        <Button type="Reject" icon="sap-icon://delete" press="onEliminarAdjunto"/>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </Panel>
+    </VBox>
+</core:FragmentDefinition>

@@ -1,0 +1,37 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:l="sap.ui.layout"
+	xmlns:u="sap.ui.unified"
+	xmlns:f="sap.ui.layout.form">
+	<Dialog 
+		title="Confirmación"
+		state="Warning"
+		icon="sap-icon://warning"
+		afterClose=".onAfterCloseMensajeConfirmacion"
+		type="Message">
+		<content>
+			<List 
+				items="{message>/}">
+			<headerToolbar>
+				<OverflowToolbar >
+					<Label text="{/tituloMensaje}" wrapping="true" wrappingType="Hyphenated" />
+				</OverflowToolbar>
+			</headerToolbar>
+				<StandardListItem
+					title="Solicitud" 
+					description="{message>description}"
+					info="{message>message}" 
+					infoState="{message>type}" />
+			</List>
+        </content>
+        <beginButton>
+            <Button text="Aceptar" type="Accept" icon="sap-icon://accept" press="onAceptarMensajeConfirmacion" />
+        </beginButton>
+        <endButton>
+            <Button text="Cancelar"  type="Reject" icon="sap-icon://decline" press="onCerrarMensajeConfirmacion" />
+        </endButton>  
+            
+	</Dialog>
+	
+</core:FragmentDefinition>

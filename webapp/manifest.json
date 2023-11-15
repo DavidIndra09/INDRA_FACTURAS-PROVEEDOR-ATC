@@ -1,0 +1,204 @@
+{
+    "_version": "1.45.0",
+    "sap.app": {
+        "id": "usil.com.createinvoice",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:worklist",
+            "version": "1.7.4",
+            "toolsId": "71a4c4c7-a37b-4ed1-a211-fdc2903657e2"
+        },
+        "dataSources": {
+            "sapService": {
+                "uri": "/sap/opu/odata/sap/ZPY_FACTURA_ISP_SRV/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "odataVersion": "2.0"
+                }
+            },
+            "mainService": {
+                "uri": "/odata/v2/facturas/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "localUri": "localService/metadata.xml",
+                    "odataVersion": "2.0"
+                }
+            }
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "createinvoice": {
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    },
+                    "semanticObject": "CreateInvoice",
+                    "action": "Display",
+                    "title": "Factura Proveedor",
+                    "subTitle": "Proveedor",
+                    "info": "Portal de proveedores",
+                    "icon": "sap-icon://my-sales-order"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.109.3",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.f": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "ODATA_SAP": {
+                "preload": true,
+                "dataSource": "sapService",
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "usil.com.createinvoice.i18n.i18n"
+                }
+            },
+            "facturaModel":{
+                "dataSource": "mainService",
+                "preload": true
+            },
+            "": {
+                "type": "sap.ui.model.json.JSONModel",
+                "preload": true,
+                "settings": {}
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "viewType": "XML",
+                "viewPath": "usil.com.createinvoice",
+                "controlId": "app",
+                "controlAggregation": "pages",
+                "bypassed": {
+                    "target": [
+                        "notFound"
+                    ]
+                },
+                "async": true
+            },
+            "routes": [
+                {
+                    "pattern": "",
+                    "name": "solicitudes",
+                    "target": [
+                        "solicitudes"
+                    ]
+                },
+                {
+                    "pattern": "Detalle/{codigoSolicitud}",
+                    "name": "detalle",
+                    "target": [
+                        "detalle"
+                    ]
+                },
+                {
+                    "pattern": "Ordenes",
+                    "name": "orden",
+                    "target": [
+                        "orden"
+                    ]
+                },
+                {
+                    "pattern": "Factura/{codigoSolicitud}",
+                    "name": "factura",
+                    "target": [
+                        "factura"
+                    ]
+                }
+            ],
+            "targets": {
+                "solicitudes": {
+                    "viewName": "solicitudes.Solicitudes",
+                    "viewId": "solicitudes",
+                    "viewLevel": 1,
+                    "title": "{i18n>solicitudesViewTitle}"
+                },
+                "detalle": {
+                    "viewName": "detalle.Detalle",
+                    "viewId": "detalle.Detalle",
+                    "viewLevel": 2,
+                    "title": "{i18n>detalleViewTitle}"
+                },
+                "orden": {
+                    "viewName": "ordenes.Orden",
+                    "viewId": "ordenes.Orden",
+                    "viewLevel": 3,
+                    "title": "{i18n>ordenViewTitle}"
+                },
+                "factura": {
+                    "viewName": "factura.Factura",
+                    "viewId": "factura.Factura",
+                    "viewLevel": 2,
+                    "title": "{i18n>facturaViewTitleCreate}"
+                },
+                "objectNotFound": {
+                    "viewName": "ObjectNotFound",
+                    "viewId": "objectNotFound"
+                },
+                "notFound": {
+                    "viewName": "NotFound",
+                    "viewId": "notFound"
+                }
+            }
+        },
+        "rootView": {
+            "viewName": "usil.com.createinvoice.view.App",
+            "type": "XML",
+            "async": true,
+            "id": "app"
+        }
+    },
+    "sap.cloud": {
+        "public": true,
+        "service": "usil-com-createinvoice"
+    }   
+}

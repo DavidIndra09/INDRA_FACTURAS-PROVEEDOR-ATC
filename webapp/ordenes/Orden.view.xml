@@ -1,0 +1,63 @@
+<mvc:View
+    controllerName="usil.com.createinvoice.ordenes.Orden"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
+
+    <f:DynamicPage
+        showFooter="true"
+        id="page"
+        busy="{ordenView>/busy}"
+        busyIndicatorDelay="{ordenView>/delay}">
+        <f:title>
+            <f:DynamicPageTitle
+                areaShrinkRatio="1:1.6:1.6"
+                backgroundDesign="Transparent">
+                <f:heading>
+                    <Title
+                        text="{i18n>ordenViewTitle}"
+                        level="H2"/>
+                </f:heading>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Solicitudes" />
+                        <Link text="Factura" press=".onNavBack"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+                <f:navigationActions>
+                    <Button
+                        icon="sap-icon://decline"
+                        type="Reject"
+                        press=".onNavBack" />
+                </f:navigationActions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:header>
+            <f:DynamicPageHeader
+                backgroundDesign="Transparent">
+                <f:content>
+                    <core:Fragment fragmentName="usil.com.createinvoice.ordenes.Filtros" type="XML" />
+                </f:content>
+            </f:DynamicPageHeader>
+        </f:header>
+        <f:content>
+            <core:Fragment fragmentName="usil.com.createinvoice.ordenes.Tabla" type="XML" />
+        </f:content>
+        <f:footer>
+            <OverflowToolbar >
+                <ToolbarSpacer/>
+                <Button 
+                    icon="sap-icon://add"  
+                    text="Agregar"  
+                    type="Accept" 
+                    press="onAgregarOrdenes" />
+            </OverflowToolbar>
+        </f:footer>
+        <f:header>
+        </f:header>
+    </f:DynamicPage>
+
+</mvc:View>

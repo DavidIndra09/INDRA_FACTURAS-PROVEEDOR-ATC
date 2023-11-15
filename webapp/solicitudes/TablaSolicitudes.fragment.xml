@@ -1,0 +1,17 @@
+<core:FragmentDefinition xmlns:vk="sap.ui.vk"
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+  xmlns:commons="sap.suite.ui.commons"
+  xmlns:u="sap.ui.unified"
+  >
+   
+   
+  <Panel id="ContenedorTabla" expandable="false" expand="true">
+  
+  </Panel> 
+ 
+  
+
+  
+
+</core:FragmentDefinition>

@@ -1,0 +1,81 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+    <form:Form
+        editable="true"
+        binding="{ordenView>/Busqueda}">
+        <form:formContainers>
+            <form:FormContainer>
+                <form:formElements>
+                    <form:FormElement>
+                        <form:fields>
+                            <Input value="{ordenView>conformidad}" placeholder="{i18n>placeholderConformidad}" />
+                        </form:fields>
+                        <form:label>
+                            <Label text="{i18n>conformidad}" design="Bold" />
+                        </form:label>
+                    </form:FormElement>
+                    <form:FormElement>
+                        <form:fields>
+                        <MultiInput
+                                            id="mtIptOrdenCompra"
+                                            value="{ordenView>ordenCompra}"
+                                            showSuggestion="false" 
+                                            showValueHelp="false"
+                                            placeholder="{i18n>placeholderOrden}"
+                                        />
+                         <!--  <Input value="{ordenView>ordenCompra}" placeholder="{i18n>placeholderOrden}"/> -->
+                        </form:fields>
+                        <form:label>
+                            <Label text="{i18n>ordenCompra}" design="Bold"/>
+                        </form:label>
+                    </form:FormElement>
+                    <form:FormElement>
+                        <form:fields>
+                         <MultiInput
+                                            id="mtIptDescMaterial"
+                                            value="{ordenView>descMaterial}"
+                                            showSuggestion="false" 
+                                            showValueHelp="false"
+                                            placeholder="{i18n>placeholderMaterial}"
+                                        />
+                           <!-- <Input value="{ordenView>descMaterial}" placeholder="{i18n>placeholderMaterial}"/> -->
+                        </form:fields>
+                        <form:label>
+                            <Label text="{i18n>material}" design="Bold"/>
+                        </form:label>
+                    </form:FormElement>
+                    <!-- <form:FormElement>
+                        <form:fields>
+                            <DateRangeSelection
+                                value="{fecha}"
+                                valueFormat="dd-MM-yyyy"
+                                displayFormat="dd-MM-yyyy" />
+                        </form:fields>
+                        <form:label>
+                            <Label text="{i18n>fechaOrden}" design="Bold"/>
+                        </form:label>
+                    </form:FormElement> -->
+                    <form:FormElement>
+                        <form:fields>
+                            <Button text="Buscar" type="Emphasized" icon="sap-icon://search" press="onBuscarOrdenes" />
+                            <Button text="Limpiar" type="Ghost" icon="sap-icon://clear-filter" press="onLimpiarFiltros" />
+                        </form:fields>
+                        <form:label>
+                            <Label text="" />
+                        </form:label>
+                    </form:FormElement>
+                </form:formElements>
+            </form:FormContainer>
+        </form:formContainers>
+        <form:layout>
+            <form:ColumnLayout
+                columnsL="3"
+                columnsM="2"
+                columnsXL="5"
+                emptyCellsLarge="0"
+                labelCellsLarge="4"/>
+        </form:layout>
+    </form:Form>
+</core:FragmentDefinition>

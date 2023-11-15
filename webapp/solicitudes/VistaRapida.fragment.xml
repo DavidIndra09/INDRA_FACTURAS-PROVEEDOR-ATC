@@ -1,0 +1,101 @@
+<core:FragmentDefinition 
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+    xmlns:microchart="sap.suite.ui.microchart"
+    xmlns:commons="sap.suite.ui.commons"
+    xmlns:form="sap.ui.layout.form">
+    <ResponsivePopover
+        id="idVistaRapida"
+        placement="Left"
+        icon="sap-icon://detail-view"
+        title="Solicitud {CODEFACT}">
+        <VBox >
+            <!-- <commons:MicroProcessFlow content="{/EstadosFactura}" >
+                <commons:content>
+                    <commons:MicroProcessFlowItem
+                        icon="{i18n>iconDetailView}"
+                        key="{ID}"
+                        state="None"
+                        title="{descripcion}"
+                        showIntermediary="{= ${/EstadosFactura}.length === (${ID} + 1) ? false : true}"
+                        showSeparator="false"
+                        stepWidth="100%">
+                        <commons:customControl>
+                            <ObjectStatus 
+                                icon="{icon}" 
+                                inverted="true" 
+                                state="{
+                                    parts:[
+                                        {path: '/EstadoFactura'},
+                                        {path: 'ID'}
+                                    ],
+                                    formatter: '.formatter.formatValueStateProcess'
+                                }"
+                                />
+                        </commons:customControl>
+                        <commons:intermediary >
+                            <core:Icon src="sap-icon://open-command-field" color="red" />
+                        </commons:intermediary>
+                    </commons:MicroProcessFlowItem>
+                </commons:content>
+            </commons:MicroProcessFlow> -->
+
+            <form:Form editable="true">
+                <form:formContainers>
+                    <form:FormContainer >
+                        <form:formElements>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{
+                                        path: 'DATRE',
+                                        formatter: '.formatter.formatearFechaString'
+                                    }"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Fecha Registro" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{
+                                        parts:[{path:'IGV'},{path:'WAERS'}],
+                                        type: 'sap.ui.model.type.Currency',
+                                        formatOptions: {showMeasure: false}
+                                    }" />
+                                </form:fields>
+                                <form:label>
+                                    <Label text="IGV" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{WAERS}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Moneda" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{BUKRS}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Sociedad" />
+                                </form:label>
+                            </form:FormElement>
+                        </form:formElements>
+                    </form:FormContainer>
+                </form:formContainers>
+                <form:layout>
+                    <form:ColumnLayout
+                        columnsL="1"
+                        columnsM="1"
+                        columnsXL="1"
+                        emptyCellsLarge="0"
+                        labelCellsLarge="2"
+                    />
+                </form:layout>
+            </form:Form>
+        </VBox>
+    </ResponsivePopover>
+</core:FragmentDefinition>

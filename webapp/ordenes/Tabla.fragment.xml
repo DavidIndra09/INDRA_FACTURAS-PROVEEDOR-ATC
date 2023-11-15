@@ -1,0 +1,95 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+    <Table
+        id="idTableOrdenes"
+        width="auto"
+        items="{
+            path: '/Ordenes',
+            sorter: {
+                path: 'conformidad',
+                descending: false
+            }
+        }"
+        noDataText="{ordenView>/tableNoDataText}"
+        busyIndicatorDelay="{ordenView>/tableBusyDelay}"
+        growing="true"
+        growingScrollToLoad="true"
+        updateFinished=".onUpdateFinished"
+        mode="MultiSelect">
+
+        <headerToolbar>
+            <OverflowToolbar>
+                <Title
+                    id="tableHeader"
+                    text="{ordenView>/ordenTableTitle}"
+                    level="H3"/>
+                <ToolbarSpacer />
+                <SearchField
+                    id="searchField"
+                    tooltip="{i18n>ordenSearchTooltip}"
+                    search=".onSearch"
+                    liveChange="onBusquedaRapida">
+                    <layoutData>
+                        <OverflowToolbarLayoutData
+                            maxWidth="200px"
+                            priority="NeverOverflow"/>
+                    </layoutData>
+                </SearchField>
+            </OverflowToolbar>
+        </headerToolbar>
+
+        <columns>
+            <Column >
+                <Label text="{i18n>conformidad}" design="Bold"/>
+            </Column>
+            <Column demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>posConformidad}" design="Bold"/>
+            </Column>
+            <Column demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>ordenCompra}" design="Bold"/>
+            </Column>
+            <Column demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>posOrden}" design="Bold"/>
+            </Column>
+
+            <Column demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>material}" design="Bold"/>
+            </Column>
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>cantidad}" design="Bold"/>
+            </Column>
+            <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+                <Label text="{i18n>importe}" design="Bold"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem
+                press=".onPress">
+                <cells>
+                    <ObjectIdentifier
+                        title="{BELNR}"/>
+                    <Text text="{BUZEI}" />
+                    <Text text="{EBELN}" />
+                    <Text text="{EBELP}" />
+                    <ObjectIdentifier title="{MATNR}" text="{TXZ01}" />
+                    <ObjectNumber
+                        number="{
+                            path: 'MENGE',
+                            formatter: '.formatter.numberUnit'
+                        }"
+                        unit="{MEINS}" />
+                        <ObjectNumber
+                            number="{
+                            parts:[{path:'NETWR'},{path:'WAERS'}],
+                            type: 'sap.ui.model.type.Currency',
+                            formatOptions: {showMeasure: false}
+                        }"
+                        unit="{WAERS}"
+                        state="Information" />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</core:FragmentDefinition>
