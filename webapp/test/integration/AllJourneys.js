@@ -8,7 +8,7 @@ sap.ui.define([
 
 	Opa5.extendConfig({
 		arrangements: new Startup(),
-		viewNamespace: "usil.com.createinvoice.view.",
+		viewNamespace: "usil.com.createinvoice.atc.view.",
 		autoWait: true
 	});
 

@@ -3,12 +3,12 @@ sap.ui.define([
     "sap/ui/Device",
     "./model/models",
     "./controller/ErrorHandler",
-    "usil/com/createinvoice/libs/xlsx",
-    "usil/com/createinvoice/libs/jszip",
+    "usil/com/createinvoice/atc/libs/xlsx",
+    "usil/com/createinvoice/atc/libs/jszip",
 ], function (UIComponent, Device, models, ErrorHandler, XLSX, jszip) {
     "use strict";
 
-    return UIComponent.extend("usil.com.createinvoice.Component", {
+    return UIComponent.extend("usil.com.createinvoice.atc.Component", {
 
         metadata: {
             manifest: "json"

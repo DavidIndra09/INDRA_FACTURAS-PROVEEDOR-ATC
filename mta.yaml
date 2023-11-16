@@ -1,94 +1,94 @@
 _schema-version: "3.2"
-ID: usil-com-createinvoice
+ID: usil-com-createinvoice-atc
 description: A Fiori application.
 version: 0.0.1
 modules:
-- name: usil-com-createinvoice-destination-content
-  type: com.sap.application.content
-  requires:
-  - name: usil-com-createinvoice-destination-service
-    parameters:
-      content-target: true
-  - name: usil-com-createinvoice-repo-host
-    parameters:
-      service-key:
-        name: usil-com-createinvoice-repo-host-key
-  - name: usil-com-createinvoice-uaa
-    parameters:
-      service-key:
-        name: usil-com-createinvoice-uaa-key
-  parameters:
-    content:
-      instance:
-        destinations:
-        - Name: usil-com-createinvoice_html_repo_host
-          ServiceInstanceName: usil-com-createinvoice-html5-srv
-          ServiceKeyName: usil-com-createinvoice-repo-host-key
-          sap.cloud.service: usil-com-createinvoice
-        - Authentication: OAuth2UserTokenExchange
-          Name: usil-com-createinvoice_uaa
-          ServiceInstanceName: usil-com-createinvoice-xsuaa-srv
-          ServiceKeyName: usil-com-createinvoice-uaa-key
-          sap.cloud.service: usil-com-createinvoice
-        existing_destinations_policy: ignore
-  build-parameters:
-    no-source: true
-- name: usil-com-createinvoice-app-content
-  type: com.sap.application.content
-  path: .
-  requires:
-  - name: usil-com-createinvoice-repo-host
-    parameters:
-      content-target: true
-  build-parameters:
-    build-result: resources
+  - name: usil-com-createinvoice-atc-destination-content
+    type: com.sap.application.content
     requires:
-    - artifacts:
-      - usilcomcreateinvoice.zip
-      name: usilcomcreateinvoice
-      target-path: resources/
-- name: usilcomcreateinvoice
-  type: html5
-  path: .
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-resources:
-- name: usil-com-createinvoice-destination-service
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      init_data:
+      - name: usil-com-createinvoice-atc-destination-service
+        parameters:
+          content-target: true
+      - name: usil-com-createinvoice-atc-repo-host
+        parameters:
+          service-key:
+            name: usil-com-createinvoice-atc-repo-host-key
+      - name: usil-com-createinvoice-atc-uaa
+        parameters:
+          service-key:
+            name: usil-com-createinvoice-atc-uaa-key
+    parameters:
+      content:
         instance:
           destinations:
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
-          existing_destinations_policy: update
-      version: 1.0.0
-    service: destination
-    service-name: usil-com-createinvoice-destination-service
-    service-plan: lite
-- name: usil-com-createinvoice-uaa
-  type: org.cloudfoundry.managed-service
-  parameters:
-    path: ./xs-security.json
-    service: xsuaa
-    service-name: usil-com-createinvoice-xsuaa-srv
-    service-plan: application
-- name: usil-com-createinvoice-repo-host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-name: usil-com-createinvoice-html5-srv
-    service-plan: app-host
+            - Name: usil-com-createinvoice-atc_html_repo_host
+              ServiceInstanceName: usil-com-createinvoice-atc-html5-srv
+              ServiceKeyName: usil-com-createinvoice-atc-repo-host-key
+              sap.cloud.service: usil-com-createinvoice-atc
+            - Authentication: OAuth2UserTokenExchange
+              Name: usil-com-createinvoice-atc_uaa
+              ServiceInstanceName: usil-com-createinvoice-atc-xsuaa-srv
+              ServiceKeyName: usil-com-createinvoice-atc-uaa-key
+              sap.cloud.service: usil-com-createinvoice-atc
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
+  - name: usil-com-createinvoice-atc-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: usil-com-createinvoice-atc-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - usilcomcreateinvoiceatc.zip
+          name: usilcomcreateinvoiceatc
+          target-path: resources/
+  - name: usilcomcreateinvoiceatc
+    type: html5
+    path: .
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+resources:
+  - name: usil-com-createinvoice-atc-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: usil-com-createinvoice-atc-destination-service
+      service-plan: lite
+  - name: usil-com-createinvoice-atc-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: usil-com-createinvoice-atc-xsuaa-srv
+      service-plan: application
+  - name: usil-com-createinvoice-atc-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: usil-com-createinvoice-atc-html5-srv
+      service-plan: app-host
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true

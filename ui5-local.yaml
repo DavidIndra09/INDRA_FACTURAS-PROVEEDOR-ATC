@@ -2,7 +2,7 @@
 
 specVersion: "2.5"
 metadata:
-  name: usil.com.createinvoice
+  name: usil.com.createinvoice.atc
 type: application
 framework:
   name: SAPUI5
@@ -45,5 +45,5 @@ server:
     - name: fiori-tools-preview
       afterMiddleware: fiori-tools-appreload
       configuration:
-        component: usil.com.createinvoice
+        component: usil.com.createinvoice.atc
         ui5Theme: sap_horizon

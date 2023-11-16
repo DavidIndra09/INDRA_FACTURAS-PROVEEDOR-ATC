@@ -21,20 +21,20 @@
         "ui5-task-zipper": "^0.5.0"
     },
     "scripts": {
-        "start": "fiori run --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#usilcomcreateinvoice-display\"",
-        "start-local": "fiori run --config ./ui5-local.yaml --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#usilcomcreateinvoice-display\"",
+        "start": "fiori run --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#usilcomcreateinvoiceatc-display\"",
+        "start-local": "fiori run --config ./ui5-local.yaml --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#usilcomcreateinvoiceatc-display\"",
         "build": "ui5 build --config=ui5.yaml --clean-dest --dest dist",
         "lint": "eslint ./ --rulesdir ./node_modules/eslint-plugin-fiori-custom/lib/rules/",
         "deploy": "fiori cfDeploy",
         "deploy-config": "fiori add deploy-config",
         "start-noflp": "fiori run --open \"index.html?sap-ui-xx-viewCache=false\"",
-        "start-mock": "fiori run --config ./ui5-mock.yaml --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#usilcomcreateinvoice-display\"",
+        "start-mock": "fiori run --config ./ui5-mock.yaml --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#usilcomcreateinvoiceatc-display\"",
         "start-variants-management": "fiori run --open \"preview.html?sap-ui-xx-viewCache=false&fiori-tools-rta-mode=true&sap-ui-rta-skip-flex-validation=true#preview-app\"",
         "unit-tests": "fiori run --config ./ui5-mock.yaml --open 'test/unit/unitTests.qunit.html'",
         "int-tests": "fiori run --config ./ui5-mock.yaml --open 'test/integration/opaTests.qunit.html'",
         "build:cf": "ui5 build preload --clean-dest --config ui5-deploy.yaml --include-task=generateManifestBundle generateCachebusterInfo",
         "build:mta": "rimraf resources mta_archives && mbt build",
-        "undeploy": "cf undeploy usil-com-createinvoice --delete-services --delete-service-keys --delete-service-brokers"
+        "undeploy": "cf undeploy usil-com-createinvoice-atc --delete-services --delete-service-keys --delete-service-brokers"
     },
     "ui5": {
         "dependencies": [

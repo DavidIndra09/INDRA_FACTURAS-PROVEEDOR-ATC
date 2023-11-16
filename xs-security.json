@@ -1,5 +1,5 @@
 {
-  "xsappname": "usilcomcreateinvoice",
+  "xsappname": "usilcomcreateinvoiceatc",
   "tenant-mode": "dedicated",
   "description": "Security profile of called application",
   "scopes": [],

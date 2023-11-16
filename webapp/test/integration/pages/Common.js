@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (Opa5) {
 	"use strict";
 
-	return Opa5.extend("usil.com.createinvoice.test.integration.pages.Common", {
+	return Opa5.extend("usil.com.createinvoice.atc.test.integration.pages.Common", {
 
 
 		theUnitNumbersShouldHaveTwoDecimals: function (sControlType, sViewName, sSuccessMsg, sErrMsg) {

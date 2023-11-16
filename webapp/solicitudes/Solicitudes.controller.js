@@ -32,7 +32,7 @@ sap.ui.define([
         messageManager,
         ODATA_SAP;
 
-    return BaseController.extend("usil.com.createinvoice.solicitudes.Solicitudes", {
+    return BaseController.extend("usil.com.createinvoice.atc.solicitudes.Solicitudes", {
 
         formatter: formatter,
 
@@ -498,7 +498,7 @@ sap.ui.define([
             let dialog = that._dialogs[dialogName];
             if (!dialog) {
                 dialog = await this.loadFragment({
-                    name: `usil.com.createinvoice.solicitudes.${dialogName}`
+                    name: `usil.com.createinvoice.atc.solicitudes.${dialogName}`
                 });
                 that._dialogs[dialogName] = dialog
             }
@@ -509,7 +509,7 @@ sap.ui.define([
             let dialog = that._dialogs[dialogName];
             if (!dialog) {
                 dialog = await this.loadFragment({
-                    name: `usil.com.createinvoice.view.fragments.${dialogName}`
+                    name: `usil.com.createinvoice.atc.view.fragments.${dialogName}`
                 });
                 that._dialogs[dialogName] = dialog
             }

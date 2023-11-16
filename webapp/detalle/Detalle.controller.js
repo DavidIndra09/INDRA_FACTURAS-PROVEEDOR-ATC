@@ -13,7 +13,7 @@ sap.ui.define([
         facturaModel,
         ODATA_SAP;
 
-    return BaseController.extend("usil.com.createinvoice.detalle.Detalle", {
+    return BaseController.extend("usil.com.createinvoice.atc.detalle.Detalle", {
 
         formatter: formatter,
 

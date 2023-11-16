@@ -2,7 +2,7 @@
 
 specVersion: "2.5"
 metadata:
-  name: usil.com.createinvoice
+  name: usil.com.createinvoice.atc
 type: application
 server:
   customMiddleware:
@@ -15,9 +15,9 @@ server:
             - /resources
             - /test-resources
           url: https://ui5.sap.com
-        backend:
-          - path: /v2
-            url: https://universidad-san-ignacio-de-loyola-s-a--dev-c2m3q3od-han39757985.cfapps.br10.hana.ondemand.com
+        #backend:
+        #  - path: /v2
+        #    url: https://universidad-san-ignacio-de-loyola-s-a--dev-c2m3q3od-han39757985.cfapps.br10.hana.ondemand.com
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
@@ -27,5 +27,5 @@ server:
     - name: fiori-tools-preview
       afterMiddleware: fiori-tools-appreload
       configuration:
-        component: usil.com.createinvoice
+        component: usil.com.createinvoice.atc
         ui5Theme: sap_horizon

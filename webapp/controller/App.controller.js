@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (BaseController) {
     "use strict";
 
-    return BaseController.extend("usil.com.createinvoice.controller.App", {
+    return BaseController.extend("usil.com.createinvoice.atc.controller.App", {
 
         onInit: function () {
             // apply content density mode to root view

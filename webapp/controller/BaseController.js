@@ -8,7 +8,7 @@ sap.ui.define([
     // shortcut for sap.m.URLHelper
     var URLHelper = mobileLibrary.URLHelper;
 
-    return Controller.extend("usil.com.createinvoice.controller.BaseController", {
+    return Controller.extend("usil.com.createinvoice.atc.controller.BaseController", {
         /**
          * Convenience method for accessing the router.
          * @public
@@ -92,7 +92,7 @@ sap.ui.define([
             let dialog = this.dialogs[dialogName];
             if (!dialog) {
                 dialog = await controller.loadFragment({
-                    name: `usil.com.createinvoice.view.fragments.${dialogName}`
+                    name: `usil.com.createinvoice.atc.view.fragments.${dialogName}`
                 });
                 this.dialogs[dialogName] = dialog;
             }

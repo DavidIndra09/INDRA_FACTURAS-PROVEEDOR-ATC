@@ -2,7 +2,7 @@
 
 specVersion: "2.5"
 metadata:
-  name: usil.com.createinvoice
+  name: usil.com.createinvoice.atc
 type: application
 server:
   customMiddleware:

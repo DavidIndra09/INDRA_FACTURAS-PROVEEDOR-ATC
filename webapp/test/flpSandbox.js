@@ -40,7 +40,7 @@ sap.ui.define([
 								"tileType": "sap.ushell.ui.tile.StaticTile",
 								"properties": {
 									"title": "Ordenes de Compra",
-									"targetURL": "#usilcomcreateinvoice-display"
+									"targetURL": "#usilcomcreateinvoiceatc-display"
 								}
 							}]
 						}]
@@ -51,8 +51,8 @@ sap.ui.define([
 				"adapter": {
 					"config": {
 						"inbounds": {
-							"usilcomcreateinvoice-display": {
-								"semanticObject": "usilcomcreateinvoice",
+							"usilcomcreateinvoiceatc-display": {
+								"semanticObject": "usilcomcreateinvoiceatc",
 								"action": "display",
 								"description": "A Fiori application.",
 								"title": "Ordenes de Compra",
@@ -61,7 +61,7 @@ sap.ui.define([
 								},
 								"resolutionResult": {
 									"applicationType": "SAPUI5",
-									"additionalInformation": "SAPUI5.Component=usil.com.createinvoice",
+									"additionalInformation": "SAPUI5.Component=usil.com.createinvoice.atc",
 									"url": sap.ui.require.toUrl("usil/com/createinvoice")
 								}
 							}

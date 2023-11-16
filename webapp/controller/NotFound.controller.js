@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (BaseController) {
     "use strict";
 
-    return BaseController.extend("usil.com.createinvoice.controller.NotFound", {
+    return BaseController.extend("usil.com.createinvoice.atc.controller.NotFound", {
 
         /**
          * Navigates to the worklist when the link is pressed

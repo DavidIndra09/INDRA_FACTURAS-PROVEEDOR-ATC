@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (Model) {
 	"use strict";
 
-	return Model.extend("usil.com.createinvoice.test.unit.helper.FakeI18nModel", {
+	return Model.extend("usil.com.createinvoice.atc.test.unit.helper.FakeI18nModel", {
 
 		constructor: function (mTexts) {
 			Model.call(this);

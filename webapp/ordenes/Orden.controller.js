@@ -22,7 +22,7 @@ sap.ui.define([
         that,
         ordenModel,
         ODATA_SAP;
-    return BaseController.extend("usil.com.createinvoice.ordenes.Orden", {
+    return BaseController.extend("usil.com.createinvoice.atc.ordenes.Orden", {
 
         formatter: formatter,
 
@@ -152,8 +152,8 @@ sap.ui.define([
 
         onDeleteItemFactura: function (oEvent) {
             var impTotalDel = 0;
-            const table = sap.ui.getCore().byId("container-usil.com.createinvoice---factura--OrdenesCompra");
-            // if(!table) table = sap.ui.core.Fragment.byId("usil.com.createinvoice.view.fragments.CreateInvoice","OrdenesCompra");
+            const table = sap.ui.getCore().byId("container-usil.com.createinvoice.atc---factura--OrdenesCompra");
+            // if(!table) table = sap.ui.core.Fragment.byId("usil.com.createinvoice.atc.view.fragments.CreateInvoice","OrdenesCompra");
             const selectedIndices = table.getSelectedItems().map(item => {
                 let path = item.getBindingContextPath();
                 return parseInt(path.substring(path.lastIndexOf("/") + 1), 16);

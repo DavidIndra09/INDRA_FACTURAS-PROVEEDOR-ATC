@@ -1,87 +1,163 @@
-<mvc:View controllerName="usil.com.createinvoice.detalle.Detalle"
+<mvc:View
+    controllerName="usil.com.createinvoice.atc.detalle.Detalle"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:f="sap.f"
     xmlns:form="sap.ui.layout.form"
     xmlns:l="sap.ui.layout"
     xmlns:commons="sap.suite.ui.commons"
-    xmlns:core="sap.ui.core">
-
-    <f:DynamicPage id="page" busy="{detalleView>/busy}" busyIndicatorDelay="{detalleView>/delay}">
+    xmlns:core="sap.ui.core"
+>
+    <f:DynamicPage
+        id="page"
+        busy="{detalleView>/busy}"
+        busyIndicatorDelay="{detalleView>/delay}"
+    >
         <f:header>
             <f:DynamicPageHeader backgroundDesign="Transparent">
                 <f:content>
-                    <core:Fragment fragmentName="usil.com.createinvoice.detalle.Cabecera" />
+                    <core:Fragment
+                        fragmentName="usil.com.createinvoice.atc.detalle.Cabecera"
+                    />
                 </f:content>
             </f:DynamicPageHeader>
         </f:header>
         <f:content>
             <!-- items="{facturaModel>conformidades}" -->
-            <Table id="reviewTable" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="10" growingScrollToLoad="true" noDataText="No hay Posiciones">
+            <Table
+                id="reviewTable"
+                items="{path: '/'}"
+                class="sapUiTinyMarginTop"
+                width="auto"
+                updateFinished="onReviewsLoaded"
+                growing="true"
+                growingThreshold="10"
+                growingScrollToLoad="true"
+                noDataText="No hay Posiciones"
+            >
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title text="" />
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>
-                    <Column >
-                        <Label text="{i18n>conformidad}" design="Bold"/>
+                    <Column>
+                        <Label
+                            text="{i18n>conformidad}"
+                            design="Bold"
+                        />
                     </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>posConformidad}" design="Bold"/>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
+                        <Label
+                            text="{i18n>posConformidad}"
+                            design="Bold"
+                        />
                     </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>ordenCompra}" design="Bold"/>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
+                        <Label
+                            text="{i18n>ordenCompra}"
+                            design="Bold"
+                        />
                     </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>posOrden}" design="Bold"/>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
+                        <Label
+                            text="{i18n>posOrden}"
+                            design="Bold"
+                        />
                     </Column>
 
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>material}" design="Bold"/>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
+                        <Label
+                            text="{i18n>material}"
+                            design="Bold"
+                        />
                     </Column>
-                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>cantidad}" design="Bold"/>
+                    <Column
+                        hAlign="End"
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
+                        <Label
+                            text="{i18n>cantidad}"
+                            design="Bold"
+                        />
                     </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
-                        <Label text="{i18n>importe}" design="Bold"/>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                        hAlign="End"
+                    >
+                        <Label
+                            text="{i18n>importe}"
+                            design="Bold"
+                        />
                     </Column>
                 </columns>
 
                 <items>
                     <ColumnListItem press=".onPress">
                         <cells>
-                            <ObjectIdentifier title="{BELNR}"/>
+                            <ObjectIdentifier title="{BELNR}" />
                             <Text text="{POSNR}" />
                             <Text text="{EBELN}" />
                             <Text text="{EBELP}" />
-                            <ObjectIdentifier title="{MATNR}" text="{TXZ01}" />
-                            <ObjectNumber number="{
+                            <ObjectIdentifier
+                                title="{MATNR}"
+                                text="{TXZ01}"
+                            />
+                            <ObjectNumber
+                                number="{
                                     path: 'MENGE',
                                     formatter: '.formatter.numberUnit'
-                                }" unit="{MEINS}"/>
-                            <ObjectNumber number="{
+                                }"
+                                unit="{MEINS}"
+                            />
+                            <ObjectNumber
+                                number="{
                                     parts:[{path:'NETWR'},{path:'WAERS'}],
                                     type: 'sap.ui.model.type.Currency',
                                     formatOptions: {showMeasure: false}
-                                }" unit="{WAERS}" state="Information" />
+                                }"
+                                unit="{WAERS}"
+                                state="Information"
+                            />
                         </cells>
                     </ColumnListItem>
                 </items>
             </Table>
         </f:content>
-        <f:header>
-        </f:header>
+        <f:header />
         <f:title>
-            <f:DynamicPageTitle areaShrinkRatio="1:1.6:1.6" backgroundDesign="Transparent">
+            <f:DynamicPageTitle
+                areaShrinkRatio="1:1.6:1.6"
+                backgroundDesign="Transparent"
+            >
                 <f:heading>
-                    <Title text="{detalleView>/detalleViewTitle}" level="H2"/>
+                    <Title
+                        text="{detalleView>/detalleViewTitle}"
+                        level="H2"
+                    />
                 </f:heading>
                 <f:navigationActions>
-                    <Button icon="sap-icon://decline" type="Reject" press=".onNavBack" />
+                    <Button
+                        icon="sap-icon://decline"
+                        type="Reject"
+                        press=".onNavBack"
+                    />
                 </f:navigationActions>
             </f:DynamicPageTitle>
         </f:title>
     </f:DynamicPage>
-
 </mvc:View>

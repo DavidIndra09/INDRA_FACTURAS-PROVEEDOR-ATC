@@ -1,7 +1,7 @@
 {
     "_version": "1.45.0",
     "sap.app": {
-        "id": "usil.com.createinvoice",
+        "id": "usil.com.createinvoice.atc",
         "type": "application",
         "i18n": "i18n/i18n.properties",
         "applicationVersion": {
@@ -107,7 +107,7 @@
             "i18n": {
                 "type": "sap.ui.model.resource.ResourceModel",
                 "settings": {
-                    "bundleName": "usil.com.createinvoice.i18n.i18n"
+                    "bundleName": "usil.com.createinvoice.atc.i18n.i18n"
                 }
             },
             "facturaModel": {
@@ -127,7 +127,7 @@
             "config": {
                 "routerClass": "sap.m.routing.Router",
                 "viewType": "XML",
-                "viewPath": "usil.com.createinvoice",
+                "viewPath": "usil.com.createinvoice.atc",
                 "controlId": "app",
                 "controlAggregation": "pages",
                 "bypassed": {
@@ -203,7 +203,7 @@
             }
         },
         "rootView": {
-            "viewName": "usil.com.createinvoice.view.App",
+            "viewName": "usil.com.createinvoice.atc.view.App",
             "type": "XML",
             "async": true,
             "id": "app"
@@ -211,6 +211,6 @@
     },
     "sap.cloud": {
         "public": true,
-        "service": "usil-com-createinvoice"
+        "service": "usil-com-createinvoice-atc"
     }
 }
