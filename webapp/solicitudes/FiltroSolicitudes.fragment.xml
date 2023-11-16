@@ -1,28 +1,21 @@
-<core:FragmentDefinition
-	xmlns="sap.m"
-	xmlns:core="sap.ui.core"
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core"
     xmlns:form="sap.ui.layout.form">
-    <form:Form
-        editable="true"
-        binding="{/Busqueda}">
+    <form:Form editable="true" binding="{/Busqueda}">
         <form:formContainers>
             <form:FormContainer>
                 <form:formElements>
                     <form:FormElement>
                         <form:fields>
-                            <Input 
-                                value="{codigoSolicitud}"
-                                placeholder="Ingrese el código de solicitud"
-                                showSuggestion="true"
-                                maxLength="10"
-                                type="Number">
-                                <!-- suggestionItems="{
-                                    path:'facturaModel>/CodigoSolicitud'
-                                }">
-                                <core:ListItem 
-                                    text="{facturaModel>codigoSolicitud}" 
-                                    key="{facturaModel>codigoSolicitud}" -->
-                            </Input>
+                            <!--  <Input value="{codigoSolicitud}" placeholder="Ingrese el código de solicitud" showSuggestion="true" maxLength="10" type="Number">
+                              
+                            </Input> -->
+                            <SearchField  id="InputCodigoSolicitud" width="100%"  showSearchButton="false" placeholder="Ingrese un código de solicitud" enableSuggestions="true" search=".handleSearch" suggest=".onSuggestCodSolicitud" suggestionItems="{path:'codSolicitudhelp>/'}">
+
+                                <SuggestionItem text="{codSolicitudhelp>VALUE} - {codSolicitudhelp>TEXTO}" />
+
+                            </SearchField>
+
                         </form:fields>
                         <form:label>
                             <Label text="{i18n>solicitud}" />
@@ -30,18 +23,14 @@
                     </form:FormElement>
                     <form:FormElement>
                         <form:fields>
-                            <Input 
-                                value="{codigoFactura}"
-                                showSuggestion="true"
-                                placeholder="Ingrese la factura"
-                                 >
-                                 <!-- suggestionItems="{
-                                    path:'facturaModel>/CodigoFactura'
-                                }">
-                                <core:ListItem 
-                                    text="{facturaModel>codigoFactura}" 
-                                    key="{facturaModel>codigoFactura}" -->
-                            </Input>
+                         <!--   <Input value="{codigoFactura}" showSuggestion="true" placeholder="Ingrese la factura">
+
+                            </Input> -->
+                             <SearchField  id="InputCodigoFactura" width="100%"  showSearchButton="false" placeholder="Ingrese una factura" enableSuggestions="true" search=".handleSearch" suggest=".onSuggestCodFactura" suggestionItems="{path:'codFacturahelp>/'}">
+
+                                <SuggestionItem text="{codFacturahelp>VALUE}" />
+
+                            </SearchField>
                         </form:fields>
                         <form:label>
                             <Label text="{i18n>factura}" />
@@ -49,11 +38,7 @@
                     </form:FormElement>
                     <form:FormElement>
                         <form:fields>
-                            <DateRangeSelection
-                                id="idDateRangeEmision"
-                                valueFormat="dd.MM.yyyy"
-                                displayFormat="dd.MM.yyyy"
-                                change="onSeleccionFechaEmision" />
+                            <DateRangeSelection id="idDateRangeEmision" valueFormat="dd.MM.yyyy" displayFormat="dd.MM.yyyy" change="onSeleccionFechaEmision" />
                         </form:fields>
                         <form:label>
                             <Label text="{i18n>fechaEmision}" />
@@ -61,11 +46,7 @@
                     </form:FormElement>
                     <form:FormElement>
                         <form:fields>
-                            <DateRangeSelection
-                                id="idDateRangeRegistro"
-                                valueFormat="dd.MM.yyyy"
-                                displayFormat="dd.MM.yyyy" 
-                                change="onSeleccionFechaRegistro"/>
+                            <DateRangeSelection id="idDateRangeRegistro" valueFormat="dd.MM.yyyy" displayFormat="dd.MM.yyyy" change="onSeleccionFechaRegistro"/>
                         </form:fields>
                         <form:label>
                             <Label text="{i18n>fechaRegistro}" />
@@ -73,23 +54,17 @@
                     </form:FormElement>
                     <form:FormElement>
                         <form:fields>
-                            <MultiComboBox 
-                                items="{
+                            <MultiComboBox items="{
                                     path: 'EstadosFactura>/'
-                                }"
-                                
-                                >
-                                <core:ListItem
-                                    text="{EstadosFactura>description}"
-                                    key="{EstadosFactura>ID}"
-                                    icon="{EstadosFactura>icon}"/>
+                                }">
+                                <core:ListItem text="{EstadosFactura>TEXTO}" key="{EstadosFactura>VALUE}" icon="{EstadosFactura>icon}"/>
                             </MultiComboBox>
                         </form:fields>
                         <form:label>
                             <Label text="{i18n>estadoFactura}" />
                         </form:label>
                     </form:FormElement>
-                    
+
                     <form:FormElement>
                         <form:fields>
                             <Button text="Buscar" type="Emphasized" icon="sap-icon://search" press="onBuscarFacturas" class="sapUiSmallMarginTop" />
@@ -107,12 +82,7 @@
             </form:FormContainer>
         </form:formContainers>
         <form:layout>
-            <form:ColumnLayout
-                columnsL="3"
-                columnsM="2"
-                columnsXL="6"
-                emptyCellsLarge="0"
-                labelCellsLarge="4"/>
+            <form:ColumnLayout columnsL="3" columnsM="2" columnsXL="6" emptyCellsLarge="0" labelCellsLarge="4"/>
         </form:layout>
         <form:title>
         </form:title>

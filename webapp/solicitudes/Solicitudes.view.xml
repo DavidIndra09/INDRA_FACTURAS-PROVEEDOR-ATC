@@ -32,6 +32,8 @@
                 backgroundDesign="Transparent"
             >
                 <f:actions>
+                <Title id="ProveedorSeleccionado" text=""></Title>
+                <Label text="" />
                     <!-- <Label text="Selecciona un proveedor:" />
                     <ComboBox id="comboBox" selectedKey="1">
                         <items>

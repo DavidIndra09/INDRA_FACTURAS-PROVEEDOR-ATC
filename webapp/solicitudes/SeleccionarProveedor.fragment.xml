@@ -1,13 +1,15 @@
 <core:FragmentDefinition xmlns="sap.m"
     xmlns:core="sap.ui.core">
 
-    <Dialog id="idDialogoProveedor" title="Búsque un Proveedor" icon="sap-icon://customer">
+    <Dialog contentWidth="40%"  id="idDialogoProveedor" title="Búsqueda de proveedor" icon="sap-icon://customer">
 
         <content>
+         
             <!-- SearchField -->
-            <SearchField id="fltReceta" width="100%" liveChange="changeReceta" showSearchButton="false" placeholder="" enableSuggestions="true" search=".handleSearch" suggest=".onSuggest" suggestionItems="{path:'proveedoreshelp>/'}">
+            <SearchField id="InputSelectProveedor" width="100%"  liveChange="changeReceta" showSearchButton="false" placeholder="Ingrese el código o nombre de un proveedor" enableSuggestions="true" search=".handleSearch" suggest=".onSuggest" suggestionItems="{path:'proveedoreshelp>/'}">
 
-                <SuggestionItem text="{proveedoreshelp>VALUE}" description="{proveedoreshelp>TEXTO}" />
+                <SuggestionItem text="{proveedoreshelp>VALUE} - {proveedoreshelp>TEXTO}"  />
+
             </SearchField>
 
         </content>

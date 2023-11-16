@@ -8,7 +8,8 @@ sap.ui.define([
     "../services/service",
     "sap/ui/core/message/Message",
     "sap/ui/core/routing/History",
-    "sap/ui/export/Spreadsheet"
+    "sap/ui/export/Spreadsheet",
+    "sap/m/MessageToast"
 ], function (
     BaseController,
     JSONModel,
@@ -19,7 +20,8 @@ sap.ui.define([
     Service,
     Message,
     History,
-    Spreadsheet
+    Spreadsheet,
+    MessageToast
 ) {
     "use strict";
 
@@ -71,7 +73,8 @@ sap.ui.define([
             this.setModel(viewModel, "solicitudesView");
             this.setModel(viewModelExcel, "ExcelView");
             this.setModel(messageManager.getMessageModel(), "message");
-            this.setModel(new JSONModel(this.getEstadosFactura()), "EstadosFactura");
+            this.getEstadosFactura();
+
 
             MODEL.setProperty("/Ordenes", Service.getInstance().newOrdenCompra());
             // MODEL.setProperty("/Tipo",Service.getInstance().newTipo());
@@ -106,9 +109,9 @@ sap.ui.define([
             // only update the counter if the length is final and
             // the table is not empty
             if (iTotalItems && oTable.getBinding("items").isLengthFinal()) {
-                sTitle = this.getResourceBundle().getText("solicitudesTableTitleCount", [iTotalItems]);
+                sTitle = that.getResourceBundle().getText("solicitudesTableTitleCount", [iTotalItems]);
             } else {
-                sTitle = this.getResourceBundle().getText("solicitudesTableTitle");
+                sTitle = that.getResourceBundle().getText("solicitudesTableTitle");
             }
             viewModel.setProperty("/solicitudesTableTitle", sTitle);
         },
@@ -338,9 +341,19 @@ sap.ui.define([
         },
 
 
-        onSeleccionarProveedor: async function () {
-            let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
-            SeleccionProveedor.close();
+        onSeleccionarProveedor: async function (oEvent) {
+            let proveedoreshelp = that.getView().getModel("proveedoreshelp").getData();
+            let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();
+            var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.split("-")[0].trim())
+            if (find != undefined) {
+                that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " /*+ find.VALUE + " - "*/ + find.TEXTO + "    ");
+                let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
+                SeleccionProveedor.close();
+            }
+            else {
+                MessageToast.show("Seleccione un proveedor valido");
+            }
+
         },
 
         onSolicitarPagoFactura: async function () {
@@ -577,14 +590,19 @@ sap.ui.define([
             });
             return await Promise.all(requests);
         },
-        getEstadosFactura: function () {
-            return [
-                { ID: "CR", description: "Creada", icon: "sap-icon://create" },
-                { ID: "EN", description: "Enviada", icon: "sap-icon://paper-plane" },
-                { ID: "PR", description: "Procesada", icon: "sap-icon://in-progress" },
-                { ID: "PA", description: "Pagada", icon: "sap-icon://paid-leave" },
-                { ID: "OB", description: "Observada", icon: "sap-icon://decline" }
+        getEstadosFactura: async function () {
+            let aFilters = [
+                new Filter("i_object", FilterOperator.EQ, "ESTADO")
             ]
+
+            let oParameters = {
+                filters: aFilters,
+                urlParameters: {}
+            };
+            const request = await this.readEntity(ODataUtilidadesModel, "/filtrosSet", oParameters);
+            let data = JSON.parse(request.results[0].et_data);
+            that.setModel(new JSONModel(data), "EstadosFactura");
+
         },
         onFileSelectTxt: function (oEvent) {
             var oFile = oEvent.getParameter("files")[0];
@@ -1116,9 +1134,10 @@ sap.ui.define([
                     ], false)
                 ];
             }
-
-            this.byId("fltReceta").getBinding("suggestionItems").filter(aFilters);
-            this.byId("fltReceta").suggest();
+            if (this.byId("InputSelectProveedor").getBinding("suggestionItems") != undefined) {
+                this.byId("InputSelectProveedor").getBinding("suggestionItems").filter(aFilters);
+                this.byId("InputSelectProveedor").suggest();
+            }
         },
         getProveedoresHelp: function (sValue = "") {
             return new Promise((resolve, reject) => {
@@ -1135,6 +1154,99 @@ sap.ui.define([
                                 aProveedores[i].VALUE = parseInt(aProveedores[i].VALUE).toString();
                             }
                             that.getView().setModel(new JSONModel(aProveedores), "proveedoreshelp");
+                        }
+                        resolve(true);
+                    },
+                    error: function (oError) {
+                        MessageBox.error(oError.responseText);
+                        resolve(true);
+                    }
+                });
+            });
+        },
+        onSuggestCodSolicitud: async function (event) {
+            var sValue = event.getParameter("suggestValue"),
+                aFilters = [];
+            sValue = sValue.toUpperCase();
+            await this.getCodSolicitudHelp(sValue);
+            if (sValue) {
+                aFilters = [
+                    new Filter([
+                        new Filter("VALUE", function (sText) {
+                            return (sText || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        }),
+                        new Filter("TEXTO", function (sDes) {
+                            return (sDes || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        })
+                    ], false)
+                ];
+            }
+            if (this.byId("InputCodigoSolicitud").getBinding("suggestionItems") != undefined) {
+                this.byId("InputCodigoSolicitud").getBinding("suggestionItems").filter(aFilters);
+                this.byId("InputCodigoSolicitud").suggest();
+            }
+
+        },
+        getCodSolicitudHelp: function (sValue = "") {
+            return new Promise((resolve, reject) => {
+                ODataUtilidadesModel.read("/filtrosSet", {
+                    filters: [
+                        new Filter("i_value", FilterOperator.EQ, sValue),
+                        new Filter("i_object", FilterOperator.EQ, "SOLFACT"),
+                        //new Filter("i_filter", FilterOperator.EQ, keyCentro)
+                    ],
+                    success: function (oData) {
+                        if (oData.results.length) {
+                            let aProveedores = JSON.parse(oData.results[0].et_data);
+                            for (let i = 0; i < aProveedores.length; i++) {
+                                aProveedores[i].VALUE = parseInt(aProveedores[i].VALUE).toString();
+                            }
+                            that.getView().setModel(new JSONModel(aProveedores), "proveedoreshelp");
+                        }
+                        resolve(true);
+                    },
+                    error: function (oError) {
+                        MessageBox.error(oError.responseText);
+                        resolve(true);
+                    }
+                });
+            });
+        },
+        onSuggestCodFactura: async function (event) {
+            var sValue = event.getParameter("suggestValue"),
+                aFilters = [];
+            sValue = sValue.toUpperCase();
+            await this.getCodFacturaHelp(sValue);
+            if (sValue) {
+                aFilters = [
+                    new Filter([
+                        new Filter("VALUE", function (sText) {
+                            return (sText || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        }),
+                        new Filter("TEXTO", function (sDes) {
+                            return (sDes || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        })
+                    ], false)
+                ];
+            }
+            if (this.byId("InputCodigoFactura").getBinding("suggestionItems") != undefined) {
+                this.byId("InputCodigoFactura").getBinding("suggestionItems").filter(aFilters);
+                this.byId("InputCodigoFactura").suggest();
+            }
+
+        },
+        getCodFacturaHelp: function (sValue = "") {
+            return new Promise((resolve, reject) => {
+                ODataUtilidadesModel.read("/filtrosSet", {
+                    filters: [
+                        new Filter("i_value", FilterOperator.EQ, sValue),
+                        new Filter("i_object", FilterOperator.EQ, "FACTUR"),
+                        //new Filter("i_filter", FilterOperator.EQ, keyCentro)
+                    ],
+                    success: function (oData) {
+                        if (oData.results.length) {
+                            let aProveedores = JSON.parse(oData.results[0].et_data);
+                            that.getView().setModel(new JSONModel(aProveedores), "codFacturahelp");
                         }
                         resolve(true);
                     },

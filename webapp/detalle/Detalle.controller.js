@@ -35,10 +35,12 @@ sap.ui.define([
                 delay: 0
             });
 
+
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
             this.getRouter().getRoute("detalle").attachPatternMatched(this._onDetalletMatched, this);
             this.setModel(viewModel, "detalleView");
+            this.setModel(new JSONModel([]), "Adjuntos");
         },
         /* =========================================================== */
         /* event handlers                                              */
@@ -159,7 +161,79 @@ sap.ui.define([
                     sap.ui.core.BusyIndicator.hide();
                 }
             });
+        },
+        onCargaAdjuntos: async function (event) {
+            const adjuntos = that.getView().getModel("Adjuntos").getData();
+            const files = event.getParameter("files");
+            const control = event.getSource();
+
+            if (files.length > 0) {
+                const file = files[0];
+                const base64String = await that.readFileAsBase64(file);
+                adjuntos.push({
+                    "lastModifiedDate": new Date(),
+                    "name": file.name.split(".")[0],
+                    "type": "." + file.name.split(".").pop(),
+                    "mimeType": file.type,
+                    "base64": base64String
+                });
+
+                that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
+
+            }
+            //control.setValue("");
+        },
+        readFileAsBase64: function (file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    resolve(reader.result.split(',')[1]);
+                };
+
+                reader.onerror = (error) => {
+                    reject(error);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        },
+        downloadFromBase64: function (event) {
+            let fila = event.getSource().getBindingContext().getProperty();
+            var byteCharacters = atob(fila.base64);
+            var byteNumbers = new Array(byteCharacters.length);
+            for (var i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            var blob = new Blob([byteArray], { type: fila.mimeType });
+
+            // Crear un enlace de descarga
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fila.name + fila.type;
+
+            // Simular un clic en el enlace para iniciar la descarga
+            link.click();
+        },
+        onEliminarAdjunto: function (oEvent) {
+            var oButton = oEvent.getSource();
+            var oListItem = oButton.getParent();
+            var iIndex = oListItem.getBindingContextPath().split("/").pop();
+            var oTable = that.getView().byId("AdjuntosDetalle");
+            var oModel = oTable.getModel();
+            var aItems = oModel.getProperty("/Adjuntos");            
+            sap.m.MessageBox.confirm("¿Estás seguro de que deseas eliminar este archivo?", {
+                title: "Confirmar eliminación",
+                onClose: function (oAction) {
+                    if (oAction === sap.m.MessageBox.Action.OK) {                        
+                        aItems.splice(iIndex, 1);
+                        oModel.setProperty("/Adjuntos", aItems);
+                    }
+                }
+            });
         }
+
     });
 
 });

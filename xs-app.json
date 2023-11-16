@@ -5,14 +5,7 @@
     {
       "source": "^/sap/(.*)$",
       "target": "/sap/$1",
-      "destination": "IDES",
-      "authenticationType": "xsuaa",
-      "csrfProtection": false
-    },
-    {
-      "source": "^/odata/(.*)$",
-      "target": "/odata/$1",
-      "destination": "hanaServices",
+      "destination": "SAP_DEV",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
