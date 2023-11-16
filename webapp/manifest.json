@@ -49,10 +49,10 @@
                         "parameters": {},
                         "additionalParameters": "allowed"
                     },
-                    "semanticObject": "CreateInvoice",
+                    "semanticObject": "CreateInvoiceAtc",
                     "action": "Display",
-                    "title": "Factura Proveedor",
-                    "subTitle": "Proveedor",
+                    "title": "Factura Proveedor ATC",
+                    "subTitle": "Proveedor ATC",
                     "info": "Portal de proveedores",
                     "icon": "sap-icon://my-sales-order"
                 }
