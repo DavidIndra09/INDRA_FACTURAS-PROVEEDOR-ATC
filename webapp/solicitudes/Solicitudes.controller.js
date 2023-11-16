@@ -27,6 +27,7 @@ sap.ui.define([
         MODEL,
         viewModel,
         viewModelExcel,
+        ODataUtilidadesModel,
         facturaModel,
         messageManager,
         ODATA_SAP;
@@ -64,6 +65,7 @@ sap.ui.define([
 
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
+            ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
             messageManager = sap.ui.getCore().getMessageManager();
 
             this.setModel(viewModel, "solicitudesView");
@@ -76,7 +78,7 @@ sap.ui.define([
             // MODEL.setProperty("/EstadosFactura",Service.getInstance().newEstadofactura());
             MODEL.setProperty("/Busqueda", {});
             that._dialogs = {};
-
+            that.onMostrarSeleccionProveedor();
             // this._getDataInitial();
             this._setListaSolicitudes({ filters: [] });
 
@@ -322,6 +324,23 @@ sap.ui.define([
             vistaRapida.close();
             vistaRapida.bindElement(path);
             vistaRapida.openBy(btnVistaRapida);
+        },
+
+        onMostrarSeleccionProveedor: async function () {
+
+            // Crear una referencia al fragmento
+            let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
+            if (!SeleccionProveedor) {
+                SeleccionProveedor = await that._getDialogs("SeleccionarProveedor");
+                SeleccionProveedor.setEscapeHandler(function () { });
+                SeleccionProveedor.open();
+            }
+        },
+
+
+        onSeleccionarProveedor: async function () {
+            let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
+            SeleccionProveedor.close();
         },
 
         onSolicitarPagoFactura: async function () {
@@ -1079,6 +1098,52 @@ sap.ui.define([
         getTable: function () {
             var table = that.byId("ContenedorTabla").getContent()[0];
             return table;
-        }
+        },
+        onSuggest: async function (event) {
+            var sValue = event.getParameter("suggestValue"),
+                aFilters = [];
+            sValue = sValue.toUpperCase();
+            await this.getProveedoresHelp(sValue);
+            if (sValue) {
+                aFilters = [
+                    new Filter([
+                        new Filter("VALUE", function (sText) {
+                            return (sText || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        }),
+                        new Filter("TEXTO", function (sDes) {
+                            return (sDes || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        })
+                    ], false)
+                ];
+            }
+
+            this.byId("fltReceta").getBinding("suggestionItems").filter(aFilters);
+            this.byId("fltReceta").suggest();
+        },
+        getProveedoresHelp: function (sValue = "") {
+            return new Promise((resolve, reject) => {
+                ODataUtilidadesModel.read("/filtrosSet", {
+                    filters: [
+                        new Filter("i_value", FilterOperator.EQ, sValue),
+                        new Filter("i_object", FilterOperator.EQ, "LIFNR"),
+                        //new Filter("i_filter", FilterOperator.EQ, keyCentro)
+                    ],
+                    success: function (oData) {
+                        if (oData.results.length) {
+                            let aProveedores = JSON.parse(oData.results[0].et_data);
+                            for (let i = 0; i < aProveedores.length; i++) {
+                                aProveedores[i].VALUE = parseInt(aProveedores[i].VALUE).toString();
+                            }
+                            that.getView().setModel(new JSONModel(aProveedores), "proveedoreshelp");
+                        }
+                        resolve(true);
+                    },
+                    error: function (oError) {
+                        MessageBox.error(oError.responseText);
+                        resolve(true);
+                    }
+                });
+            });
+        },
     });
 });

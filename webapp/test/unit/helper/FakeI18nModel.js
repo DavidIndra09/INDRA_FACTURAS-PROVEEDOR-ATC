@@ -5,14 +5,14 @@ sap.ui.define([
 
 	return Model.extend("usil.com.createinvoice.test.unit.helper.FakeI18nModel", {
 
-		constructor : function (mTexts) {
+		constructor: function (mTexts) {
 			Model.call(this);
 			this.mTexts = mTexts || {};
 		},
 
-		getResourceBundle : function () {
+		getResourceBundle: function () {
 			return {
-				getText : function (sTextName) {
+				getText: function (sTextName) {
 					return this.mTexts[sTextName];
 				}.bind(this)
 			};

@@ -24,6 +24,14 @@
                     "odataVersion": "2.0"
                 }
             },
+            "ODataUtilidades": {
+                "uri": "/sap/opu/odata/sap/ZGW_UTILIDADES_SRV/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "odataVersion": "2.0"
+                }
+            },
             "mainService": {
                 "uri": "/odata/v2/facturas/",
                 "type": "OData",
@@ -92,13 +100,17 @@
                     "earlyRequests": true
                 }
             },
+            "ODataUtilidadesModel": {
+                "preload": true,
+                "dataSource": "ODataUtilidades"
+            },
             "i18n": {
                 "type": "sap.ui.model.resource.ResourceModel",
                 "settings": {
                     "bundleName": "usil.com.createinvoice.i18n.i18n"
                 }
             },
-            "facturaModel":{
+            "facturaModel": {
                 "dataSource": "mainService",
                 "preload": true
             },
@@ -200,5 +212,5 @@
     "sap.cloud": {
         "public": true,
         "service": "usil-com-createinvoice"
-    }   
+    }
 }

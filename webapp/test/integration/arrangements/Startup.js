@@ -1,7 +1,7 @@
 sap.ui.define([
 	"sap/ui/test/Opa5",
 	"sap/ui/model/odata/v2/ODataModel"
-], function(Opa5, ODataModel) {
+], function (Opa5, ODataModel) {
 	"use strict";
 
 	return Opa5.extend("usil.com.createinvoice.test.integration.arrangements.Startup", {
@@ -13,7 +13,7 @@ sap.ui.define([
 		 * @param {string} [oOptionsParameter.hash] The in-app hash can also be passed separately for better readability in tests
 		 * @param {boolean} [oOptionsParameter.autoWait=true] Automatically wait for pending requests while the application is starting up
 		 */
-		iStartMyApp : function (oOptionsParameter) {
+		iStartMyApp: function (oOptionsParameter) {
 			var oOptions = oOptionsParameter || {};
 
 			this._clearSharedData();

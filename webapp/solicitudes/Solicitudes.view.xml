@@ -22,13 +22,13 @@
         <f:title>
             <f:DynamicPageTitle areaShrinkRatio="1:1.6:1.6" backgroundDesign="Transparent">
                 <f:actions>
-                    <Label text="Selecciona un proveedor:" />
+                    <!-- <Label text="Selecciona un proveedor:" />
                     <ComboBox id="comboBox" selectedKey="1">
                         <items>
                             <core:Item key="1" text="Proveedor 1" />
                             <core:Item key="2" text="Proveedor 2" />
                         </items>
-                    </ComboBox>
+                    </ComboBox>-->
                     <Button icon="sap-icon://create" text="Crear Factura" type="Emphasized" press="onNavFacturaNueva" />
                 </f:actions>
                 <f:heading>

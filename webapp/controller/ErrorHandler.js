@@ -15,7 +15,7 @@ sap.ui.define([
          * @public
          * @alias usil.com.createinvoice.controller.ErrorHandler
          */
-        constructor : function (oComponent) {
+        constructor: function (oComponent) {
             var oMessageManager = sap.ui.getCore().getMessageManager(),
                 oMessageModel = oMessageManager.getMessageModel(),
                 oResourceBundle = oComponent.getModel("i18n").getResourceBundle(),
@@ -58,12 +58,12 @@ sap.ui.define([
          * @param {string} sDetails A technical error to be displayed on request
          * @private
          */
-        _showServiceError : function (sErrorTitle, sDetails) {
+        _showServiceError: function (sErrorTitle, sDetails) {
             this._bMessageOpen = true;
             MessageBox.error(
                 sErrorTitle,
                 {
-                    id : "serviceErrorMessageBox",
+                    id: "serviceErrorMessageBox",
                     details: sDetails,
                     styleClass: this._oComponent.getContentDensityClass(),
                     actions: [MessageBox.Action.CLOSE],

@@ -9,7 +9,7 @@ sap.ui.define([
          * Navigates to the worklist when the link is pressed
          * @public
          */
-        onLinkPressed : function () {
+        onLinkPressed: function () {
             this.getRouter().navTo("worklist");
         }
 

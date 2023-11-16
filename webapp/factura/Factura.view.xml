@@ -1,29 +1,17 @@
-<mvc:View
-    controllerName="usil.com.createinvoice.factura.Factura"
+<mvc:View controllerName="usil.com.createinvoice.factura.Factura"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:f="sap.f"
     xmlns:core="sap.ui.core">
 
-    <f:DynamicPage
-        showFooter="true"
-        id="page"
-        busy="{facturaView>/busy}"
-        busyIndicatorDelay="{facturaView>/delay}">
+    <f:DynamicPage showFooter="true" id="page" busy="{facturaView>/busy}" busyIndicatorDelay="{facturaView>/delay}">
         <f:title>
-            <f:DynamicPageTitle
-                areaShrinkRatio="1:1.6:1.6"
-                backgroundDesign="Transparent">
+            <f:DynamicPageTitle areaShrinkRatio="1:1.6:1.6" backgroundDesign="Transparent">
                 <f:heading>
-                    <Title
-                        text="{facturaView>/facturaViewTitle}"
-                        level="H2"/>
+                    <Title text="{facturaView>/facturaViewTitle}" level="H2"/>
                 </f:heading>
                 <f:navigationActions>
-                    <Button
-                        icon="sap-icon://decline"
-                        type="Reject"
-                        press=".onNavBack" />
+                    <Button icon="sap-icon://decline" type="Reject" press=".onNavBack" />
                 </f:navigationActions>
                 <f:breadcrumbs>
                     <Breadcrumbs>
@@ -33,8 +21,7 @@
             </f:DynamicPageTitle>
         </f:title>
         <f:header>
-            <f:DynamicPageHeader
-                backgroundDesign="Transparent">
+            <f:DynamicPageHeader backgroundDesign="Transparent">
                 <f:content>
                     <core:Fragment fragmentName="usil.com.createinvoice.factura.Cabecera" type="XML" />
                 </f:content>
@@ -47,7 +34,7 @@
             <OverflowToolbar >
                 <ToolbarSpacer/>
                 <Button text="Guardar" type="Success" icon="sap-icon://save" press=".onCreateInvoice" />
-                <Button text="Cancelar"  type="Negative" icon="sap-icon://sys-cancel" press="onNavSolicitudes" />
+                <Button text="Cancelar" type="Negative" icon="sap-icon://sys-cancel" press="onNavSolicitudes" />
             </OverflowToolbar>
         </f:footer>
         <f:header>

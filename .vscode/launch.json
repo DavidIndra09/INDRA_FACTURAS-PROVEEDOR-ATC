@@ -23,7 +23,7 @@
       "outputCapture": "std",
       "env": {
         "run.config": "{\"handlerId\":\"fiori_tools\",\"runnableId\":\"/home/user/projects/INDRA_FACTURAS-PROVEEDOR\"}",
-        //"FIORI_TOOLS_BACKEND_CONFIG": "[{\"destination\":\"northwind\",\"path\":\"/northwind\"},{\"destination\":\"hanaServices\",\"path\":\"/odata\"},{\"destination\":\"sunatSeguridadApi\",\"path\":\"/apisunatseguridad\"},{\"destination\":\"sunatConsultaApi\",\"path\":\"/apisunatconsulta\"},{\"destination\":\"IDES\",\"path\":\"/sap\"}]",
+        "FIORI_TOOLS_BACKEND_CONFIG": "[{\"destination\":\"SAP_DEV\",\"path\":\"/sap\"}]",
         "FIORI_TOOLS_URL_PARAMS": "sap-ui-xx-viewCache=false"
       }
     }

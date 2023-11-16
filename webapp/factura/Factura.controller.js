@@ -136,7 +136,7 @@ sap.ui.define([
                     fileUploader.setValue("");
                     return;
                 }
-                
+
                 const datosFactura = {
                     version: invoice.ublversionid,
                     numeroSerie: invoice.id,
@@ -200,7 +200,7 @@ sap.ui.define([
             }
         },
         onClearArchivoXml: function (event) {
-            MODEL.setProperty("/facturaXml", {}); 
+            MODEL.setProperty("/facturaXml", {});
             MODEL.setProperty("/Factura/codigoFactura", "");
             MODEL.setProperty("/Factura/fechaEmision", "");
             MODEL.setProperty("/Factura/fechaEmisionParameter", "");
@@ -213,7 +213,7 @@ sap.ui.define([
             MODEL.setProperty("/Factura/estadoCp", "");
             nuevafacturaModel.setProperty("/isEnabledCabecera", true);
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
-            
+
             const fileUploader = this.getView().byId("fileUploader");
             fileUploader.setValue("");
         },
@@ -420,7 +420,7 @@ sap.ui.define([
                 }.bind(this)
             });
 
-            function obtenerTotalConformidad (aData) {
+            function obtenerTotalConformidad(aData) {
                 let dTotal = 0;
                 for (let i = 0; i < aData.length; i++) {
                     dTotal = parseFloat(aData[i].NETWR) + dTotal;
@@ -724,7 +724,7 @@ sap.ui.define([
                 "bestu": "CR",
                 "waers": "PEN",
                 "mnsje": "",
-                "igv"  : dIgv
+                "igv": dIgv
                 //conformidades: conformidades
             }
             const codigoSolicitud = factura.codigoSolicitud;
@@ -785,12 +785,12 @@ sap.ui.define([
             j[nodeName] = cur;
         },
 
-        onRefresh : function () {
+        onRefresh: function () {
             var oTable = this.byId("idtablaFactura");
             oTable.getBinding("items").refresh();
         },
-        
-        onBusquedaRapida : function (event) {
+
+        onBusquedaRapida: function (event) {
             if (event.getParameters().refreshButtonPressed) {
                 this.onRefresh();
             } else {
@@ -813,7 +813,7 @@ sap.ui.define([
             }
         },
 
-        _applySearch: function(aTableSearchState) {
+        _applySearch: function (aTableSearchState) {
             var oTable = this.byId("idtablaFactura");
             oTable.getBinding("items").filter(aTableSearchState, "Application");
             // changes the noDataText of the list in case there are no filter results

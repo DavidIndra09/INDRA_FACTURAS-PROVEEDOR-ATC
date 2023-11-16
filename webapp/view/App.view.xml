@@ -1,14 +1,9 @@
-<mvc:View
-    controllerName="usil.com.createinvoice.controller.App"
-    displayBlock="true"
+<mvc:View controllerName="usil.com.createinvoice.controller.App" displayBlock="true"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc">
 
     <Shell appWidthLimited="false">
-        <App
-            id="app"
-            busy="{appView>/busy}"
-            busyIndicatorDelay="{appView>/delay}"/>
+        <App id="app" busy="{appView>/busy}" busyIndicatorDelay="{appView>/delay}"/>
     </Shell>
 
 </mvc:View>

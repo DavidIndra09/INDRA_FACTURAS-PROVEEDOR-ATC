@@ -5,7 +5,7 @@ sap.ui.define([
 
     return BaseController.extend("usil.com.createinvoice.controller.App", {
 
-        onInit : function () {
+        onInit: function () {
             // apply content density mode to root view
             this.getView().addStyleClass(this.getOwnerComponent().getContentDensityClass());
 
@@ -13,7 +13,7 @@ sap.ui.define([
         },
 
 
-        _getDataInitial : async function () {
+        _getDataInitial: async function () {
             const model = this.getModel();
             model.setProperty("/nodes", [
                 {
@@ -26,7 +26,7 @@ sap.ui.define([
                     "stateText": "OK status",
                     "focused": false,
                     "highlighted": false,
-                    "texts": [ "De acuerdo", "Se lo Merecía" ]
+                    "texts": ["De acuerdo", "Se lo Merecía"]
                 }, {
                     "id": "10",
                     "lane": "1",
@@ -37,13 +37,13 @@ sap.ui.define([
                     "stateText": "Rechazado",
                     "focused": false,
                     "highlighted": false,
-                    "texts": [ "En Desacuerdo ", "Conversarlo con el Supervisor" ]
+                    "texts": ["En Desacuerdo ", "Conversarlo con el Supervisor"]
                 }, {
                     "id": "20",
                     "lane": "2",
                     "title": "Último Aprobador",
                     "titleAbbreviation": "#3",
-                    "children": [ ],
+                    "children": [],
                     "state": "Critical",
                     "stateText": "Pendiente",
                     "focused": false,
@@ -68,7 +68,7 @@ sap.ui.define([
                     "label": "Nivel de Aprobación 3",
                     "position": 2
                 }
-            ])  
+            ])
         }
     });
 
