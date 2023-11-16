@@ -330,7 +330,6 @@ sap.ui.define([
         },
 
         onMostrarSeleccionProveedor: async function () {
-
             // Crear una referencia al fragmento
             let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
             if (!SeleccionProveedor) {
@@ -340,11 +339,10 @@ sap.ui.define([
             }
         },
 
-
         onSeleccionarProveedor: async function (oEvent) {
             let proveedoreshelp = that.getView().getModel("proveedoreshelp").getData();
             let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();
-            var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.split("-")[0].trim())
+            var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.split("-")[0].trim() || element.TEXTO == proveedorSelected.split("-")[0].trim())
             if (find != undefined) {
                 that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " /*+ find.VALUE + " - "*/ + find.TEXTO + "    ");
                 let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
@@ -353,7 +351,6 @@ sap.ui.define([
             else {
                 MessageToast.show("Seleccione un proveedor valido");
             }
-
         },
 
         onSolicitarPagoFactura: async function () {
@@ -1140,10 +1137,11 @@ sap.ui.define([
             }
         },
         getProveedoresHelp: function (sValue = "") {
+            let value = sValue.substr(0, 18);            
             return new Promise((resolve, reject) => {
                 ODataUtilidadesModel.read("/filtrosSet", {
                     filters: [
-                        new Filter("i_value", FilterOperator.EQ, sValue),
+                        new Filter("i_value", FilterOperator.EQ, value),
                         new Filter("i_object", FilterOperator.EQ, "LIFNR"),
                         //new Filter("i_filter", FilterOperator.EQ, keyCentro)
                     ],
