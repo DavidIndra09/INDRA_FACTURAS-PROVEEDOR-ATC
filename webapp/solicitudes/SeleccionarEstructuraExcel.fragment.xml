@@ -2,7 +2,7 @@
     xmlns:core="sap.ui.core"
     xmlns:l="sap.ui.layout"
     xmlns:u="sap.ui.unified">
-    <Dialog id="uploadDialog" title="Selecciona una opción de carga" contentWidth="39%" verticalScrolling="false"  icon="sap-icon://enter-more">
+    <Dialog id="uploadDialog" title="Selecciona una opción de carga" contentWidth="36%" verticalScrolling="false"  icon="sap-icon://enter-more">
 
         <content>
 
