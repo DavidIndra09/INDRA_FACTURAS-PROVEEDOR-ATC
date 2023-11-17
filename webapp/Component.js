@@ -3,9 +3,9 @@ sap.ui.define([
     "sap/ui/Device",
     "./model/models",
     "./controller/ErrorHandler",
-    "usil/com/createinvoice/atc/libs/xlsx",
     "usil/com/createinvoice/atc/libs/jszip",
-], function (UIComponent, Device, models, ErrorHandler, XLSX, jszip) {
+    "usil/com/createinvoice/atc/libs/xlsx"
+], function (UIComponent, Device, models, ErrorHandler, jszip, XLSX) {
     "use strict";
 
     return UIComponent.extend("usil.com.createinvoice.atc.Component", {

@@ -1,0 +1,28 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:u="sap.ui.unified">
+    <Dialog id="uploadDialog" title="Selecciona una opción de carga" contentWidth="39%" verticalScrolling="false"  icon="sap-icon://enter-more">
+
+        <content>
+
+            <VBox>
+                <Label ></Label>
+                <HBox>
+                    <RadioButtonGroup id="radioButtonGroup" selectedIndex="0" columns="3">
+                        <RadioButton text="1. Repuestos" />
+                        <RadioButton text="2. Vehículos" />
+                    </RadioButtonGroup>                   
+                    
+                    <u:FileUploader  id="onFileSelectExcel" name="uploadFile" fileType="xls,xlsx" icon="sap-icon://excel-attachment" buttonText="Seleccionar Documento"  iconOnly="false" buttonOnly="true" />
+                 
+                </HBox>
+            </VBox>
+
+        </content>
+
+        <beginButton>
+            <Button text="Procesar Archivo" press="onProcesarDataExcel" />
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

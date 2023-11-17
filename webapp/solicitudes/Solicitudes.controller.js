@@ -339,6 +339,19 @@ sap.ui.define([
             }
         },
 
+        onMostrarSeleccionEstructuraExcel: async function () {
+            // Crear una referencia al fragmento
+            let SeleccionEstructura = that._dialogs["SeleccionarEstructuraExcel"];
+            if (!SeleccionEstructura) {
+                SeleccionEstructura = await that._getDialogs("SeleccionarEstructuraExcel");
+                //SeleccionEstructura.setEscapeHandler(function () { });
+                SeleccionEstructura.open();
+            }
+            else {
+                SeleccionEstructura.open();
+            }
+        },
+
         onSeleccionarProveedor: async function (oEvent) {
             let proveedoreshelp = that.getView().getModel("proveedoreshelp").getData();
             let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();
@@ -619,10 +632,9 @@ sap.ui.define([
         },
         onFileSelectExcel: function (oEvent) {
             var oFile = oEvent.getParameter("files")[0];
-            console.log("Archivo seleccionado:", oFile);
             that.onReadExcel(oFile);
         },
-        onReadExcel: function (oFile) {
+        onReadExcel: function (oFile, TypeTable) {
             if (window.FileReader) {
                 var reader = new FileReader();
                 reader.onload = function (e) {
@@ -632,12 +644,24 @@ sap.ui.define([
                     });
                     sXmlRead.SheetNames.forEach(function (sheetName) {
                         var aXmlData = XLSX.utils.sheet_to_row_object_array(sXmlRead.Sheets[sheetName]);
+
                         if (aXmlData[0] != "ERROR") {
                             if (aXmlData.length > 0) {
                                 aXmlData.splice(0, 1);
-                                var DataValida = aXmlData;
-                                MODEL.setProperty("/CargaExcel", DataValida);
-                                that.MostrarTablaPorFlujo("Excel");
+                                let DataValida = that.buildArrayFromDataExcel(aXmlData, TypeTable);
+                                switch (TypeTable) {
+                                    case "Repuestos":
+                                        MODEL.setProperty("/ExcelRepuestos", DataValida);
+                                        that.MostrarTablaPorFlujo(TypeTable);
+                                        break;
+                                    case "Vehiculos":
+                                        MODEL.setProperty("/ExcelVehiculos", DataValida);
+                                        that.MostrarTablaPorFlujo(TypeTable);
+                                        break;
+                                }
+
+                                //that.MostrarTablaPorFlujo("Excel");
+                                //that.getView().setModel(new JSONModel(aProveedores), "/ExcelRepuestos");
                             } else {
                                 that.MessageBox.error("El archivo excel no cuenta con datos");
                                 oView.byId("button-message").setVisible(true);
@@ -646,7 +670,6 @@ sap.ui.define([
                         } else {
                             MessageBox.error("Formato excel incorrecto, por favor descargue la plantilla.");
                             sap.ui.core.BusyIndicator.hide(0);
-                            that.onLimpiarTable();
                         }
                     });
                 }
@@ -671,7 +694,7 @@ sap.ui.define([
                         }
                     });
                     break;
-                case "Excel":
+                case "Vehiculos":
                     oColumnListItem = new sap.m.ColumnListItem({
                         type: "Inactive",
                         //press: this.onDetalleSolicitud,
@@ -681,6 +704,17 @@ sap.ui.define([
                         }*/
                     });
                     break;
+                case "Repuestos":
+                    oColumnListItem = new sap.m.ColumnListItem({
+                        type: "Inactive",
+                        //press: this.onDetalleSolicitud,
+                        /*highlight: {
+                            path: 'BESTU',
+                            formatter: '.formatter.formatEstados'
+                        }*/
+                    });
+                    break;
+
             }
             return oColumnListItem;
         },
@@ -716,7 +750,19 @@ sap.ui.define([
                         oColumnListItem.addCell(oCell);
                     });
                     break;
-                case "Excel":
+                case "Vehiculos":
+                    // Agregar celdas a los elementos de la tabla
+                    aColumns.forEach(function (oColumnData) {
+                        var oCell;
+                        if (oColumnData.path) {
+                            oCell = new sap.m.Text({ text: "{" + oColumnData.path + "}" });
+                        } else {
+                            oCell = new sap.m.Text({ text: "" });
+                        }
+                        oColumnListItem.addCell(oCell);
+                    });
+                    break;
+                case "Repuestos":
                     // Agregar celdas a los elementos de la tabla
                     aColumns.forEach(function (oColumnData) {
                         var oCell;
@@ -756,7 +802,7 @@ sap.ui.define([
                         oTable.addColumn(oColumn);
                     });
                     break;
-                case "Excel":
+                case "Vehiculos":
                     // Crear las columnas
                     aColumns = [
                         { id: "NumFactura", label: "N° De Fact", path: "NumFactura", width: "9rem" },
@@ -772,6 +818,77 @@ sap.ui.define([
                         { id: "Total", label: "TOTAL", path: "Total", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
 
                     ];
+
+                    // Agregar las columnas a la tabla
+                    aColumns.forEach(function (oColumnData) {
+                        var oColumn = new sap.m.Column({
+                            width: oColumnData.width || "auto",
+                            header: new sap.m.Text({ text: oColumnData.label }),
+                            id: oColumnData.id
+                        });
+                        // Agregar columnas al modelo
+                        oTable.addColumn(oColumn);
+                    });
+                    break;
+
+                case "Repuestos":
+                    // Crear las columnas
+                    aColumns = [
+                        { id: "Sociedad", label: "Sociedad", path: "Sociedad", width: "9rem" },
+                        { id: "Item", label: "Caja", path: "Caja", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "TipoDocumento", label: "Tipo Documento", path: "TipoDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "ClaseDocumento", label: "Clase Documento", path: "ClaseDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "NroPedido", label: "Nro Pedido", path: "NroPedido", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
+                        { id: "Proveedor", label: "Proveedor", path: "Proveedor", demandPopin: true, minScreenWidth: "Tablet", width: "10rem" },
+                        { id: "OrganizacionCompras", label: "Organizacion Compras", path: "OrganizacionCompras", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "GrupoCompras", label: "Grupo Compras", path: "GrupoCompras", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
+                        { id: "Material", label: "Material", path: "Material", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Cantidad", label: "Cantidad", path: "Cantidad", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "PrecioNeto", label: "Precio Neto", path: "PrecioNeto", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Solped", label: "Solped", path: "Solped", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "ValorTotal", label: "Valor Total", path: "ValorTotal", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Caja", label: "Caja", path: "Caja", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "PaisOrigen", label: "Pais Origen", path: "PaisOrigen", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Centro", label: "Centro", path: "Centro", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Almacen", label: "Almacen", path: "Almacen", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Unidad", label: "Unidad", path: "Unidad", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "NumeroBl", label: "Numero Bl", path: "NumeroBl", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "FechaBl", label: "Fecha Bl", path: "FechaBl", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "PuertoSalida", label: "Puerto Salida", path: "PuertoSalida", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Puertollegada", label: "Puerto Llegada", path: "Puertollegada", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Icoterms", label: "Icoterms", path: "Icoterms", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "LugarIncoterms", label: "Lugar Incoterms", path: "LugarIncoterms", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "ViaTransporte", label: "Via Transporte", path: "ViaTransporte", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                    ];
+
+                    /*aColumns = [
+                        { id: "SOCIEDAD", label: "Sociedad", path: "SOCIEDAD", width: "9rem" },
+                        { id: "ITEM", label: "Item", path: "ITEM", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "TIPO_DOCUMENTO_COMPRAS", label: "Tipo Documento", path: "TIPO DE DOCUMENTO DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "CLASE_DE_DOCUMENTO_DE_COMPRAS", label: "Clase Documento", path: "CLASE DE DOCUMENTO DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "No_PEDIDO", label: "Nro Pedido", path: "No PEDIDO", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
+                        { id: "PROVEEDOR", label: "Proveedor", path: "PROVEEDOR", demandPopin: true, minScreenWidth: "Tablet", width: "10rem" },
+                        { id: "ORGANIZACION_DE_COMPRAS", label: "Organizacion Compras", path: "ORGANIZACIÓN DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "GRUPO_DE_COMPRAS", label: "Grupo Compras", path: "GRUPO DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
+                        { id: "MATERIAL", label: "Material", path: "MATERIAL", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "CANTIDAD", label: "Cantidad", path: "CANTIDAD", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "PRECIO_NETO", label: "Precio Neto", path: "PRECIO NETO", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "SOLPED", label: "Solped", path: "SOLPED", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "VALOR_TOTAL", label: "Valor Total", path: "VALOR TOTAL", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "CAJA", label: "Caja", path: "CAJA", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "PAIS_DE_ORIGEN", label: "Pais Origen", path: "PAIS DE ORIGEN", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "CENTRO", label: "Centro", path: "CENTRO", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "ALMACEN", label: "Almacen", path: "ALMACEN", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "UNIDAD", label: "Unidad", path: "UNIDAD", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "NUMERO_BL", label: "Numero Bl", path: "NUMERO BL", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "FECHA_BL", label: "Fecha Bl", path: "FECHA BL", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "PUERTO_DE_SALIDA", label: "Puerto Salida", path: "PUERTO DE SALIDA", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "PUERTO_DE_LLEGADA", label: "Puerto Llegada", path: "PUERTO DE LLEGADA", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "ICOTERMS", label: "Icoterms", path: "ICOTERMS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "LUGAR_INCOTERMS", label: "Lugar Incoterms", path: "LUGAR INCOTERMS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "VIA_TRANSPORTE", label: "Via Transporte", path: "VIA TRANSPORTE", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                    ];*/
+
 
                     // Agregar las columnas a la tabla
                     aColumns.forEach(function (oColumnData) {
@@ -820,17 +937,27 @@ sap.ui.define([
                       oHeaderToolbar.addContent(oFileUploaderTXT); */
 
                     // Agregar FileUploader para cargar archivos Excel
-                    var oFileUploaderExcel = new sap.ui.unified.FileUploader({
-                        id: "onFileSelectExcel",
-                        name: "uploadFile",
-                        fileType: "xls,xlsx",
-                        icon: "sap-icon://excel-attachment",
-                        buttonText: "Cargar excel",
-                        change: this.onFileSelectExcel,
-                        iconOnly: false,
-                        buttonOnly: true
+                    /*  var oFileUploaderExcel = new sap.ui.unified.FileUploader({
+                          id: "onFileSelectExcel",
+                          name: "uploadFile",
+                          fileType: "xls,xlsx",
+                          icon: "sap-icon://excel-attachment",
+                          buttonText: "Cargar excel",
+                          change: this.onFileSelectExcel,
+                          iconOnly: false,
+                          buttonOnly: true
+                      });
+                      oHeaderToolbar.addContent(oFileUploaderExcel);
+                      */
+
+                    //Botón para abrir popu de cargar Excel
+                    var oButtonSeleccionarTipoCarga = new sap.m.Button({
+                        text: "Cargar Facturas",
+                        icon: "sap-icon://enter-more",
+                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
                     });
-                    oHeaderToolbar.addContent(oFileUploaderExcel);
+
+                    oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
 
                     // Crear el botón con icono
                     var oButtonDescargarExcel = new sap.m.Button({
@@ -856,7 +983,7 @@ sap.ui.define([
 
                     break;
 
-                case "Excel":
+                case "Vehiculos":
                     // Crear la toolbar de encabezado
                     oHeaderToolbar = new sap.m.OverflowToolbar();
 
@@ -885,30 +1012,39 @@ sap.ui.define([
                     oHeaderToolbar.addContent(oSearchField);
 
                     // Agregar FileUploader para cargar archivos TXT
-                    var oFileUploaderTXT = new sap.ui.unified.FileUploader({
-                        id: "fileUploaderTXT",
-                        name: "uploadFile",
-                        fileType: "txt",
-                        icon: "sap-icon://document-text",
-                        buttonText: "Cargar txt",
-                        change: this.onFileSelectTxt,
-                        iconOnly: false,
-                        buttonOnly: true
-                    });
-                    oHeaderToolbar.addContent(oFileUploaderTXT);
+                    /*   var oFileUploaderTXT = new sap.ui.unified.FileUploader({
+                           id: "fileUploaderTXT",
+                           name: "uploadFile",
+                           fileType: "txt",
+                           icon: "sap-icon://document-text",
+                           buttonText: "Cargar txt",
+                           change: this.onFileSelectTxt,
+                           iconOnly: false,
+                           buttonOnly: true
+                       });
+                       oHeaderToolbar.addContent(oFileUploaderTXT);
+   */
+                    /*  // Agregar FileUploader para cargar archivos Excel
+                      var oFileUploaderExcel = new sap.ui.unified.FileUploader({
+                          id: "onFileSelectExcel",
+                          name: "uploadFile",
+                          fileType: "xls,xlsx",
+                          icon: "sap-icon://excel-attachment",
+                          buttonText: "Cargar excel",
+                          change: this.onFileSelectExcel,
+                          iconOnly: false,
+                          buttonOnly: true
+                      });
+                      oHeaderToolbar.addContent(oFileUploaderExcel);*/
 
-                    // Agregar FileUploader para cargar archivos Excel
-                    var oFileUploaderExcel = new sap.ui.unified.FileUploader({
-                        id: "onFileSelectExcel",
-                        name: "uploadFile",
-                        fileType: "xls,xlsx",
-                        icon: "sap-icon://excel-attachment",
-                        buttonText: "Cargar excel",
-                        change: this.onFileSelectExcel,
-                        iconOnly: false,
-                        buttonOnly: true
+                    //Botón para abrir popu de cargar Excel
+                    var oButtonSeleccionarTipoCarga = new sap.m.Button({
+                        text: "Cargar Facturas",
+                        icon: "sap-icon://enter-more",
+                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
                     });
-                    oHeaderToolbar.addContent(oFileUploaderExcel);
+
+                    oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
 
                     // Crear el botón con icono
                     var oButtonDescargarExcel = new sap.m.Button({
@@ -919,6 +1055,81 @@ sap.ui.define([
 
                     oHeaderToolbar.addContent(oButtonDescargarExcel);
                     break;
+
+                case "Repuestos":
+                    // Crear la toolbar de encabezado
+                    oHeaderToolbar = new sap.m.OverflowToolbar();
+
+                    // Agregar el título
+                    var oTitle = new sap.m.Title({
+                        id: "tableHeader",
+                        text: "{ExcelView>/solicitudesTableTitle}",
+                        level: "H3"
+                    });
+                    oHeaderToolbar.addContent(oTitle);
+
+                    // Agregar espacio en blanco
+                    oHeaderToolbar.addContent(new sap.m.ToolbarSpacer());
+
+                    // Agregar campo de búsqueda
+                    var oSearchField = new sap.m.SearchField({
+                        id: "idBusquedaRapida",
+                        tooltip: "{i18n>solicitudesSearchTooltip}",
+                        liveChange: this.onBusquedaRapida,
+                        showSearchButton: false,
+                        layoutData: new sap.m.OverflowToolbarLayoutData({
+                            maxWidth: "200px",
+                            priority: "NeverOverflow"
+                        })
+                    });
+                    oHeaderToolbar.addContent(oSearchField);
+
+                    // Agregar FileUploader para cargar archivos TXT
+                    /*   var oFileUploaderTXT = new sap.ui.unified.FileUploader({
+                           id: "fileUploaderTXT",
+                           name: "uploadFile",
+                           fileType: "txt",
+                           icon: "sap-icon://document-text",
+                           buttonText: "Cargar txt",
+                           change: this.onFileSelectTxt,
+                           iconOnly: false,
+                           buttonOnly: true
+                       });
+                       oHeaderToolbar.addContent(oFileUploaderTXT);
+   */
+                    /*  // Agregar FileUploader para cargar archivos Excel
+                      var oFileUploaderExcel = new sap.ui.unified.FileUploader({
+                          id: "onFileSelectExcel",
+                          name: "uploadFile",
+                          fileType: "xls,xlsx",
+                          icon: "sap-icon://excel-attachment",
+                          buttonText: "Cargar excel",
+                          change: this.onFileSelectExcel,
+                          iconOnly: false,
+                          buttonOnly: true
+                      });
+                      oHeaderToolbar.addContent(oFileUploaderExcel);*/
+
+                    //Botón para abrir popu de cargar Excel
+                    var oButtonSeleccionarTipoCarga = new sap.m.Button({
+                        text: "Cargar Facturas",
+                        icon: "sap-icon://enter-more",
+                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
+                    });
+
+                    oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
+
+                    // Crear el botón con icono
+                    var oButtonDescargarExcel = new sap.m.Button({
+                        text: "Descargar Excel",
+                        icon: "sap-icon://download",
+                        press: this.ExportExcel.bind(this, TypeTable)
+                    });
+
+                    oHeaderToolbar.addContent(oButtonDescargarExcel);
+                    break;
+
+
             }
             return oHeaderToolbar;
         },
@@ -948,12 +1159,12 @@ sap.ui.define([
                     });
                     break;
 
-                case "Excel":
+                case "Vehiculos":
                     oTable = new sap.m.Table({
-                        id: "idCargaExcelTable",
+                        id: "idCargaExcelVehiculoTable",
                         width: "auto",
                         items: {
-                            path: "/CargaExcel",
+                            path: "/ExcelVehiculos",
                             sorter: {
                                 path: "codigoSolicitud",
                                 descending: true,
@@ -969,6 +1180,30 @@ sap.ui.define([
                         mode: "MultiSelect"
                     });
                     break;
+
+                case "Repuestos":
+                    oTable = new sap.m.Table({
+                        id: "idCargaExcelRepuestosTable",
+                        width: "auto",
+                        items: {
+                            path: "/ExcelRepuestos",
+                            sorter: {
+                                path: "codigoSolicitud",
+                                descending: true,
+                            },
+                            template: oColumnListItem
+                        },
+                        noDataText: "{ExcelView>/tableNoDataText}",
+                        busyIndicatorDelay: 0,
+                        busy: "{ExcelView>tableBusy}",
+                        growing: true,
+                        growingScrollToLoad: true,
+                        //updateFinished: this.onUpdateFinished,
+                        mode: "MultiSelect"
+                    });
+                    break;
+
+
             }
             return oTable;
 
@@ -978,8 +1213,11 @@ sap.ui.define([
                 case "Solicitudes":
                     oTable.bindItems("/Facturas", oColumnListItem);
                     break;
-                case "Excel":
-                    oTable.bindItems("/CargaExcel", oColumnListItem);
+                case "Vehiculos":
+                    oTable.bindItems("/ExcelVehiculos", oColumnListItem);
+                    break;
+                case "Repuestos":
+                    oTable.bindItems("/ExcelRepuestos", oColumnListItem);
                     break;
             }
         },
@@ -1046,9 +1284,9 @@ sap.ui.define([
                     }
                     break;
 
-                case "Excel":
+                case "Vehiculos":
                     var table = oView.byId("ContenedorTabla").getContent()[0];
-                    var aData = MODEL.getProperty("/CargaExcel");
+                    var aData = MODEL.getProperty("/ExcelVehiculos");
                     var columns = [];
                     if (aData.length > 0) {
                         columns = that.getColumnas(TypeTable, table);
@@ -1064,6 +1302,27 @@ sap.ui.define([
                         );
                     }
                     break;
+
+                case "Repuestos":
+                    var table = oView.byId("ContenedorTabla").getContent()[0];
+                    var aData = MODEL.getProperty("/ExcelRepuestos");
+                    var columns = [];
+                    if (aData.length > 0) {
+                        columns = that.getColumnas(TypeTable, table);
+                        that.DownLoadExcel(aData, columns, "Reporte - Excel carga masiva");
+                    }
+                    else {
+                        MessageBox.information(
+                            "No se obtuvo información para exportar",
+                            {
+                                title: "Descargar Excel: Sin datos para exportar",
+                                actions: [MessageBox.Action.OK]
+                            }
+                        );
+                    }
+                    break;
+
+
             }
         },
         DownLoadExcel: function (Data, Columns, name) {
@@ -1093,7 +1352,19 @@ sap.ui.define([
                     });
                     break;
 
-                case "Excel":
+                case "Vehiculos":
+                    var Columns = Table.getColumns();
+                    $.each(Columns, function (i, item) {
+                        if (!(item.getId()).includes("_")) {
+                            columnas.push({
+                                "label": item.getHeader().getText(),
+                                "property": item.getId(),
+                                "type": "string"
+                            })
+                        }
+                    });
+                    break;
+                case "Repuestos":
                     var Columns = Table.getColumns();
                     $.each(Columns, function (i, item) {
                         if (!(item.getId()).includes("_")) {
@@ -1137,7 +1408,7 @@ sap.ui.define([
             }
         },
         getProveedoresHelp: function (sValue = "") {
-            let value = sValue.substr(0, 18);            
+            let value = sValue.substr(0, 18);
             return new Promise((resolve, reject) => {
                 ODataUtilidadesModel.read("/filtrosSet", {
                     filters: [
@@ -1255,5 +1526,112 @@ sap.ui.define([
                 });
             });
         },
+        onProcesarDataExcel: function () {
+            var TypeTable = "";
+            // Obtener la referencia al RadioButtonGroup
+            var oRadioButtonGroup = that.getView().byId("radioButtonGroup");
+
+            // Obtener el índice del RadioButton seleccionado
+            var selectedIndex = oRadioButtonGroup.getSelectedIndex();
+
+            // Obtener el RadioButton seleccionado
+            var selectedRadioButton = oRadioButtonGroup.getButtons()[selectedIndex];
+
+            // Obtener el texto del RadioButton seleccionado
+            var selectedText = selectedRadioButton.getText();
+
+
+            switch (selectedIndex) {
+
+                case 0:
+                    TypeTable = "Repuestos";
+                    break;
+
+                case 1:
+                    TypeTable = "Vehiculos";
+                    break;
+
+            }
+
+            let file = that.getFileFromUploader();
+            if (file) {
+                let SeleccionEstructura = that._dialogs["SeleccionarEstructuraExcel"];
+                SeleccionEstructura.close();
+                that.onReadExcel(file, TypeTable);
+            }
+            else {
+
+            }
+        },
+        getFileFromUploader: function () {
+            // Obtén una referencia al FileUploader por su ID
+            var oFileUploader = that.getView().byId("onFileSelectExcel");
+
+            // Obtén la lista de archivos cargados
+            var aFiles = oFileUploader && oFileUploader.getValue() ? oFileUploader.oFileUpload.files : [];
+
+            // Verifica si hay algún archivo cargado
+            if (aFiles.length > 0) {
+                // Accede al primer archivo en la lista
+                var oFile = aFiles[0];
+
+                // Retorna el objeto de archivo
+                return oFile;
+            } else {
+                // Retorna null si no hay archivo seleccionado
+                return null;
+            }
+        },
+        buildArrayFromDataExcel: function (DataExcel, TypeTable) {
+
+            var resultData = [];
+            DataExcel.forEach(function (item) {
+                var jsonObject = {};
+                if (TypeTable == "Repuestos") {
+                    jsonObject.Sociedad = item["SOCIEDAD"]
+                    jsonObject.Item = item["ITEM"]
+                    jsonObject.TipoDocumento = item["TIPO DE DOCUMENTO DE COMPRAS"]
+                    jsonObject.ClaseDocumento = item["CLASE DE DOCUMENTO DE COMPRAS"]
+                    jsonObject.NroPedido = item["No PEDIDO"]
+                    jsonObject.Proveedor = item["PROVEEDOR"]
+                    jsonObject.OrganizacionCompras = item["ORGANIZACIÓN DE COMPRAS"]
+                    jsonObject.GrupoCompras = item["GRUPO DE COMPRAS"]
+                    jsonObject.Material = item["MATERIAL"]
+                    jsonObject.Cantidad = item["CANTIDAD"]
+                    jsonObject.PrecioNeto = item["PRECIO NETO"]
+                    jsonObject.Solped = item["SOLPED"]
+                    jsonObject.ValorTotal = item["VALOR TOTAL"]
+                    jsonObject.Caja = item["CAJA"]
+                    jsonObject.PaisOrigen = item["PAIS DE ORIGEN"]
+                    jsonObject.Centro = item["CENTRO"]
+                    jsonObject.Almacen = item["ALMACEN"]
+                    jsonObject.Unidad = item["UNIDAD"]
+                    jsonObject.NumeroBl = item["NUMERO BL"]
+                    jsonObject.FechaBl = item["FECHA BL"]
+                    jsonObject.PuertoSalida = item["PUERTO DE SALIDA"]
+                    jsonObject.Puertollegada = item["PUERTO DE LLEGADA"]
+                    jsonObject.Icoterms = item["ICOTERMS"]
+                    jsonObject.LugarIncoterms = item["LUGAR INCOTERMS"]
+                    jsonObject.ViaTransporte = item["VIA TRANSPORTE"]
+                }
+                else {
+                    jsonObject.NumFactura = item["N° DE FACT"]
+                    jsonObject.Caja = item["CAJA"]
+                    jsonObject.NumOrden = item["N° DE ORDEN"]
+                    jsonObject.NumParte = item["N° DE PARTE"]
+                    jsonObject.Item = item["ITEM"]
+                    jsonObject.Descripcion = item["DESCRIPCIÓN"]
+                    jsonObject.Origen = item["ORIGEN"]
+                    jsonObject.Peso = item["PESO (KGRS)"]
+                    jsonObject.Fob = item["FOB"]
+                    jsonObject.Cant = item["CANT"]
+                    jsonObject.Total = item["TOTAL"]
+                }
+                resultData.push(jsonObject);
+            });
+
+            return resultData;
+        }
+
     });
 });

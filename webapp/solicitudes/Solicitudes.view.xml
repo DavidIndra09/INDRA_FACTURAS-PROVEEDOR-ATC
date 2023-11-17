@@ -43,7 +43,7 @@
                     </ComboBox>-->
                     <Button
                         icon="sap-icon://create"
-                        text="Crear Factura"
+                        text="Crear factura manual"
                         type="Emphasized"
                         press="onNavFacturaNueva"
                     />

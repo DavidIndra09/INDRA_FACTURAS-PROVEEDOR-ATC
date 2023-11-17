@@ -18686,7 +18686,8 @@ function sheet_to_json(sheet, opts) {
 				hdr[C] = vv;
 		}
 	}
-	var oHeader = {
+	
+	/*var oHeader = {
 	    NumFactura     : hdr[0],
 		Caja           : hdr[1],
 		NumOrden       : hdr[2],
@@ -18712,7 +18713,7 @@ function sheet_to_json(sheet, opts) {
 	hdr[7] = "Peso";
 	hdr[8] = "Fob";
 	hdr[9] = "Cant";
-	hdr[10] = "Total";	
+	hdr[10] = "Total";	*/
 	
 	var row = (header === 1) ? [] : {};
 	for (R = r.s.r + offset; R <= r.e.r; ++R) {
@@ -18754,8 +18755,8 @@ function sheet_to_json(sheet, opts) {
 	
 	out.length = outi;	
 	if(hdr.length!=11){
-		out = [];
-		out[0] = "ERROR";
+		//out = [];
+		//out[0] = "ERROR";
 	}
 	return out;
 }
