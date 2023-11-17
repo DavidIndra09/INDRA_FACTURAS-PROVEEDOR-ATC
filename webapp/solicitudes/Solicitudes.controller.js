@@ -961,7 +961,7 @@ sap.ui.define([
 
                     // Crear el botón con icono
                     var oButtonDescargarExcel = new sap.m.Button({
-                        text: "",
+                        text: "Descargar Excel",
                         icon: "sap-icon://download",
                         press: this.ExportExcel.bind(this, TypeTable)
                     });
