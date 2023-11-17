@@ -5,7 +5,8 @@ sap.ui.define([
     "sap/m/MessageBox",
     "../model/formatter",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
+    "sap/ui/model/FilterOperator",
+    "sap/ui/core/format/DateFormat"
 ], function (
     BaseController,
     JSONModel,
@@ -13,12 +14,14 @@ sap.ui.define([
     MessageBox,
     formatter,
     Filter,
-    FilterOperator
+    FilterOperator,
+    DateFormat
 ) {
     "use strict";
     let MODEL,
         nuevafacturaModel,
         facturaModel,
+        that,
         ODATA_SAP;
     return BaseController.extend("usil.com.createinvoice.atc.factura.Factura", {
 
@@ -33,6 +36,7 @@ sap.ui.define([
          * @public
          */
         onInit: function () {
+            that = this;
             // Model used to manipulate control states. The chosen values make sure,
             // detail page shows busy indication immediately so there is no break in
             // between the busy indication for loading the view's meta data
@@ -396,7 +400,7 @@ sap.ui.define([
         onCreateInvoice: async function () {
             const factura = MODEL.getProperty("/Factura");
             let dTotalConfor = obtenerTotalConformidad(factura.conformidades.results);
-
+            /*
             if (parseFloat(factura.importe) != dTotalConfor) {
                 MessageBox.error("El importe de la factura y el total de conformidades deben ser el mismo.");
                 return;
@@ -405,20 +409,20 @@ sap.ui.define([
             if (factura.estadoCp != '1' && factura.estadoCp != '1') {
                 MessageBox.error("El arhivo xml debe ser válido o autorizado por SUNAT");
                 return;
-            }
-            if (!factura.codigoSolicitud) {
-                MessageBox.confirm(`¿Está seguro que desea crear esta solicitud?`, {
-                    onClose: function (action) {
-                        if (action === "OK") this._crearFactura();
-                    }.bind(this)
-                });
-                return;
-            }
-            MessageBox.confirm(`¿Está seguro que desea actualizar la solicitud ${factura.codigoSolicitud}?`, {
+            }*/
+            //if (!factura.codigoSolicitud) {
+            MessageBox.confirm(`¿Está seguro que desea crear esta factura?`, {
                 onClose: function (action) {
-                    if (action === "OK") this._actualizarFactura();
+                    if (action === "OK") this._crearFactura();
                 }.bind(this)
             });
+            //return;
+            //}
+            /* MessageBox.confirm(`¿Está seguro que desea actualizar la solicitud ${factura.codigoSolicitud}?`, {
+                 onClose: function (action) {
+                     if (action === "OK") this._actualizarFactura();
+                 }.bind(this)
+             });*/
 
             function obtenerTotalConformidad(aData) {
                 let dTotal = 0;
@@ -620,16 +624,37 @@ sap.ui.define([
             return await dataFile.then(resolveImport, rejectImport);
         },
 
+        _mostrarMensaje: function (Mensaje) {
+            var oMessageStrip = new sap.m.MessageStrip({
+                text: Mensaje,
+                type: sap.ui.core.MessageType.Success,
+                showIcon: true,
+                customIcon: "sap-icon://error",
+                class: "sapUiMsgError"
+            });
+            var oDialog = new sap.m.Dialog({
+                title: "Dato Obligatorio",
+                content: [oMessageStrip],
+                beginButton: new sap.m.Button({
+                    text: "Cerrar",
+                    press: function () {
+                        oDialog.close();
+                    }
+                })
+            });
+            oDialog.open();
+        },
+
         _crearFactura: async function () {
-            const data = this._getDataFactura();
-            //const request = await this.createEntity(facturaModel, "/Facturas", data);
-            const request = await this.createEntity(ODATA_SAP, "/facturaSet", data);
+            const data = this._getDataFactura();           
+            const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
             //MessageBox.success(`La solicitud ${request.codigoSolicitud}  se ha sido creada correctamente`, {
-            if (request.e_msg.indexOf("exito") < 0) {
+            /*if (request.E_MSG.indexOf("exito") < 0) {
                 type = "error";
-            }
-            MessageBox[type](request.e_msg, {
+            }*/
+            //that._mostrarMensaje()
+            MessageBox[type](request.E_MSG, {
                 onClose: function () {
                     ODATA_SAP.refresh();
                     this.onNavSolicitudes();
@@ -730,14 +755,34 @@ sap.ui.define([
             const codigoSolicitud = factura.codigoSolicitud;
             if (codigoSolicitud) data.codigoSolicitud = codigoSolicitud;
 
-            let oReturn = {
+            /*let oReturn = {
                 "i_userscp": "P2002198484",
                 "i_accion": "CR",
                 "is_fact_prov_c": JSON.stringify(data),
                 "it_fact_prov_d": JSON.stringify(conformidades)
-            };
+            };*/
+
+            let oReturn = {
+                "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
+                "I_FACTUR": factura.codigoFactura,
+                "I_FEMISI": /*"20230920",*/that.formatFecha(factura.fechaEmisionParameter),//JSON.stringify(data),
+                "I_IMPORT": factura.importe,//JSON.stringify(conformidades),
+                "IT_DOC": "",
+                "IT_DET": ""
+            }
 
             return oReturn;
+        },
+
+        formatFecha: function (fecha) {
+            // Extraer la fecha del formato "2023-11-16T05:00:00"
+            var fechaArray = fecha.split("T");
+            var fechaExtraida = fechaArray[0];
+
+            // Reemplazar los guiones
+            var fechaFormateada = fechaExtraida.replace(/-/g, '');
+
+            return fechaFormateada;
         },
 
         _getSolicitud: async function (codigoSolicitud) {

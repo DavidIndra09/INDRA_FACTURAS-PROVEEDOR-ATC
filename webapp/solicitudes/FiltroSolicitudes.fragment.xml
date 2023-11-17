@@ -12,7 +12,7 @@
                             </Input> -->
                             <SearchField  id="InputCodigoSolicitud" width="100%"  showSearchButton="false" placeholder="Ingrese un código de solicitud" enableSuggestions="true" search=".handleSearch" suggest=".onSuggestCodSolicitud" suggestionItems="{path:'codSolicitudhelp>/'}">
 
-                                <SuggestionItem text="{codSolicitudhelp>VALUE} - {codSolicitudhelp>TEXTO}" />
+                                <SuggestionItem text="{codSolicitudhelp>VALUE}" />
 
                             </SearchField>
 
@@ -54,7 +54,15 @@
                     </form:FormElement>
                     <form:FormElement>
                         <form:fields>
-                            <MultiComboBox items="{
+                            <DateRangeSelection id="idDateRangeContabilizacion" valueFormat="dd.MM.yyyy" displayFormat="dd.MM.yyyy" change="onSeleccionFechaRegistro"/>
+                        </form:fields>
+                        <form:label>
+                            <Label text="{i18n>fechaContabilziacion}" />
+                        </form:label>
+                    </form:FormElement>
+                    <form:FormElement>
+                        <form:fields>
+                            <MultiComboBox id="ComboEstados" items="{
                                     path: 'EstadosFactura>/'
                                 }">
                                 <core:ListItem text="{EstadosFactura>TEXTO}" key="{EstadosFactura>VALUE}" icon="{EstadosFactura>icon}"/>

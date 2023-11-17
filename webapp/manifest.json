@@ -17,7 +17,7 @@
         },
         "dataSources": {
             "sapService": {
-                "uri": "/sap/opu/odata/sap/ZPY_FACTURA_ISP_SRV/",
+                "uri": "/sap/opu/odata/sap/ZGW_PORTAL_PROVEEDORES_SRV/",
                 "type": "OData",
                 "settings": {
                     "annotations": [],

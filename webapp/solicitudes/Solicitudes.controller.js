@@ -81,7 +81,7 @@ sap.ui.define([
             // MODEL.setProperty("/EstadosFactura",Service.getInstance().newEstadofactura());
             MODEL.setProperty("/Busqueda", {});
             that._dialogs = {};
-            //that.onMostrarSeleccionProveedor();
+            that.onMostrarSeleccionProveedor();
             // this._getDataInitial();
             this._setListaSolicitudes({ filters: [] });
 
@@ -184,12 +184,26 @@ sap.ui.define([
                 fechaFinal: formatter.formatDateParameter(fechaFinal)
             });
         },
+        onSeleccionFechaContabilizacion: function (event) {
+            const fechaInicio = event.getSource().getDateValue();
+            const fechaFinal = event.getSource().getSecondDateValue();
+            MODEL.setProperty("/Busqueda/fechaContabilizacion", {
+                fechaInicio: formatter.formatDateParameter(fechaInicio),
+                fechaFinal: formatter.formatDateParameter(fechaFinal)
+            });
+        },
 
         onBuscarFacturas: function () {
+
             const busqueda = MODEL.getProperty("/Busqueda");
             const filters = [];
             const dFechaEmision = that.byId("idDateRangeEmision"),
-                dFechaRegistro = that.byId("idDateRangeRegistro");
+                dFechaRegistro = that.byId("idDateRangeRegistro"),
+                dFechaContabilizacion = that.byId("idDateRangeContabilizacion").getValue(),
+                InputCodigoFactura = that.byId("InputCodigoFactura").getValue(),
+                InputCodigoSolicitud = that.byId("InputCodigoSolicitud").getValue(),
+                ComboEstados = that.byId("ComboEstados").getSelectedKeys().join(","),
+                Proveedor = sap.ui.getCore().getModel("Lifnr");
 
             if (dFechaEmision.getValue() !== "") {
                 let sFechaIni = dFechaEmision.getDateValue();
@@ -197,30 +211,45 @@ sap.ui.define([
 
                 if ((sFechaIni != null && sFechaIni != undefined) && (sFechaFin != null && sFechaFin != undefined)) {
                     filters.push(
-                        new Filter("ir_datfa", "BT", formatter.formatDateToString(sFechaIni), formatter.formatDateToString(sFechaFin)) // fechaEmision
+                        new Filter("IR_FEMISI", "BT", formatter.formatDateToString(sFechaIni), formatter.formatDateToString(sFechaFin)) // fechaEmision
                     );
                 }
             }
 
+            if (dFechaContabilizacion.getValue() !== "") {
+                let sFechaIni = dFechaContabilizacion.getDateValue();
+                let sFechaFin = dFechaContabilizacion.getSecondDateValue();
+
+                if ((sFechaIni != null && sFechaIni != undefined) && (sFechaFin != null && sFechaFin != undefined)) {
+                    filters.push(
+                        new Filter("IR_FECREA", "BT", formatter.formatDateToString(sFechaIni), formatter.formatDateToString(sFechaFin)) // fechaEmision
+                    );
+                }
+            }
+
+            //Fecha Creación de solicitud
             if (dFechaRegistro.getValue() !== "") {
                 let sFechaIni = dFechaRegistro.getDateValue();
                 let sFechaFin = dFechaRegistro.getSecondDateValue();
 
                 if ((sFechaIni != null && sFechaIni != undefined) && (sFechaFin != null && sFechaFin != undefined)) {
                     filters.push(
-                        new Filter("ir_bedat", "BT", formatter.formatDateToString(sFechaIni), formatter.formatDateToString(sFechaFin)) //fechaRegistro
+                        new Filter("IR_FCRESO", "BT", formatter.formatDateToString(sFechaIni), formatter.formatDateToString(sFechaFin)) //fechaRegistro
                     );
                 }
             }
 
-            if (busqueda.codigoSolicitud) filters.push(new Filter("ir_solicitud", "EQ", busqueda.codigoSolicitud)); //codigoSolicitud
-            if (busqueda.codigoFactura) filters.push(new Filter("ir_codefact", "EQ", busqueda.codigoFactura)); // codigoFactura
+            if (Proveedor) filters.push(new Filter("I_LIFNR", "EQ", Proveedor));
+
+            if (InputCodigoSolicitud) filters.push(new Filter("I_SOLFAC", "EQ", InputCodigoSolicitud)); //codigoSolicitud
+            if (InputCodigoFactura) filters.push(new Filter("I_FACTUR", "EQ", InputCodigoFactura)); // codigoFactura
             // if(busqueda.fechaEmision) {
             //     filters.push(
             //         new Filter("ir_bedat","BT", busqueda.fechaEmision.fechaInicio , busqueda.fechaEmision.fechaFinal) // fechaEmision
             //     );
             // } 
-            if (busqueda.estadoFactura) filters.push(new Filter("i_status", "EQ", busqueda.estadoFactura)); // estadoFactura_ID
+            debugger
+            if (ComboEstados) filters.push(new Filter("I_ESTADO", "EQ", ComboEstados)); // estadoFactura_ID
             // if(busqueda.fechaRegistro) {
             //     filters.push(
             //         new Filter("fechaRegistro","BT", busqueda.fechaRegistro.fechaInicio , busqueda.fechaRegistro.fechaFinal) // fechaRegistro
@@ -234,9 +263,12 @@ sap.ui.define([
             MODEL.setProperty("/Busqueda", {});
             const dateRangeEmision = this.getView().byId("idDateRangeEmision");
             const dateRangeRegistro = this.getView().byId("idDateRangeRegistro");
+            const DateRangeContabilizacion = this.getView().byId("idDateRangeContabilizacion");
             // limpiamos fechas
             dateRangeEmision.setDateValue(null);
             dateRangeEmision.setSecondDateValue(null);
+            DateRangeContabilizacion.setDateValue(null);
+            DateRangeContabilizacion.setSecondDateValue(null);
             dateRangeRegistro.setDateValue(null);
             dateRangeRegistro.setSecondDateValue(null);
             viewModel.setProperty("/tableBusy", true);
@@ -245,7 +277,56 @@ sap.ui.define([
 
         },
 
-        onBusquedaRapida: function (event) {
+        onObtenerFiltrosSearch: function (TypeTable, query) {
+            let aTableSearchState = [];
+            switch (TypeTable) {
+                case "Solicitudes":
+                    aTableSearchState = [
+                        new Filter({
+                            filters: [
+                                new Filter("CODEFACT", FilterOperator.Contains, query),
+                                new Filter("XBLNR", FilterOperator.Contains, query)
+                            ],
+                            and: false
+                        })
+                    ];
+                    break;
+
+                case "Vehiculos":
+                    aTableSearchState = [
+                        new Filter({
+                            filters: [
+                                new Filter("NumFactura", FilterOperator.Contains, query),
+                                new Filter("NumOrden", FilterOperator.Contains, query),
+                                new Filter("NumParte", FilterOperator.Contains, query),
+                                new Filter("Item", FilterOperator.Contains, query),
+                                new Filter("Descripcion", FilterOperator.Contains, query),
+                                new Filter("Origen", FilterOperator.Contains, query),
+                            ],
+                            and: false
+                        })
+                    ];
+                    break;
+
+                case "Repuestos":
+                    aTableSearchState = [
+                        new Filter({
+                            filters: [
+                                new Filter("CODEFACT", FilterOperator.Contains, query),
+                                new Filter("XBLNR", FilterOperator.Contains, query)
+                            ],
+                            and: false
+                        })
+                    ];
+                    break;
+
+            }
+
+            return aTableSearchState;
+
+        },
+        onBusquedaRapida: function (TypeTable, event) {
+
             if (event.getParameters().refreshButtonPressed) {
                 // Search field's 'refresh' button has been pressed.
                 // This is visible if you select any main list item.
@@ -257,17 +338,9 @@ sap.ui.define([
                 var query = event.getParameter("newValue");
 
                 if (query && query.length > 0) {
-                    aTableSearchState = [
-                        new Filter({
-                            filters: [
-                                new Filter("CODEFACT", FilterOperator.Contains, query),
-                                new Filter("XBLNR", FilterOperator.Contains, query)
-                            ],
-                            and: false
-                        })
-                    ];
+                    aTableSearchState = that.onObtenerFiltrosSearch(TypeTable, query);
                 }
-                this._applySearch(aTableSearchState);
+                that._applySearch(aTableSearchState);
             }
         },
 
@@ -357,6 +430,7 @@ sap.ui.define([
             let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();
             var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.split("-")[0].trim() || element.TEXTO == proveedorSelected.split("-")[0].trim())
             if (find != undefined) {
+                sap.ui.getCore().setModel(new JSONModel({ "Lifnr": find.VALUE }), "Lifnr")
                 that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " /*+ find.VALUE + " - "*/ + find.TEXTO + "    ");
                 let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
                 SeleccionProveedor.close();
@@ -490,11 +564,11 @@ sap.ui.define([
          * @private
          */
         _applySearch: function (aTableSearchState) {
-            var oTable = this.byId("idFacturasTable");
+            let oTable = that.getTable();
             oTable.getBinding("items").filter(aTableSearchState, "Application");
             // changes the noDataText of the list in case there are no filter results
             if (aTableSearchState.length !== 0) {
-                viewModel.setProperty("/tableNoDataText", this.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
+                viewModel.setProperty("/tableNoDataText", that.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
             }
         },
 
@@ -556,13 +630,15 @@ sap.ui.define([
             // };
             // const request = await this.readEntity(facturaModel,"/Facturas",parameters);
             //var aFilters = [];
-            var oFilter = new Filter("i_userscp", FilterOperator.EQ, "P2002198484");
-            parameters.filters.push(oFilter);
-            //aFilters.push(oFilter);
-            var sociedad = new Filter("ir_bukrs", FilterOperator.EQ, "CDBS,PE02,3000,1000");
-            parameters.filters.push(sociedad);
-            //aFilters.push(sociedad);
-            //parameters.filters = aFilters;
+            debugger
+
+            /* var oFilter = new Filter("i_userscp", FilterOperator.EQ, "P2002198484");
+             parameters.filters.push(oFilter);
+             //aFilters.push(oFilter);
+             var sociedad = new Filter("ir_bukrs", FilterOperator.EQ, "CDBS,PE02,3000,1000");
+             parameters.filters.push(sociedad);
+             //aFilters.push(sociedad);
+             //parameters.filters = aFilters;*/
             parameters.urlParameters = {};
             const request = await this.readEntity(ODATA_SAP, "/listarFacturaSet", parameters);
             let sJson = request.results[0].et_data;
@@ -632,7 +708,9 @@ sap.ui.define([
         },
         onFileSelectExcel: function (oEvent) {
             //var oFile = oEvent.getParameter("files")[0];
+
             that.onProcesarDataExcel();
+
             //that.onReadExcel(oFile);
         },
         onReadExcel: function (oFile, TypeTable) {
@@ -643,12 +721,25 @@ sap.ui.define([
                     var sXmlRead = XLSX.read(sXmlResult, {
                         type: 'binary'
                     });
+
                     sXmlRead.SheetNames.forEach(function (sheetName) {
                         var aXmlData = XLSX.utils.sheet_to_row_object_array(sXmlRead.Sheets[sheetName]);
 
                         if (aXmlData[0] != "ERROR") {
                             if (aXmlData.length > 0) {
-                                aXmlData.splice(0, 1);
+                                //aXmlData.splice(0, 1);
+                                let result = that.onValidarFormatos((aXmlData[0] == undefined) ? aXmlData[1] : aXmlData[0], TypeTable);
+
+                                if (!result.valid) {
+                                    MessageBox.error(
+                                        "Estructura de Excel incorrecta para el tipo de carga seleccionado.", {
+                                        title: "Formato Incorrecto",
+                                        details: result.mensaje,
+                                        actions: [sap.m.MessageBox.Action.OK]
+                                    }
+                                    );
+                                    return
+                                }
                                 let DataValida = that.buildArrayFromDataExcel(aXmlData, TypeTable);
                                 switch (TypeTable) {
                                     case "Repuestos":
@@ -966,7 +1057,7 @@ sap.ui.define([
                     var oSearchField = new sap.m.SearchField({
                         id: "idBusquedaRapida",
                         tooltip: "{i18n>solicitudesSearchTooltip}",
-                        liveChange: this.onBusquedaRapida,
+                        liveChange: this.onBusquedaRapida.bind(this, TypeTable),
                         showSearchButton: false,
                         layoutData: new sap.m.OverflowToolbarLayoutData({
                             maxWidth: "200px",
@@ -994,7 +1085,7 @@ sap.ui.define([
 
                     oHeaderToolbar.addContent(oButtonDescargarExcel);
 
-                   
+
 
                     break;
 
@@ -1017,7 +1108,7 @@ sap.ui.define([
                     var oSearchField = new sap.m.SearchField({
                         id: "idBusquedaRapida",
                         tooltip: "{i18n>solicitudesSearchTooltip}",
-                        liveChange: this.onBusquedaRapida,
+                        liveChange: this.onBusquedaRapida.bind(this, TypeTable),
                         showSearchButton: false,
                         layoutData: new sap.m.OverflowToolbarLayoutData({
                             maxWidth: "200px",
@@ -1091,7 +1182,7 @@ sap.ui.define([
                     var oSearchField = new sap.m.SearchField({
                         id: "idBusquedaRapida",
                         tooltip: "{i18n>solicitudesSearchTooltip}",
-                        liveChange: this.onBusquedaRapida,
+                        liveChange: this.onBusquedaRapida.bind(this, TypeTable),
                         showSearchButton: false,
                         layoutData: new sap.m.OverflowToolbarLayoutData({
                             maxWidth: "200px",
@@ -1271,6 +1362,7 @@ sap.ui.define([
             var oView = this.getView();
             oView.addDependent(oTable);
             oView.byId("ContenedorTabla").addContent(oTable);
+
         },
         MostrarTablaPorFlujo: function (TypeTable) {
             var oView = this.getView();
@@ -1483,11 +1575,12 @@ sap.ui.define([
                     ],
                     success: function (oData) {
                         if (oData.results.length) {
-                            let aProveedores = JSON.parse(oData.results[0].et_data);
-                            for (let i = 0; i < aProveedores.length; i++) {
-                                aProveedores[i].VALUE = parseInt(aProveedores[i].VALUE).toString();
-                            }
-                            that.getView().setModel(new JSONModel(aProveedores), "proveedoreshelp");
+                            let aCodSolicitud = JSON.parse(oData.results[0].et_data);
+                            /*for (let i = 0; i < aCodSolicitud.length; i++) {
+                                aCodSolicitud[i].VALUE = parseInt(aCodSolicitud[i].VALUE).toString();
+                            }*/
+
+                            that.getView().setModel(new JSONModel(aCodSolicitud), "codSolicitudhelp");
                         }
                         resolve(true);
                     },
@@ -1652,6 +1745,84 @@ sap.ui.define([
         onAbrirFileUploader: function () {
             let fileUploader = this.getView().byId("onFileSelectExcel");
             fileUploader.$().find('input').click();
+        },
+        onValidarFormatos: function (objElement, typeTable) {
+            let mensajes = [];
+            let obj = { "mensaje": [], "valid": true }
+            const elementosRequeridosRepuestos = [
+                "SOCIEDAD",
+                "ITEM",
+                "TIPO DE DOCUMENTO DE COMPRAS",
+                "CLASE DE DOCUMENTO DE COMPRAS",
+                "No PEDIDO",
+                "PROVEEDOR",
+                "ORGANIZACIÓN DE COMPRAS",
+                "GRUPO DE COMPRAS",
+                "MATERIAL",
+                "CANTIDAD",
+                "PRECIO NETO",
+                "SOLPED",
+                "VALOR TOTAL",
+                "CAJA",
+                "PAIS DE ORIGEN",
+                "CENTRO",
+                "ALMACEN",
+                "UNIDAD",
+                "NUMERO BL",
+                "FECHA BL",
+                "PUERTO DE SALIDA",
+                "PUERTO DE LLEGADA",
+                "ICOTERMS",
+                "LUGAR INCOTERMS",
+                "VIA TRANSPORTE"
+            ];
+
+            const elementosRequeridosVehiculos = [
+                "N° DE FACT",
+                "CAJA",
+                "N° DE ORDEN",
+                "N° DE PARTE",
+                "ITEM",
+                "DESCRIPCIÓN",
+                "ORIGEN",
+                "PESO (KGRS)",
+                "FOB",
+                "CANT",
+                "TOTAL"
+            ];
+
+            let elementosRequeridos;
+            switch (typeTable) {
+                case "Vehiculos":
+                    elementosRequeridos = elementosRequeridosVehiculos;
+                    break;
+                case "Repuestos":
+                    elementosRequeridos = elementosRequeridosRepuestos;
+                    break;
+                default:
+                    console.error("Tipo de tabla no válido.");
+                    return { "mensaje": "Tipo de tabla no válido.", "valid": false };
+            }
+
+            for (const elementoRequerido of elementosRequeridos) {
+                if (!(elementoRequerido in objElement)) {
+                    mensajes.push(`El elemento "${elementoRequerido}" no está presente en la estructura del Excel`);
+                    obj.valid = false;
+                }
+            }
+
+            obj.mensaje = that.formatMessagesAsHTML(mensajes);
+
+            return obj;
+        },
+        formatMessagesAsHTML: function (Mensaje) {
+            let NuevoMensaje = "";
+            let count = 0;
+            Mensaje.map((mensaje) => {
+                count++;
+                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + ".<br>";
+            });
+            return NuevoMensaje;
         }
     });
 });
