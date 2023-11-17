@@ -81,7 +81,7 @@ sap.ui.define([
             // MODEL.setProperty("/EstadosFactura",Service.getInstance().newEstadofactura());
             MODEL.setProperty("/Busqueda", {});
             that._dialogs = {};
-            that.onMostrarSeleccionProveedor();
+            //that.onMostrarSeleccionProveedor();
             // this._getDataInitial();
             this._setListaSolicitudes({ filters: [] });
 
@@ -314,14 +314,14 @@ sap.ui.define([
             });
         },
 
-        onMostrarVistaRapida: async function (event) {
+        onMostrarVistaRapida: async function (VistaRapida, event) {
             const btnVistaRapida = event.getSource();
             // const solicitud = btnVistaRapida.getBindingContext().getObject();
             const path = btnVistaRapida.getBindingContext().getPath();
             // MODEL.setProperty("/EstadoFactura",solicitud.estadoFactura);            
-            let vistaRapida = that._dialogs["VistaRapida"];
+            let vistaRapida = that._dialogs[VistaRapida];
             if (!vistaRapida) {
-                vistaRapida = await that._getDialogs("VistaRapida");
+                vistaRapida = await that._getDialogs(VistaRapida);
             }
             vistaRapida.unbindElement();
             vistaRapida.close();
@@ -631,8 +631,9 @@ sap.ui.define([
             }
         },
         onFileSelectExcel: function (oEvent) {
-            var oFile = oEvent.getParameter("files")[0];
-            that.onReadExcel(oFile);
+            //var oFile = oEvent.getParameter("files")[0];
+            that.onProcesarDataExcel();
+            //that.onReadExcel(oFile);
         },
         onReadExcel: function (oFile, TypeTable) {
             if (window.FileReader) {
@@ -739,7 +740,7 @@ sap.ui.define([
 
                             var oButtonDetailView = new sap.m.Button({
                                 icon: "{i18n>iconDetailView}",
-                                press: that.onMostrarVistaRapida,
+                                press: that.onMostrarVistaRapida.bind(that, "VistaRapida"),
                                 type: "Transparent",
                                 ariaHasPopup: "Dialog",
                                 tooltip: "{i18n>vistaRapidaTooltip}"
@@ -766,10 +767,18 @@ sap.ui.define([
                     // Agregar celdas a los elementos de la tabla
                     aColumns.forEach(function (oColumnData) {
                         var oCell;
-                        if (oColumnData.path) {
+                        if (!oColumnData.path.includes("btn")) {
                             oCell = new sap.m.Text({ text: "{" + oColumnData.path + "}" });
                         } else {
-                            oCell = new sap.m.Text({ text: "" });
+
+                            var oButtonDetailView = new sap.m.Button({
+                                icon: "{i18n>iconDetailView}",
+                                press: that.onMostrarVistaRapida.bind(that, "VistaRapidaRepuestos"),
+                                type: "Transparent",
+                                ariaHasPopup: "Dialog",
+                                tooltip: "{i18n>vistaRapidaTooltip}"
+                            });
+                            oCell = oButtonDetailView;
                         }
                         oColumnListItem.addCell(oCell);
                     });
@@ -834,32 +843,34 @@ sap.ui.define([
                 case "Repuestos":
                     // Crear las columnas
                     aColumns = [
-                        { id: "Sociedad", label: "Sociedad", path: "Sociedad", width: "9rem" },
-                        { id: "Item", label: "Caja", path: "Caja", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "TipoDocumento", label: "Tipo Documento", path: "TipoDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "ClaseDocumento", label: "Clase Documento", path: "ClaseDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "NroPedido", label: "Nro Pedido", path: "NroPedido", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
-                        { id: "Proveedor", label: "Proveedor", path: "Proveedor", demandPopin: true, minScreenWidth: "Tablet", width: "10rem" },
-                        { id: "OrganizacionCompras", label: "Organizacion Compras", path: "OrganizacionCompras", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "GrupoCompras", label: "Grupo Compras", path: "GrupoCompras", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
-                        { id: "Material", label: "Material", path: "Material", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Cantidad", label: "Cantidad", path: "Cantidad", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "PrecioNeto", label: "Precio Neto", path: "PrecioNeto", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Solped", label: "Solped", path: "Solped", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "ValorTotal", label: "Valor Total", path: "ValorTotal", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Caja", label: "Caja", path: "Caja", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "PaisOrigen", label: "Pais Origen", path: "PaisOrigen", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Centro", label: "Centro", path: "Centro", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Almacen", label: "Almacen", path: "Almacen", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Unidad", label: "Unidad", path: "Unidad", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "NumeroBl", label: "Numero Bl", path: "NumeroBl", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "FechaBl", label: "Fecha Bl", path: "FechaBl", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "PuertoSalida", label: "Puerto Salida", path: "PuertoSalida", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Puertollegada", label: "Puerto Llegada", path: "Puertollegada", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "Icoterms", label: "Icoterms", path: "Icoterms", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "LugarIncoterms", label: "Lugar Incoterms", path: "LugarIncoterms", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "ViaTransporte", label: "Via Transporte", path: "ViaTransporte", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
+                        { id: "Sociedad", label: "Sociedad", path: "Sociedad", width: "9rem", visible: true },
+                        { id: "Item", label: "Caja", path: "Caja", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
+                        { id: "TipoDocumento", label: "Tipo Documento", path: "TipoDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
+                        { id: "ClaseDocumento", label: "Clase Documento", path: "ClaseDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
+                        { id: "NroPedido", label: "Nro Pedido", path: "NroPedido", demandPopin: true, minScreenWidth: "Tablet", width: "5rem", visible: true },
+                        { id: "Proveedor", label: "Proveedor", path: "Proveedor", demandPopin: true, minScreenWidth: "Tablet", width: "10rem", visible: true },
+                        { id: "OrganizacionCompras", label: "Organizacion Compras", path: "OrganizacionCompras", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
+                        { id: "GrupoCompras", label: "Grupo Compras", path: "GrupoCompras", demandPopin: true, minScreenWidth: "Tablet", width: "5rem", visible: true },
+                        { id: "Material", label: "Material", path: "Material", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
+                        { id: "Cantidad", label: "Cantidad", path: "Cantidad", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
+                        { id: "PrecioNeto", label: "Precio Neto", path: "PrecioNeto", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "Solped", label: "Solped", path: "Solped", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "ValorTotal", label: "Valor Total", path: "ValorTotal", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "Caja", label: "Caja", path: "Caja", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "PaisOrigen", label: "Pais Origen", path: "PaisOrigen", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "Centro", label: "Centro", path: "Centro", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "Almacen", label: "Almacen", path: "Almacen", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "Unidad", label: "Unidad", path: "Unidad", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "NumeroBl", label: "Numero Bl", path: "NumeroBl", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "FechaBl", label: "Fecha Bl", path: "FechaBl", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "PuertoSalida", label: "Puerto Salida", path: "PuertoSalida", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "Puertollegada", label: "Puerto Llegada", path: "Puertollegada", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "Icoterms", label: "Icoterms", path: "Icoterms", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "LugarIncoterms", label: "Lugar Incoterms", path: "LugarIncoterms", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { id: "ViaTransporte", label: "Via Transporte", path: "ViaTransporte", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: false },
+                        { width: "5rem", path: "btnverDetalle2", visible: true },
                     ];
+
 
                     /*aColumns = [
                         { id: "SOCIEDAD", label: "Sociedad", path: "SOCIEDAD", width: "9rem" },
@@ -895,7 +906,8 @@ sap.ui.define([
                         var oColumn = new sap.m.Column({
                             width: oColumnData.width || "auto",
                             header: new sap.m.Text({ text: oColumnData.label }),
-                            id: oColumnData.id
+                            id: oColumnData.id,
+                            visible: oColumnData.visible
                         });
                         // Agregar columnas al modelo
                         oTable.addColumn(oColumn);
@@ -950,24 +962,6 @@ sap.ui.define([
                       oHeaderToolbar.addContent(oFileUploaderExcel);
                       */
 
-                    //Botón para abrir popu de cargar Excel
-                    var oButtonSeleccionarTipoCarga = new sap.m.Button({
-                        text: "Cargar Facturas",
-                        icon: "sap-icon://enter-more",
-                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
-                    });
-
-                    oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
-
-                    // Crear el botón con icono
-                    var oButtonDescargarExcel = new sap.m.Button({
-                        text: "Descargar Excel",
-                        icon: "sap-icon://download",
-                        press: this.ExportExcel.bind(this, TypeTable)
-                    });
-
-                    oHeaderToolbar.addContent(oButtonDescargarExcel);
-
                     // Agregar campo de búsqueda
                     var oSearchField = new sap.m.SearchField({
                         id: "idBusquedaRapida",
@@ -980,6 +974,27 @@ sap.ui.define([
                         })
                     });
                     oHeaderToolbar.addContent(oSearchField);
+
+                    //Botón para abrir popu de cargar Excel
+                    var oButtonSeleccionarTipoCarga = new sap.m.Button({
+                        text: "Cargar Facturas",
+                        icon: "sap-icon://enter-more",
+                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
+                    });
+
+                    oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
+
+                    // Crear el botón con icono
+                    var oButtonDescargarExcel = new sap.m.Button({
+                        text: "",
+                        tooltip: "Descargar Excel",
+                        icon: "sap-icon://download",
+                        press: this.ExportExcel.bind(this, TypeTable)
+                    });
+
+                    oHeaderToolbar.addContent(oButtonDescargarExcel);
+
+                   
 
                     break;
 
@@ -1048,7 +1063,8 @@ sap.ui.define([
 
                     // Crear el botón con icono
                     var oButtonDescargarExcel = new sap.m.Button({
-                        text: "Descargar Excel",
+                        text: "",
+                        tooltip: "Descargar Excel",
                         icon: "sap-icon://download",
                         press: this.ExportExcel.bind(this, TypeTable)
                     });
@@ -1121,7 +1137,8 @@ sap.ui.define([
 
                     // Crear el botón con icono
                     var oButtonDescargarExcel = new sap.m.Button({
-                        text: "Descargar Excel",
+                        text: "",
+                        tooltip: "Descargar Excel",
                         icon: "sap-icon://download",
                         press: this.ExportExcel.bind(this, TypeTable)
                     });
@@ -1631,7 +1648,10 @@ sap.ui.define([
             });
 
             return resultData;
+        },
+        onAbrirFileUploader: function () {
+            let fileUploader = this.getView().byId("onFileSelectExcel");
+            fileUploader.$().find('input').click();
         }
-
     });
 });

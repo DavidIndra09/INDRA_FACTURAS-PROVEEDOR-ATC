@@ -6,9 +6,14 @@
     xmlns:form="sap.ui.layout.form">
     <ResponsivePopover
         id="idVistaRapida"
-        placement="Left"
+        placement="Left"        
         icon="sap-icon://detail-view"
-        title="Solicitud {CODEFACT}">
+        title="Solicitud {CODEFACT}"
+        contentWidth="30%">
+        <ScrollContainer
+            height="10rem" 
+            vertical="true"
+        >
         <VBox >
             <!-- <commons:MicroProcessFlow content="{/EstadosFactura}" >
                 <commons:content>
@@ -97,5 +102,6 @@
                 </form:layout>
             </form:Form>
         </VBox>
+        </ScrollContainer>
     </ResponsivePopover>
 </core:FragmentDefinition>

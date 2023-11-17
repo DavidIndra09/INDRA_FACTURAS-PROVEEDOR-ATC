@@ -1,0 +1,158 @@
+<core:FragmentDefinition 
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+    xmlns:microchart="sap.suite.ui.microchart"
+    xmlns:commons="sap.suite.ui.commons"
+    xmlns:form="sap.ui.layout.form">
+    <ResponsivePopover
+        id="idVistaRapidaRepuestos"
+        placement="Left"
+        contentWidth="30%"
+        icon="sap-icon://detail-view"
+        title="Solicitud {CODEFACT}">
+        <ScrollContainer
+            height="10rem" 
+            vertical="true"
+        >
+        <VBox >  
+            <form:Form editable="true">
+                <form:formContainers>
+                    <form:FormContainer >
+                        <form:formElements>                            
+                            <form:FormElement >
+                                <form:fields  >
+                                    <Text  text="{PrecioNeto}" />
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Precio Neto" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Solped}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Solped" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{ValorTotal}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Valor Total" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Caja}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Caja" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{PaisOrigen}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Pais Origen" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Centro}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Centro" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Almacen}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Almacen" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Unidad}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Unidad" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Numero Bl}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Numero Bl" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{FechaBl}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Fecha Bl" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{PuertoSalida}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Puerto Salida" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Puertollegada}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Puerto llegada" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{Icoterms}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Icoterms" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{LugarIncoterms}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Lugar Incoterms" />
+                                </form:label>
+                            </form:FormElement>
+                            <form:FormElement>
+                                <form:fields>
+                                    <Text text="{ViaTransporte}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Via Transporte" />
+                                </form:label>
+                            </form:FormElement>
+                        </form:formElements>
+                    </form:FormContainer>
+                </form:formContainers>
+                <form:layout>
+                    <form:ColumnLayout
+                        columnsL="1"
+                        columnsM="1"
+                        columnsXL="1"
+                        emptyCellsLarge="1"
+                        labelCellsLarge="2"                        
+                    />
+                </form:layout>
+            </form:Form>
+        </VBox>
+        </ScrollContainer>
+    </ResponsivePopover>
+</core:FragmentDefinition>
