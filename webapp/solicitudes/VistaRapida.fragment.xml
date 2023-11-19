@@ -51,10 +51,11 @@
                         <form:formElements>
                             <form:FormElement>
                                 <form:fields>
-                                    <Text text="{
-                                        path: 'DATRE',
+                                 <Text text="{FCRESO}"/>
+                                 <!--   <Text text="{
+                                        path: 'FCRESO',
                                         formatter: '.formatter.formatearFechaString'
-                                    }"/>
+                                    }"/> -->
                                 </form:fields>
                                 <form:label>
                                     <Label text="Fecha Registro" />

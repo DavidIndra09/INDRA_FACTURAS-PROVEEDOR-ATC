@@ -49,6 +49,8 @@ sap.ui.define([
         onInit: function () {
             that = this;
             MODEL = this.getOwnerComponent().getModel();
+            facturaModel = this.getOwnerComponent().getModel("facturaModel");
+            ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
             that.MostrarTablaPorFlujo("Solicitudes");
             // Model used to manipulate control states
             viewModel = new JSONModel({
@@ -65,8 +67,7 @@ sap.ui.define([
                 tableBusyDelay: 0
             });
 
-            facturaModel = this.getOwnerComponent().getModel("facturaModel");
-            ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
+
             ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
             messageManager = sap.ui.getCore().getMessageManager();
 
@@ -83,7 +84,7 @@ sap.ui.define([
             that._dialogs = {};
             that.onMostrarSeleccionProveedor();
             // this._getDataInitial();
-            this._setListaSolicitudes({ filters: [] });
+            //this._setListaSolicitudes({ filters: [] });
 
             this.getRouter().getRoute("solicitudes").attachPatternMatched(this._onSolicitudesMatched, this);
         },
@@ -136,7 +137,7 @@ sap.ui.define([
         onDetalleSolicitud: function (event) {
             const contexto = event.getSource().getBindingContext();
             const solicitud = contexto.getObject();
-            const codigoSolicitud = contexto.getProperty("CODEFACT");//codigoSolicitud
+            const codigoSolicitud = contexto.getProperty("SOLFAC");//codigoSolicitud
             let page = "detalle";
             if (solicitud.estadoFactura_ID === 1) {
                 page = "factura";
@@ -199,11 +200,11 @@ sap.ui.define([
             const filters = [];
             const dFechaEmision = that.byId("idDateRangeEmision"),
                 dFechaRegistro = that.byId("idDateRangeRegistro"),
-                dFechaContabilizacion = that.byId("idDateRangeContabilizacion").getValue(),
+                dFechaContabilizacion = that.byId("idDateRangeContabilizacion"),
                 InputCodigoFactura = that.byId("InputCodigoFactura").getValue(),
                 InputCodigoSolicitud = that.byId("InputCodigoSolicitud").getValue(),
                 ComboEstados = that.byId("ComboEstados").getSelectedKeys().join(","),
-                Proveedor = sap.ui.getCore().getModel("Lifnr");
+                Proveedor = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
 
             if (dFechaEmision.getValue() !== "") {
                 let sFechaIni = dFechaEmision.getDateValue();
@@ -239,7 +240,7 @@ sap.ui.define([
                 }
             }
 
-            if (Proveedor) filters.push(new Filter("I_LIFNR", "EQ", Proveedor));
+            //if (Proveedor) filters.push(new Filter("I_LIFNR", "EQ", Proveedor));
 
             if (InputCodigoSolicitud) filters.push(new Filter("I_SOLFAC", "EQ", InputCodigoSolicitud)); //codigoSolicitud
             if (InputCodigoFactura) filters.push(new Filter("I_FACTUR", "EQ", InputCodigoFactura)); // codigoFactura
@@ -248,7 +249,7 @@ sap.ui.define([
             //         new Filter("ir_bedat","BT", busqueda.fechaEmision.fechaInicio , busqueda.fechaEmision.fechaFinal) // fechaEmision
             //     );
             // } 
-            debugger
+
             if (ComboEstados) filters.push(new Filter("I_ESTADO", "EQ", ComboEstados)); // estadoFactura_ID
             // if(busqueda.fechaRegistro) {
             //     filters.push(
@@ -284,8 +285,8 @@ sap.ui.define([
                     aTableSearchState = [
                         new Filter({
                             filters: [
-                                new Filter("CODEFACT", FilterOperator.Contains, query),
-                                new Filter("XBLNR", FilterOperator.Contains, query)
+                                new Filter("SOLFAC", FilterOperator.Contains, query),
+                                new Filter("FACTUR", FilterOperator.Contains, query)
                             ],
                             and: false
                         })
@@ -630,7 +631,7 @@ sap.ui.define([
             // };
             // const request = await this.readEntity(facturaModel,"/Facturas",parameters);
             //var aFilters = [];
-            debugger
+
 
             /* var oFilter = new Filter("i_userscp", FilterOperator.EQ, "P2002198484");
              parameters.filters.push(oFilter);
@@ -640,13 +641,16 @@ sap.ui.define([
              //aFilters.push(sociedad);
              //parameters.filters = aFilters;*/
             parameters.urlParameters = {};
-            const request = await this.readEntity(ODATA_SAP, "/listarFacturaSet", parameters);
-            let sJson = request.results[0].et_data;
-            sJson = sJson.replace(/00000000/g, '"00000000"');
+
+            const request = await this.readEntity(ODATA_SAP, "/obtenerSolFactSet", parameters);
+
+            let sJson = request.results[0].ET_DATA;
+            //sJson = sJson.replace(/00000000/g, '"00000000"');
             let aLista = JSON.parse(sJson);
-            $.each(aLista, (idx, value) => {
+            /*$.each(aLista, (idx, value) => {
                 value.CODEFACT = value.CODEFACT.toString();
-            });
+            });*/
+
             MODEL.setProperty("/Facturas", aLista);
             viewModel.setProperty("/tableBusy", false);
         },
@@ -882,11 +886,11 @@ sap.ui.define([
                 case "Solicitudes":
                     // Crear las columnas
                     aColumns = [
-                        { id: "CODEFACT", label: "Solicitud", path: "CODEFACT", width: "10rem" },
-                        { id: "XBLNR", label: "Factura", path: "XBLNR", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "DATFA", label: "Fecha de Emisión", path: "DATFA", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "NETWR", label: "Importe", path: "NETWR", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "BESTU", label: "Estado de Factura", path: "BESTU", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "10rem" },
+                        { id: "FACTUR", label: "Factura", path: "FACTUR", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "IMPORT", label: "Importe", path: "IMPORT", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "ESTADO", label: "Estado de Factura", path: "ESTADO", demandPopin: true, minScreenWidth: "Tablet" },
                         { width: "5rem", path: "btnverDetalle" },
                         { width: "5rem", path: "btnEliminarSolicitud" }
                     ];
@@ -1331,38 +1335,33 @@ sap.ui.define([
         },
         createDynamicTable: function (TypeTable) {
 
-            let oColumnListItem = that.CreateColumnListItem(TypeTable);
+            let oColumnListItem = that.CreateColumnListItem("Solicitudes"/*TypeTable*/);
 
-            let oTable = that.GenerateTable(oColumnListItem, TypeTable);
+            let oTable = that.GenerateTable(oColumnListItem, "Solicitudes" /*TypeTable*/);
 
-            let oHeaderToolbar = that.CreateDynamicHeaderToolbar(TypeTable);
+            let oHeaderToolbar = that.CreateDynamicHeaderToolbar("Solicitudes"/*TypeTable*/);
 
             // agregamos el toolbar de encabezado en la tabla
             oTable.setHeaderToolbar(oHeaderToolbar);
 
             //Agregamos las columnas a la tabla
-            let aColumns = that.ColumnsForDynamicTable(oTable, TypeTable);
+            let aColumns = that.ColumnsForDynamicTable(oTable, "Solicitudes" /*TypeTable*/);
 
             // Agregar celdas a los elementos de la tabla
-            that.AddCellToColumnListItem(aColumns, oColumnListItem, TypeTable);
+            that.AddCellToColumnListItem(aColumns, oColumnListItem, "Solicitudes"/*TypeTable*/);
 
             // Agregar elementos a la tabla
-            that.bindItemsToTable(oTable, oColumnListItem, TypeTable);
+            that.bindItemsToTable(oTable, oColumnListItem, "Solicitudes"/*TypeTable*/);
 
             // Devolver la tabla creada
             return oTable;
 
         },
         AddcontentToView: function (oTable) {
-            let object = {
-                "CODEFACT": "121212", "XBLNR": "F343434", "DATFA": "15.11.2023",
-                "NETWR": "1000", "BESTU": "Success", "IGV": 1.18
-            }
-            MODEL.setProperty("/Facturas", [object]);
             var oView = this.getView();
             oView.addDependent(oTable);
             oView.byId("ContenedorTabla").addContent(oTable);
-
+            this._setListaSolicitudes({ filters: [] });
         },
         MostrarTablaPorFlujo: function (TypeTable) {
             var oView = this.getView();
