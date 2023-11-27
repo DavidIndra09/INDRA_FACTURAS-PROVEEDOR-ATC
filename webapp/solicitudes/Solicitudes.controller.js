@@ -194,9 +194,7 @@ sap.ui.define([
                 fechaFinal: formatter.formatDateParameter(fechaFinal)
             });
         },
-
         onBuscarFacturas: function () {
-
             const busqueda = MODEL.getProperty("/Busqueda");
             const filters = [];
             const dFechaEmision = that.byId("idDateRangeEmision"),
@@ -434,12 +432,13 @@ sap.ui.define([
         onSeleccionarProveedor: async function (oEvent) {
             let proveedoreshelp = that.getView().getModel("proveedoreshelp").getData();
             let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();
-            
+
             var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.trim() || element.TEXTO == proveedorSelected.trim())
             if (find != undefined) {
                 sap.ui.getCore().setModel(new JSONModel({ "Lifnr": find.VALUE }), "Lifnr")
                 that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " /*+ find.VALUE + " - "*/ + find.TEXTO + "    ");
                 let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
+                that.onBuscarFacturas();
                 SeleccionProveedor.close();
             }
             else {
@@ -674,20 +673,7 @@ sap.ui.define([
         },
 
         _setListaSolicitudes: async function (parameters) {
-            // parameters.urlParameters = {
-            //     "$expand":"estadoFactura,conformidades"
-            // };
-            // const request = await this.readEntity(facturaModel,"/Facturas",parameters);
-            //var aFilters = [];
 
-
-            /* var oFilter = new Filter("i_userscp", FilterOperator.EQ, "P2002198484");
-             parameters.filters.push(oFilter);
-             //aFilters.push(oFilter);
-             var sociedad = new Filter("ir_bukrs", FilterOperator.EQ, "CDBS,PE02,3000,1000");
-             parameters.filters.push(sociedad);
-             //aFilters.push(sociedad);
-             //parameters.filters = aFilters;*/
             parameters.urlParameters = {};
 
             const request = await this.readEntity(ODATA_SAP, "/obtenerSolFactSet", parameters);

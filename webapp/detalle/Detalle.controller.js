@@ -80,7 +80,7 @@ sap.ui.define([
                 oObject.codigo = "20297868790";
                 oObject.proveedor = "Indra Peru S.A.";
                 oObject.total = (Number(oObject.NETWR) * Number(oObject.IGV)).toFixed(2);
-                //that.mostrarDetalle(oObject.CODEFACT);
+                that.mostrarDetalle(oParameters.arguments.codigoSolicitud);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
                 viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
@@ -142,18 +142,31 @@ sap.ui.define([
         mostrarDetalle: function (sCODEFACT) {
             sap.ui.core.BusyIndicator.show(0);
             let aFilters = [];
-            let oFilter = new Filter("is_fact_prov_c", FilterOperator.EQ, sCODEFACT);
-            aFilters.push(oFilter);
-
-            ODATA_SAP.read("/listarDetalleFacturaSet", {
+            aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
+            aFilters.push(new Filter("I_BUKRS", FilterOperator.EQ, "1000"));
+            debugger
+            ODATA_SAP.read("/getDetailSolFactSet", {
                 filters: aFilters,
                 success: function (data) {
                     sap.ui.core.BusyIndicator.hide();
-                    let sJson = data.results[0].et_data;
-                    let aLista = JSON.parse(sJson);
-                    console.log(aLista);
+                    let Detalle = data.results[0].ET_DET;
+                    let Documentos = data.results[0].ET_DOC;
+                    let aLista = JSON.parse(Detalle);
+                    let aListaDocumentos = JSON.parse(Documentos);
+                    let adjuntos = [];
+                    $.each(aListaDocumentos, function (i, item) {
+                        adjuntos.push({
+                            "lastModifiedDate": that.convertirCadenaAFecha(item.DATUM),
+                            "name": item.FILENAME,
+                            "type": item.FILETYPE,
+                            "mimeType": item.FILETYPE,
+                            "base64": item.BASE64
+                        });
+                    });
+
                     let oModelLista = new JSONModel(aLista);
                     that.byId("reviewTable").setModel(oModelLista);
+                    that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                 },
                 error: function (err) {
                     var error = err;
@@ -162,6 +175,16 @@ sap.ui.define([
                     sap.ui.core.BusyIndicator.hide();
                 }
             });
+        },
+        convertirCadenaAFecha(cadenaFecha) {
+            // Dividir la cadena en partes: año, mes, día
+            const partesFecha = cadenaFecha.split('-');
+
+            // Crear un objeto Date con las partes de la fecha
+            // Nota: El mes en JavaScript es 0-indexado, por lo que restamos 1 al mes
+            const fecha = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+
+            return fecha;
         },
         onCargaAdjuntos: async function (event) {
             const adjuntos = that.getView().getModel("Adjuntos").getData();

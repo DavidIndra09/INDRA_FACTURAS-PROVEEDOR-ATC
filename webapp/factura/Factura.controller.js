@@ -725,7 +725,7 @@ sap.ui.define([
 
         _getDataFactura: function () {
             const factura = MODEL.getProperty("/Factura");
-            debugger
+
             let posnr = 0;
             let adjuntos = MODEL.getProperty("/Adjuntos");
             const adjuntoModel = adjuntos.map(item => {
