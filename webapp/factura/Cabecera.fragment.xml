@@ -93,7 +93,7 @@
 
                        <form:FormElement>
                             <form:fields>                               
-                               <ObjectStatus class="sapUiSmallMarginBottom" title="Estado" text="{estado}" active="true" state="{estadoState}" press="handleStatusPressed" icon="{estadoIcon}" />
+                               <ObjectStatus class="sapUiSmallMarginBottom" title="Estado XML" text="{estado}" active="true" state="{estadoState}" press="handleStatusPressed" icon="{estadoIcon}" />
                             </form:fields>
                             
                         </form:FormElement>
@@ -114,7 +114,7 @@
         </form:Form>
 
 
-        <Panel headerText="Adjuntar" expand="false" expandable="true" class="sapUiSmallMarginTop">
+        <Panel headerText="Adjuntar" expanded="true" expandable="true" class="sapUiSmallMarginTop">
             <Table id="AdjuntosFactura" items="{
                     path:'/Adjuntos'
                 }" updateFinished="onUpdateFinishedAdjuntos" noDataText="Actualmente no hay archivos">

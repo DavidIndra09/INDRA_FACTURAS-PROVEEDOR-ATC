@@ -86,7 +86,7 @@
     </f:DynamicPage>
     -->
     <!--Nueva vista detalle-->
-    <uxap:ObjectPageLayout id="idHomePage" upperCaseAnchorBar="false">
+    <uxap:ObjectPageLayout id="idHomePage" upperCaseAnchorBar="false" showFooter="true">
         <!-- <uxap:headerTitle>
             <uxap:ObjectPageDynamicHeaderTitle >
                 <uxap:expandedHeading>               
@@ -229,7 +229,13 @@
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
             </uxap:ObjectPageSection>
-
         </uxap:sections>
+        <uxap:footer>
+			<OverflowToolbar>
+				<ToolbarSpacer/>
+				<Button type="Accept" text="Guardar" press="actualizarFactura"/>
+				<Button type="Reject" text="Cancelar" press=".onNavBack"/>
+			</OverflowToolbar>
+		</uxap:footer>
     </uxap:ObjectPageLayout>
 </mvc:View>

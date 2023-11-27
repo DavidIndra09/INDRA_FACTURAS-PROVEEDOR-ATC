@@ -46,7 +46,7 @@
             <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>posConformidad}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet"  width="6rem">
+            <Column demandPopin="true" minScreenWidth="Tablet"  width="9rem">
                 <Label text="{i18n>ordenCompra}" design="Bold"/>
             </Column>
             <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">

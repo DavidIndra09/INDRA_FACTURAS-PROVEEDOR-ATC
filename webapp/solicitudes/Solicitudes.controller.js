@@ -587,6 +587,7 @@ sap.ui.define([
                 contentType: "application/scim+json; charset=utf-8",
                 async: false,
                 success: async function (response) {
+                    sap.ui.getCore().setModel(new JSONModel({ "USERIAS": response.name }), "USERIAS")
                     //that.onGetFullDataUserInfo(response);
                 },
                 error: function (xhr) {
@@ -601,7 +602,7 @@ sap.ui.define([
                 contentType: "application/scim+json; charset=utf-8",
                 async: false,
                 success: async function (response) {
-                    debugger
+                    
                 },
                 error: function (xhr) {
                 }
