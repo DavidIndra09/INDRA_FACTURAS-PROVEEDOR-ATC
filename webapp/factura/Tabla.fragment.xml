@@ -96,7 +96,7 @@
                             path: 'MENGE',
                             formatter: '.formatter.numberUnit'
                         }"
-                        unit="{MEINS}" />
+                         />
                         <ObjectNumber
                             number="{
                             parts:[{path:'NETWR'},{path:'WAERS'}],

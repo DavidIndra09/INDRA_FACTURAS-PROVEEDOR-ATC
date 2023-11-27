@@ -77,13 +77,15 @@ sap.ui.define([
             if (that.getOwnerComponent().getModel("oCabecera")) {
                 var oParameters = oEvent.getParameters();
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
-                oObject.codigo = "20297868790";
-                oObject.proveedor = "Indra Peru S.A.";
-                oObject.total = (Number(oObject.NETWR) * Number(oObject.IGV)).toFixed(2);
-                that.mostrarDetalle(oParameters.arguments.codigoSolicitud);
+                //oObject.codigo = "20297868790";
+                //oObject.proveedor = "Indra Peru S.A.";
+                oObject.total = (Number(oObject.IMPORT).toFixed(2)) /* Number(oObject.IGV)).toFixed(2)*/;
+
+                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
                 viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
+                viewModel.setProperty("/detalleViewSubTitle", resourceBundle.getText("detalleViewSubTitle", [oParameters.arguments.proveedor]));
                 viewModel.setProperty("/busy", false);
                 viewModel.setProperty("/busy", false);
             } else {
@@ -139,12 +141,11 @@ sap.ui.define([
             viewModel.setProperty("/busy", false);
         },
 
-        mostrarDetalle: function (sCODEFACT) {
+        mostrarDetalle: function (sCODEFACT, oCabecera) {
             sap.ui.core.BusyIndicator.show(0);
             let aFilters = [];
             aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
             aFilters.push(new Filter("I_BUKRS", FilterOperator.EQ, "1000"));
-            debugger
             ODATA_SAP.read("/getDetailSolFactSet", {
                 filters: aFilters,
                 success: function (data) {
@@ -152,6 +153,9 @@ sap.ui.define([
                     let Detalle = data.results[0].ET_DET;
                     let Documentos = data.results[0].ET_DOC;
                     let aLista = JSON.parse(Detalle);
+                    $.each(aLista, function (i, item) {
+                        item.WAERS = oCabecera.WAERS;
+                    });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
                     $.each(aListaDocumentos, function (i, item) {
@@ -160,7 +164,8 @@ sap.ui.define([
                             "name": item.FILENAME,
                             "type": item.FILETYPE,
                             "mimeType": item.FILETYPE,
-                            "base64": item.BASE64
+                            "base64": item.BASE64,
+                            "actions": (oCabecera.DescripcionEstado == "Creado") ? true : false
                         });
                     });
 
@@ -254,7 +259,108 @@ sap.ui.define([
                     }
                 }
             });
-        }
+        },
+        _getDataFactura: function () {
+            const factura = MODEL.getProperty("/Factura");
+
+            let posnr = 0;
+            let adjuntos = MODEL.getProperty("/Adjuntos");
+            const adjuntoModel = adjuntos.map(item => {
+                posnr = posnr + 10
+                return {
+                    "POSNR": posnr,
+                    "DATUM": that.convertirFechaAFormatoYMD(item.lastModifiedDate),
+                    "BASE64": item.base64,
+                    "FILETYPE": item.type,
+                    "FILENAME": item.name,
+                    "BUKRS": "1000"
+                }
+            });
+            const conformidades = factura.conformidades.results.map(item => {
+                return {
+                    "mandt": "800",
+                    "bukrs": item.BUKRS,
+                    "lifnr": item.LIFNR,
+                    "codefact": "",
+                    "posnr": item.BUZEI,
+                    "datre": "20001102",
+                    "ebeln": item.EBELN,
+                    "lblni": "",
+                    "ebelp": item.EBELP,
+                    "matnr": item.MATNR,
+                    "tipod": "B",
+                    "menge": item.MENGE,
+                    "meins": item.MEINS,
+                    "netwr": item.NETWR,
+                    "waers": item.WAERS,
+                    "txz01": item.TXZ01,
+                    "belnr": item.BELNR
+                }
+            });
+
+
+
+            let dIgv = 0,
+                dRetencion = 0;
+
+            if (factura.tipoImpuesto == 1) {
+                dIgv = parseFloat(factura.total) / parseFloat(factura.importe);
+            } else {
+                dRetencion = parseFloat(factura.total) / parseFloat(factura.importe);
+            }
+
+            const data = {
+                "mandt": "800",
+                "bukrs": factura.sociedad,
+                "lifnr": "",
+                "datre": "20231025",
+                "codefact": "",
+                "datfa": "20231026",
+                "xblnr": factura.codigoFactura,
+                "fatyp": "F",
+                "cpudt": "00000000",
+                "fhdet": "00000000",
+                "detra": "0",
+                "reten": "0",
+                "wrbtr": "0",
+                "netwr": parseFloat(factura.importe),//factura.total.toString(),
+                "bankn": "",
+                "bankl": "",
+                "banks": "",
+                "bestu": "CR",
+                "waers": "PEN",
+                "mnsje": "",
+                "igv": dIgv
+            }
+            const codigoSolicitud = factura.codigoSolicitud;
+            if (codigoSolicitud) data.codigoSolicitud = codigoSolicitud;
+
+            let oReturn = {
+                "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
+                "I_FACTUR": factura.codigoFactura,
+                "I_FEMISI": that.formatFecha(factura.fechaEmisionParameter),
+                "I_IMPORT": factura.importe,
+                "IT_DOC": JSON.stringify(adjuntoModel),
+                "IT_DET": JSON.stringify(conformidades)
+            }
+
+            return oReturn;
+        },
+        actualizarFactura: async function () {
+            sap.ui.core.BusyIndicator.show()
+            const data = that._getDataFactura();
+            const request = await that.createEntity(ODATA_SAP, "/crearSolFactSet", data);
+            const type = "success";
+
+            MessageBox[type](request.E_MSG, {
+                onClose: function () {
+                    ODATA_SAP.refresh();
+                    sap.ui.core.BusyIndicator.hide()
+                    //this.onNavSolicitudes();
+                }.bind(this)
+            });
+
+        },
 
     });
 

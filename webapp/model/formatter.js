@@ -94,11 +94,21 @@ sap.ui.define([
 
         formatearFechaString: function (fecha) {
             if (!fecha) return "";
-            fecha = fecha.toString();
-            let anio = fecha.slice(0, 4);
-            let mes = fecha.slice(4, 6);
-            let dia = fecha.slice(6, 8);
-            return `${dia}.${mes}.${anio}`;
+
+            // Verificar si la fecha es un objeto Date
+            if (fecha instanceof Date) {
+                let anio = fecha.getFullYear();
+                let mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Meses son 0-indexados
+                let dia = fecha.getDate().toString().padStart(2, '0');
+                return `${dia}.${mes}.${anio}`;
+            } else if (typeof fecha === 'string') {
+                // Si la fecha es una cadena en formato "YYYY-MM-DD"
+                let [anio, mes, dia] = fecha.split('-');
+                return `${dia}.${mes}.${anio}`;
+            } else {
+                // Manejar otros casos según sea necesario
+                return "";
+            }
         },
 
         formatEstados: function (value) {

@@ -143,9 +143,9 @@ sap.ui.define([
                 page = "factura";
             }
             that.getOwnerComponent().setModel(new JSONModel(solicitud), "oCabecera");
-
             that.getRouter().navTo(page, {
-                codigoSolicitud: codigoSolicitud
+                codigoSolicitud: codigoSolicitud,
+                proveedor: that.getView().byId("ProveedorSeleccionado").getText().trim()
             }, true);
         },
 
@@ -222,7 +222,7 @@ sap.ui.define([
 
                 if ((sFechaIni != null && sFechaIni != undefined) && (sFechaFin != null && sFechaFin != undefined)) {
                     filters.push(
-                        new Filter("IR_FECREA", "BT", formatter.formatDateToString(sFechaIni), formatter.formatDateToString(sFechaFin)) // fechaEmision
+                        new Filter("IR_FKDAT", "BT", formatter.formatDateToString(sFechaIni), formatter.formatDateToString(sFechaFin)) // fechaEmision
                     );
                 }
             }
@@ -558,9 +558,10 @@ sap.ui.define([
             }
             //that.byId("idFacturasTable").removeSelections();
             const historyDirection = History.getInstance().getDirection();
+
             if (historyDirection === "NewEntry") {
                 viewModel.setProperty("/tableBusy", true);
-                //this._setListaSolicitudes({ filters: [] });
+                this._setListaSolicitudes({ filters: [] });
                 return;
             }
         },
@@ -684,7 +685,7 @@ sap.ui.define([
             let EstadosFactura = that.getModel("EstadosFactura").getData();
             $.each(aLista, (idx, value) => {
                 let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
-                value.DescricionEstado = find.TEXTO;
+                value.DescripcionEstado = find.TEXTO;
                 let resultEstatus = that.getColorStatus(find.TEXTO);
                 value.ColorEstado = resultEstatus.state;
                 value.IconoEstado = resultEstatus.icon;
@@ -900,7 +901,7 @@ sap.ui.define([
                     aColumns.forEach(function (oColumnData) {
                         var oCell;
                         if (!oColumnData.path.includes("btn")) {
-                            if (oColumnData.path == "DescricionEstado") {
+                            if (oColumnData.path == "DescripcionEstado") {
                                 oCell = new sap.m.ObjectStatus({ text: "{" + oColumnData.path + "}", icon: "{" + oColumnData.icon + "}", state: "{" + oColumnData.state + "}", class: "sapUiSmallMarginBottom" });
                             }
                             else {
@@ -975,7 +976,7 @@ sap.ui.define([
                         { id: "FACTUR", label: "Factura", path: "FACTUR", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "IMPORT", label: "Importe", path: "IMPORT", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "ESTADO", label: "Estado de Factura", path: "DescricionEstado", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet" },
                         { width: "5rem", path: "btnverDetalle" },
                         { width: "5rem", path: "btnEliminarSolicitud" }
                     ];
@@ -1446,7 +1447,7 @@ sap.ui.define([
             var oView = this.getView();
             oView.addDependent(oTable);
             oView.byId("ContenedorTabla").addContent(oTable);
-            this._setListaSolicitudes({ filters: [] });
+            //this._setListaSolicitudes({ filters: [] });
         },
         MostrarTablaPorFlujo: function (TypeTable) {
             var oView = this.getView();

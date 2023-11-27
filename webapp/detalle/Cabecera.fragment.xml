@@ -44,7 +44,7 @@
                                 <form:FormElement>
                                     <form:fields>
                                         <Input value="{
-                                            path: 'oCabecera>/DATFA',
+                                            path: 'oCabecera>/FEMISI',
                                             formatter: '.formatter.formatearFechaString'
                                         }" enabled="false"/>
                                     </form:fields>
@@ -55,7 +55,7 @@
                                 <form:FormElement>
                                     <form:fields>
                                         <Input value="{
-                                            parts:[{path:'oCabecera>/NETWR'},{path:'oCabecera>/WAERS'}],
+                                            parts:[{path:'oCabecera>/IMPORT'},{path:'oCabecera>/WAERS'}],
                                             type: 'sap.ui.model.type.Currency',
                                             formatOptions: {showMeasure: false}
                                         }" enabled="false"/>

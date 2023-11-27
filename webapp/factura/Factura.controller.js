@@ -694,6 +694,7 @@ sap.ui.define([
         },
 
         _crearFactura: async function () {
+            sap.ui.core.BusyIndicator.show()
             const data = this._getDataFactura();
             const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
@@ -705,6 +706,7 @@ sap.ui.define([
             MessageBox[type](request.E_MSG, {
                 onClose: function () {
                     ODATA_SAP.refresh();
+                    sap.ui.core.BusyIndicator.hide()
                     this.onNavSolicitudes();
                 }.bind(this)
             });
