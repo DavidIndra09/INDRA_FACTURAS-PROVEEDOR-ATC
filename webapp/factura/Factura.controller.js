@@ -806,7 +806,8 @@ sap.ui.define([
                 "I_FEMISI": that.formatFecha(factura.fechaEmisionParameter),
                 "I_IMPORT": factura.importe,
                 "IT_DOC": JSON.stringify(adjuntoModel),
-                "IT_DET": JSON.stringify(conformidades)
+                "IT_DET": JSON.stringify(conformidades),
+                "I_SOLFAC": ""
             }
 
             return oReturn;

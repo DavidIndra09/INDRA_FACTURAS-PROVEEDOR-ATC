@@ -162,11 +162,14 @@ sap.ui.define([
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
                     $.each(aListaDocumentos, function (i, item) {
+
                         adjuntos.push({
                             "lastModifiedDate": that.convertirCadenaAFecha(item.DATUM),
                             "name": item.FILENAME,
                             "type": item.FILETYPE,
                             "mimeType": item.FILETYPE,
+                            "solfac": item.SOLFAC,
+                            //"posnr": item.POSNR,
                             "base64": item.BASE64,
                             "actions": (oCabecera.DescripcionEstado == "Creado") ? true : false
                         });
@@ -174,8 +177,9 @@ sap.ui.define([
 
                     let oModelLista = new JSONModel(aLista);
                     that.byId("reviewTable").setModel(oModelLista);
+
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
-                    AdjuntosOriginal = adjuntos;
+                    AdjuntosOriginal = [...adjuntos];
                 },
                 error: function (err) {
                     var error = err;
@@ -196,7 +200,7 @@ sap.ui.define([
             return fecha;
         },
         onCargaAdjuntos: async function (event) {
-            const adjuntos = that.getView().getModel("Adjuntos").getData();
+            const adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             const files = event.getParameter("files");
             const control = event.getSource();
 
@@ -278,6 +282,7 @@ sap.ui.define([
                     "POSNR": posnr,
                     "DATUM": that.convertirFechaAFormatoYMD(item.lastModifiedDate),
                     "BASE64": item.base64,
+                    "SOLFAC": cabecera.SOLFAC,
                     "FILETYPE": item.type,
                     "FILENAME": item.name,
                     "BORRADO": "",
@@ -288,17 +293,21 @@ sap.ui.define([
             });
             $.each(AdjuntosEliminados, function (i, item) {
                 let find = AdjuntosOriginal.find(element => element.base64 == item.base64);
-                adjuntoModel.push({
-                    "POSNR": posnr,
-                    "DATUM": that.convertirFechaAFormatoYMD(item.lastModifiedDate),
-                    "BASE64": item.base64,
-                    "FILETYPE": item.type,
-                    "FILENAME": item.name,
-                    "BORRADO": "X",
-                    "FBORRA": that.convertirFechaAFormatoYMD(new Date()),
-                    "UBORRA": sap.ui.getCore().getModel("USERIAS").getData().USERIAS,
-                    "BUKRS": "1000"
-                });
+                if (find) {
+                    posnr = posnr + 10
+                    adjuntoModel.push({
+                        "POSNR": posnr,//item.posnr,
+                        "DATUM": that.convertirFechaAFormatoYMD(item.lastModifiedDate),
+                        "BASE64": item.base64,
+                        "SOLFAC": cabecera.SOLFAC,
+                        "FILETYPE": item.type,
+                        "FILENAME": item.name,
+                        "BORRADO": "X",
+                        "FBORRA": that.convertirFechaAFormatoYMD(new Date()),
+                        "UBORRA": sap.ui.getCore().getModel("USERIAS").getData().USERIAS,
+                        "BUKRS": "1000"
+                    });
+                }
             });
 
             const conformidades = posiciones.map(item => {
@@ -319,11 +328,10 @@ sap.ui.define([
                     "netwr": item.NETWR,
                     "waers": item.WAERS,
                     "txz01": item.TXZ01,
-                    "belnr": item.BELNR
+                    "belnr": item.BELNR,
+                    "solfac": item.SOLFAC
                 }
             });
-
-            
 
             let oReturn = {
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
@@ -342,12 +350,12 @@ sap.ui.define([
             const data = that._getDataFactura();
             const request = await that.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
-
+            sap.ui.core.BusyIndicator.hide()
             MessageBox[type](request.E_MSG, {
                 onClose: function () {
                     ODATA_SAP.refresh();
                     sap.ui.core.BusyIndicator.hide()
-                    //this.onNavSolicitudes();
+                    that.getRouter().navTo("solicitudes", {}, false);
                 }.bind(this)
             });
 
