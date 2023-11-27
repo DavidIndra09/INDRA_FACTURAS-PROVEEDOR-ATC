@@ -43,24 +43,33 @@
             <Column >
                 <Label text="{i18n>conformidad}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet">
+            <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>posConformidad}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet">
+            <Column demandPopin="true" minScreenWidth="Tablet"  width="6rem">
                 <Label text="{i18n>ordenCompra}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet">
+            <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>posOrden}" design="Bold"/>
             </Column>
 
             <Column demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>material}" design="Bold"/>
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+             <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
+                <Label text="{i18n>descmaterial}" design="Bold"/>
+            </Column>
+             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
+                <Label text="{i18n>unidadMedida}" design="Bold"/>
+            </Column>
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>cantidad}" design="Bold"/>
             </Column>
             <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                 <Label text="{i18n>importe}" design="Bold"/>
+            </Column>           
+            <Column hAlign="Center" width="5rem">
+                <Label text="" />
             </Column>
         </columns>
 
@@ -69,25 +78,28 @@
                 press=".onPress">
                 <cells>
                     <ObjectIdentifier
-                        title="{BELNR}"/>
+                          title="{BELNR}"/>
                     <Text text="{BUZEI}" />
                     <Text text="{EBELN}" />
                     <Text text="{EBELP}" />
-                    <ObjectIdentifier title="{MATNR}" text="{TXZ01}" />
+                    <Text text="{MATNR}" />
+                    <Text text="{TXZ01}" /> 
+                    <Text text="{MEINS}" />                   
                     <ObjectNumber
                         number="{
                             path: 'MENGE',
                             formatter: '.formatter.numberUnit'
                         }"
-                        unit="{MEINS}" />
+                         />
                         <ObjectNumber
                             number="{
                             parts:[{path:'NETWR'},{path:'WAERS'}],
                             type: 'sap.ui.model.type.Currency',
                             formatOptions: {showMeasure: false}
-                        }"
-                        unit="{WAERS}"
+                        }"     
+                        unit="{WAERS}"                   
                         state="Information" />
+                        <Text text="{WAERS}" />
                 </cells>
             </ColumnListItem>
         </items>

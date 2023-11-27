@@ -32,6 +32,12 @@
                 backgroundDesign="Transparent"
             >
                 <f:actions>
+                <Button
+                        icon="sap-icon://employee-lookup"
+                        text=""
+                        type="Emphasized"
+                        press="onMostrarSeleccionProveedor"
+                    />
                 <Title id="ProveedorSeleccionado" text=""></Title>
                 <Label text="" />
                     <!-- <Label text="Selecciona un proveedor:" />

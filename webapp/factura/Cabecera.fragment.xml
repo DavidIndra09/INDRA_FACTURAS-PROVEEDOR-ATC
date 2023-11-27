@@ -115,7 +115,7 @@
 
 
         <Panel headerText="Adjuntar" expand="false" expandable="true" class="sapUiSmallMarginTop">
-            <Table items="{
+            <Table id="AdjuntosFactura" items="{
                     path:'/Adjuntos'
                 }" updateFinished="onUpdateFinishedAdjuntos" noDataText="Actualmente no hay archivos">
                 <headerToolbar>
@@ -125,7 +125,7 @@
                         <u:FileUploader name="myFileUpload" placeholder="Seleccione archivos" uploadUrl="upload/" buttonText="Seleccionar Adjunto" style="Emphasized" tooltip="Adjunte sus archivos" change="onCargaAdjuntos" buttonOnly="{device>/system/phone}" icon="sap-icon://attachment" iconOnly="{device>/system/phone}"/>
                     </OverflowToolbar>
                 </headerToolbar>
-                <columns>
+                 <columns>
                     <Column >
                         <Label text="Nombre" />
                     </Column>
@@ -134,6 +134,9 @@
                     </Column>
                     <Column demandPopin="true" minScreenWidth="Tablet">
                         <Label text="Tipo de Archivo" />
+                    </Column>
+                    <Column width="3rem">
+                        <Label text="" />
                     </Column>
                     <Column width="3rem">
                         <Label text="" />
@@ -147,8 +150,11 @@
                             formatter: '.formatter.formatDateView'    
                         }" />
 
-                        <ObjectStatus text="{type}" state="Indication07"/>
+                        <ObjectStatus
+                            text="{type}" 
+                            state="Indication07"/>
                         <Button type="Reject" icon="sap-icon://delete" press="onEliminarAdjunto"/>
+                        <Button type="Ghost" icon="sap-icon://download" press="downloadFromBase64"/>
                     </ColumnListItem>
                 </items>
             </Table>

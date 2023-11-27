@@ -33,14 +33,14 @@
                     <form:formContainers>
                         <form:FormContainer>
                             <form:formElements>
-                                <form:FormElement>
+                             <!--   <form:FormElement>
                                     <form:fields>
                                         <Input value="{oCabecera>/BUKRS}" enabled="false" />
                                     </form:fields>
                                     <form:label>
                                         <Label text="{i18n>sociedad}" />
                                     </form:label>
-                                </form:FormElement>
+                                </form:FormElement> -->
                                 <form:FormElement>
                                     <form:fields>
                                         <Input value="{

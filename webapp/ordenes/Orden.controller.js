@@ -41,6 +41,7 @@ sap.ui.define([
             // between the busy indication for loading the view's meta data
             let oMultiInput1 = that.byId("mtIptOrdenCompra");
             let oMultiInput2 = that.byId("mtIptDescMaterial");
+            let oMultiInput3 = that.byId("mtIptConformidades");
             // add validator
             let fnValidator = function (args) {
                 let text = args.text;
@@ -49,6 +50,7 @@ sap.ui.define([
             };
             oMultiInput1.addValidator(fnValidator);
             oMultiInput2.addValidator(fnValidator);
+            oMultiInput3.addValidator(fnValidator);
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
             ordenModel = new JSONModel({
                 busy: true,
@@ -143,7 +145,7 @@ sap.ui.define([
                 // 	MessageBox.error("Hubo errores de validacion. Revisar el log en la parte inferior");
                 // }
                 // this.getRouter().navTo("factura",{numSolicitud:"N"},true);
-
+                MODEL.setProperty("/Ordenes", []);
                 this.onNavBack();
             } else {
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
@@ -176,23 +178,33 @@ sap.ui.define([
                 MessageBox.error("Debe seleccionar al menos un registro.");
             }
         },
-
-        onBuscarOrdenes: function () {
+        onBuscarOrdenes: async function () {
             const busqueda = ordenModel.getProperty("/Busqueda");
             const filters = [];
-            if (busqueda.conformidad) filters.push(new Filter("BELNR", "EQ", busqueda.conformidad));//conformidad
-            if (busqueda.ordenCompra) filters.push(new Filter("EBELN", "EQ", busqueda.ordenCompra));//ordenCompra
-            if (busqueda.descMaterial) filters.push(new Filter("TXZ01", "Contains", busqueda.descMaterial));//descripcionMaterial
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
+            filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
+            filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
+            //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+            this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
+                filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
+            });
+            this.getView().byId("mtIptConformidades").getTokens().map(function (token) {
+                filters.push(new Filter("IR_BELNR", "EQ", token.getKey()));
+            });
+            this.getView().byId("mtIptDescMaterial").getTokens().map(function (token) {
+                filters.push(new Filter("IR_MATNR", "EQ", token.getKey()));
+            });
 
-            this._applySearch(filters);
+            let parameters = { filters: filters };
 
+            const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
+            var posiciones = JSON.parse(request.results[0].ET_DATA);
+            MODEL.setProperty("/Ordenes", posiciones);
         },
-
         onLimpiarFiltros: function () {
             ordenModel.setProperty("/Busqueda", {});
             this._applySearch([]);
         },
-
         onBusquedaRapida: function (event) {
             const query = event.getParameter("newValue");
             const filters = [
@@ -224,32 +236,19 @@ sap.ui.define([
          * @private
          */
         _onOrdenMatched: async function (oEvent) {
+            MODEL.setProperty("/Ordenes", []);
             this.byId("idTableOrdenes").removeSelections();
             ordenModel.setProperty("/busy", false);
             ordenModel.setProperty("/Busqueda", {});
             let parameters = { filters: [] };
-            let oFilter = new Filter("i_stcd1", FilterOperator.EQ, "20603355611");
-            parameters.filters.push(oFilter);
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
+            parameters.filters.push(new Filter("IR_BUKRS", FilterOperator.EQ, "1000"));
+            parameters.filters.push(new Filter("IR_LIFNR", FilterOperator.EQ, lifnr));
+            //parameters.filters.push(new Filter("I_LOEKZ", FilterOperator.EQ, "X"));
             parameters.urlParameters = {};
-            const request = await this.readEntity(ODATA_SAP, "/conformidadesSet", parameters);
-            let sJson = request.results[0].et_data;
-            sJson = sJson.replace(/"BUDAT":(\d+)/g, '"BUDAT":"$1"');
-            sJson = sJson.replace(/"CPUDT":(\d+)/g, '"CPUDT":"$1"');
-            sJson = sJson.replace(/"CPUTM":(\d+)/g, '"CPUTM":"$1"');
-            sJson = sJson.replace(/"BLDAT":(\d+)/g, '"BLDAT":"$1"');
-
-            //sJson = sJson.replace(/00000000/g, '"00000000"');
-            //let posiciones = JSON.parse(sJson);
-            try {
-                var posiciones = JSON.parse(sJson);
-                MODEL.setProperty("/Ordenes", posiciones);
-                //this._seleccionarTabla(posiciones);
-            } catch (error) {
-                console.error("Error al analizar la cadena JSON: " + error);
-            }
-            //console.log(posiciones);
-            //const posiciones = MODEL.getProperty("/Factura/conformidades/results");
-
+            const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
+            var posiciones = JSON.parse(request.results[0].ET_DATA);
+            MODEL.setProperty("/Ordenes", posiciones);   
             //this._seleccionarTabla(posiciones);
         },
 

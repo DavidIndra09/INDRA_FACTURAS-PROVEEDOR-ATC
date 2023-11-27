@@ -505,18 +505,66 @@ sap.ui.define([
 
             if (files.length > 0) {
                 const file = files[0];
-                adjuntos.push(file);
-                MODEL.setProperty("/Adjuntos", adjuntos);
+                const base64String = await that.readFileAsBase64(file);
+                adjuntos.push({
+                    "lastModifiedDate": new Date(),
+                    "name": file.name.split(".")[0],
+                    "type": "." + file.name.split(".").pop(),
+                    "mimeType": file.type,
+                    "base64": base64String
+                });
+                that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": adjuntos }));
             }
-            control.setValue("");
         },
+        readFileAsBase64: function (file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
 
-        onEliminarAdjunto: function (event) {
-            const path = event.getSource().getBindingContext().getPath();
-            const index = path.slice(-1);
-            const adjuntos = MODEL.getProperty("/Adjuntos");
-            adjuntos.splice(index, 1);
-            MODEL.setProperty("/Adjuntos", adjuntos);
+                reader.onload = () => {
+                    resolve(reader.result.split(',')[1]);
+                };
+
+                reader.onerror = (error) => {
+                    reject(error);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        },
+        downloadFromBase64: function (event) {
+            let fila = event.getSource().getBindingContext().getProperty();
+            var byteCharacters = atob(fila.base64);
+            var byteNumbers = new Array(byteCharacters.length);
+            for (var i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            var blob = new Blob([byteArray], { type: fila.mimeType });
+
+            // Crear un enlace de descarga
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fila.name + fila.type;
+
+            // Simular un clic en el enlace para iniciar la descarga
+            link.click();
+        },
+        onEliminarAdjunto: function (oEvent) {
+            var oButton = oEvent.getSource();
+            var oListItem = oButton.getParent();
+            var iIndex = oListItem.getBindingContextPath().split("/").pop();
+            var oTable = that.getView().byId("AdjuntosFactura");
+            var oModel = oTable.getModel();
+            var aItems = oModel.getProperty("/Adjuntos");
+            sap.m.MessageBox.confirm("¿Estás seguro de que deseas eliminar este archivo?", {
+                title: "Confirmar eliminación",
+                onClose: function (oAction) {
+                    if (oAction === sap.m.MessageBox.Action.OK) {
+                        aItems.splice(iIndex, 1);
+                        oModel.setProperty("/Adjuntos", aItems);
+                    }
+                }
+            });
         },
 
         /* =========================================================== */
@@ -646,7 +694,7 @@ sap.ui.define([
         },
 
         _crearFactura: async function () {
-            const data = this._getDataFactura();           
+            const data = this._getDataFactura();
             const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
             //MessageBox.success(`La solicitud ${request.codigoSolicitud}  se ha sido creada correctamente`, {
@@ -677,22 +725,25 @@ sap.ui.define([
 
         _getDataFactura: function () {
             const factura = MODEL.getProperty("/Factura");
+            debugger
+            let posnr = 0;
+            let adjuntos = MODEL.getProperty("/Adjuntos");
+            const adjuntoModel = adjuntos.map(item => {
+                posnr = posnr + 10
+                return {
+                    "POSNR": posnr,
+                    "DATUM": that.convertirFechaAFormatoYMD(item.lastModifiedDate),
+                    "BASE64": item.base64,
+                    "FILETYPE": item.type,
+                    "FILENAME": item.name,
+                    "BUKRS": "1000"
+                }
+            });
             const conformidades = factura.conformidades.results.map(item => {
-                // return {
-                //     "conformidad": item.conformidad,
-                //     "posicionConformidad": item.posicionConformidad,
-                //     "ordenCompra": item.ordenCompra,
-                //     "posicionOrden": item.posicionOrden,
-                //     "codigoMaterial": item.codigoMaterial,
-                //     "descripcionMaterial": item.descripcionMaterial,
-                //     "cantidad": parseFloat(item.cantidad),
-                //     "importe": item.importe,
-                //     "moneda": item.moneda
-                // };
                 return {
                     "mandt": "800",
-                    "bukrs": factura.sociedad,
-                    "lifnr": "500000",
+                    "bukrs": item.BUKRS,
+                    "lifnr": item.LIFNR,
                     "codefact": "",
                     "posnr": item.BUZEI,
                     "datre": "20001102",
@@ -709,6 +760,9 @@ sap.ui.define([
                     "belnr": item.BELNR
                 }
             });
+
+
+
             let dIgv = 0,
                 dRetencion = 0;
 
@@ -719,16 +773,6 @@ sap.ui.define([
             }
 
             const data = {
-                // "codigoFactura": factura.codigoFactura || "",
-                // "fechaEmision": factura.fechaEmisionParameter,
-                // "fechaRegistro": formatter.formatDateParameter(new Date()),
-                // "importe": factura.importe,
-                // "total": factura.total,
-                // "sociedad": factura.sociedad,
-                // "estadoFactura_ID": 1,
-                // "estadoContabilizacion": { "ID": 0 },
-                // "moneda": "PEN",
-                // "igv": 34.23,
                 "mandt": "800",
                 "bukrs": factura.sociedad,
                 "lifnr": "",
@@ -750,28 +794,37 @@ sap.ui.define([
                 "waers": "PEN",
                 "mnsje": "",
                 "igv": dIgv
-                //conformidades: conformidades
             }
             const codigoSolicitud = factura.codigoSolicitud;
             if (codigoSolicitud) data.codigoSolicitud = codigoSolicitud;
 
-            /*let oReturn = {
-                "i_userscp": "P2002198484",
-                "i_accion": "CR",
-                "is_fact_prov_c": JSON.stringify(data),
-                "it_fact_prov_d": JSON.stringify(conformidades)
-            };*/
-
             let oReturn = {
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": factura.codigoFactura,
-                "I_FEMISI": /*"20230920",*/that.formatFecha(factura.fechaEmisionParameter),//JSON.stringify(data),
-                "I_IMPORT": factura.importe,//JSON.stringify(conformidades),
-                "IT_DOC": "",
-                "IT_DET": ""
+                "I_FEMISI": that.formatFecha(factura.fechaEmisionParameter),
+                "I_IMPORT": factura.importe,
+                "IT_DOC": JSON.stringify(adjuntoModel),
+                "IT_DET": JSON.stringify(conformidades)
             }
 
             return oReturn;
+        },
+
+        convertirFechaAFormatoYMD(fecha) {
+            // Asegurarse de que la entrada sea un objeto Date
+            if (!(fecha instanceof Date)) {
+                throw new Error('La entrada debe ser un objeto Date.');
+            }
+
+            // Obtener los componentes de la fecha
+            const year = fecha.getFullYear();
+            const month = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses son 0-indexados
+            const day = String(fecha.getDate()).padStart(2, '0');
+
+            // Construir la cadena en el formato yyyyMMdd
+            const formatoYMD = `${year}${month}${day}`;
+
+            return formatoYMD;
         },
 
         formatFecha: function (fecha) {

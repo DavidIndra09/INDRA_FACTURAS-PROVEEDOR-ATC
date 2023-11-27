@@ -3,6 +3,17 @@
   "authenticationMethod": "route",
   "routes": [
     {
+      "source": "^/user-api(.*)",
+      "target": "$1",
+      "service": "sap-approuter-userapi"
+    },
+    {
+      "source": "^/service/(.*)$",
+      "target": "$1",
+      "destination": "IAS_INTEGRATION",
+      "authenticationType": "none"
+    },
+    {
       "source": "^/sap/(.*)$",
       "target": "/sap/$1",
       "destination": "SAP_DEV",

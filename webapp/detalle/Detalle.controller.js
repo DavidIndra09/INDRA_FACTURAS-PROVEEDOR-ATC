@@ -75,6 +75,7 @@ sap.ui.define([
          */
         _onDetalletMatched: function (oEvent) {
             if (that.getOwnerComponent().getModel("oCabecera")) {
+                var oParameters = oEvent.getParameters();
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
                 oObject.codigo = "20297868790";
                 oObject.proveedor = "Indra Peru S.A.";
@@ -82,7 +83,7 @@ sap.ui.define([
                 //that.mostrarDetalle(oObject.CODEFACT);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
-                viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oObject.CODEFACT]));
+                viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
                 viewModel.setProperty("/busy", false);
                 viewModel.setProperty("/busy", false);
             } else {
@@ -177,9 +178,7 @@ sap.ui.define([
                     "mimeType": file.type,
                     "base64": base64String
                 });
-
                 that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
-
             }
             //control.setValue("");
         },
@@ -222,11 +221,11 @@ sap.ui.define([
             var iIndex = oListItem.getBindingContextPath().split("/").pop();
             var oTable = that.getView().byId("AdjuntosDetalle");
             var oModel = oTable.getModel();
-            var aItems = oModel.getProperty("/Adjuntos");            
+            var aItems = oModel.getProperty("/Adjuntos");
             sap.m.MessageBox.confirm("¿Estás seguro de que deseas eliminar este archivo?", {
                 title: "Confirmar eliminación",
                 onClose: function (oAction) {
-                    if (oAction === sap.m.MessageBox.Action.OK) {                        
+                    if (oAction === sap.m.MessageBox.Action.OK) {
                         aItems.splice(iIndex, 1);
                         oModel.setProperty("/Adjuntos", aItems);
                     }

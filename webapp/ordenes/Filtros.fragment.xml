@@ -10,7 +10,14 @@
                 <form:formElements>
                     <form:FormElement>
                         <form:fields>
-                            <Input value="{ordenView>conformidad}" placeholder="{i18n>placeholderConformidad}" />
+                          <!--  <Input value="{ordenView>conformidad}" placeholder="{i18n>placeholderConformidad}" /> -->
+                            <MultiInput
+                                            id="mtIptConformidades"
+                                            value="{ordenView>conformidad}"
+                                            showSuggestion="false" 
+                                            showValueHelp="false"
+                                            placeholder="{i18n>placeholderConformidad}"
+                                        />
                         </form:fields>
                         <form:label>
                             <Label text="{i18n>conformidad}" design="Bold" />

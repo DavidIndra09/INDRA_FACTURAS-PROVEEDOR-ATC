@@ -58,7 +58,7 @@
                                     }"/> -->
                                 </form:fields>
                                 <form:label>
-                                    <Label text="Fecha Registro" />
+                                    <Label text="Fecha creación solicitud" />
                                 </form:label>
                             </form:FormElement>
                             <form:FormElement>
@@ -70,7 +70,7 @@
                                     }" />
                                 </form:fields>
                                 <form:label>
-                                    <Label text="IGV" />
+                                    <Label text="IVA" />
                                 </form:label>
                             </form:FormElement>
                             <form:FormElement>
@@ -81,14 +81,14 @@
                                     <Label text="Moneda" />
                                 </form:label>
                             </form:FormElement>
-                            <form:FormElement>
+                          <!--  <form:FormElement>
                                 <form:fields>
                                     <Text text="{BUKRS}"/>
                                 </form:fields>
                                 <form:label>
                                     <Label text="Sociedad" />
                                 </form:label>
-                            </form:FormElement>
+                            </form:FormElement> -->
                         </form:formElements>
                     </form:FormContainer>
                 </form:formContainers>

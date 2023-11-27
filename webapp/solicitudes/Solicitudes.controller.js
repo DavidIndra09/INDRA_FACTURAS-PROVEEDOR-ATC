@@ -143,6 +143,7 @@ sap.ui.define([
                 page = "factura";
             }
             that.getOwnerComponent().setModel(new JSONModel(solicitud), "oCabecera");
+
             that.getRouter().navTo(page, {
                 codigoSolicitud: codigoSolicitud
             }, true);
@@ -240,7 +241,7 @@ sap.ui.define([
                 }
             }
 
-            //if (Proveedor) filters.push(new Filter("I_LIFNR", "EQ", Proveedor));
+            if (Proveedor) filters.push(new Filter("I_LIFNR", "EQ", Proveedor));
 
             if (InputCodigoSolicitud) filters.push(new Filter("I_SOLFAC", "EQ", InputCodigoSolicitud)); //codigoSolicitud
             if (InputCodigoFactura) filters.push(new Filter("I_FACTUR", "EQ", InputCodigoFactura)); // codigoFactura
@@ -411,6 +412,10 @@ sap.ui.define([
                 SeleccionProveedor.setEscapeHandler(function () { });
                 SeleccionProveedor.open();
             }
+            else {
+                SeleccionProveedor.setEscapeHandler(function () { });
+                SeleccionProveedor.open();
+            }
         },
 
         onMostrarSeleccionEstructuraExcel: async function () {
@@ -429,7 +434,8 @@ sap.ui.define([
         onSeleccionarProveedor: async function (oEvent) {
             let proveedoreshelp = that.getView().getModel("proveedoreshelp").getData();
             let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();
-            var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.split("-")[0].trim() || element.TEXTO == proveedorSelected.split("-")[0].trim())
+            
+            var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.trim() || element.TEXTO == proveedorSelected.trim())
             if (find != undefined) {
                 sap.ui.getCore().setModel(new JSONModel({ "Lifnr": find.VALUE }), "Lifnr")
                 that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " /*+ find.VALUE + " - "*/ + find.TEXTO + "    ");
@@ -545,6 +551,7 @@ sap.ui.define([
 
 
         _onSolicitudesMatched: function (event) {
+            this.onGetUsersIAS();
             let table = that.getTable();
             let idTable = table.getId();
             if (idTable == "idFacturasTable") {
@@ -558,7 +565,48 @@ sap.ui.define([
                 return;
             }
         },
+        _getAppModulePath: function (sDestination) {
 
+            let sPathReturn = "";
+
+            const appId = this.getOwnerComponent().getManifestEntry("/sap.app/id");
+            const appPath = appId.replaceAll(".", "/");
+            const appPathPortal = jQuery.sap.getModulePath(appPath);
+            if (appPathPortal !== ".") {
+                sPathReturn = appPathPortal;
+            }
+
+            return sPathReturn;
+
+        },
+        onGetUsersIAS: async function () {
+            let url = that._getAppModulePath() + "/user-api" + "/attributes"//"service/scim/Users"            
+            await $.ajax({
+                url: url,
+                dataType: "json",
+                contentType: "application/scim+json; charset=utf-8",
+                async: false,
+                success: async function (response) {
+                    //that.onGetFullDataUserInfo(response);
+                },
+                error: function (xhr) {
+                }
+            });
+        },
+        onGetFullDataUserInfo: async function (User) {
+            let url = that._getAppModulePath() + "/service/scim/Users/" + User.email
+            await $.ajax({
+                url: url,
+                dataType: "json",
+                contentType: "application/scim+json; charset=utf-8",
+                async: false,
+                success: async function (response) {
+                    debugger
+                },
+                error: function (xhr) {
+                }
+            });
+        },
         /**
          * Internal helper method to apply both filter and search state together on the list binding
          * @param {sap.ui.model.Filter[]} aTableSearchState An array of filters for the search
@@ -647,14 +695,59 @@ sap.ui.define([
             let sJson = request.results[0].ET_DATA;
             //sJson = sJson.replace(/00000000/g, '"00000000"');
             let aLista = JSON.parse(sJson);
-            /*$.each(aLista, (idx, value) => {
-                value.CODEFACT = value.CODEFACT.toString();
-            });*/
+            let EstadosFactura = that.getModel("EstadosFactura").getData();
+            $.each(aLista, (idx, value) => {
+                let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
+                value.DescricionEstado = find.TEXTO;
+                let resultEstatus = that.getColorStatus(find.TEXTO);
+                value.ColorEstado = resultEstatus.state;
+                value.IconoEstado = resultEstatus.icon;
+            });
 
             MODEL.setProperty("/Facturas", aLista);
             viewModel.setProperty("/tableBusy", false);
         },
 
+        getColorStatus: function (Estado) {
+            let object = { "state": "", "icon": "" };
+            switch (Estado) {
+
+                case "Creado":
+                    object.state = "Indication05";
+                    object.icon = "sap-icon://information";
+                    break;
+
+                case "Liberado para pago":
+                    object.state = "Information";
+                    object.icon = "sap-icon://information";
+                    break;
+
+                case "Factura Registrada":
+                    object.state = "Indication05";
+                    object.icon = "sap-icon://information";
+                    break;
+
+                case "Factura Pagada":
+                    object.state = "Success";
+                    object.icon = "sap-icon://sys-enter-2";
+                    break;
+                case "Con errores":
+                    object.state = "Error";
+                    object.icon = "sap-icon://error";
+                    break;
+                case "Factura Contabilizada":
+                    object.state = "Indication08";
+                    object.icon = "sap-icon://information";
+                    break;
+
+                case "Rechazado":
+                    object.state = "Warning";
+                    object.icon = "sap-icon://alert";
+                    break;
+            }
+            return object;
+
+        },
         _actualizarSolicitudes: async function (solicitudes) {
             let solicitud;
             const requests = solicitudes.map(item => {
@@ -821,8 +914,14 @@ sap.ui.define([
                     aColumns.forEach(function (oColumnData) {
                         var oCell;
                         if (!oColumnData.path.includes("btn")) {
-                            oCell = new sap.m.Text({ text: "{" + oColumnData.path + "}" });
-                        } else {
+                            if (oColumnData.path == "DescricionEstado") {
+                                oCell = new sap.m.ObjectStatus({ text: "{" + oColumnData.path + "}", icon: "{" + oColumnData.icon + "}", state: "{" + oColumnData.state + "}", class: "sapUiSmallMarginBottom" });
+                            }
+                            else {
+                                oCell = new sap.m.Text({ text: "{" + oColumnData.path + "}" });
+                            }
+                        }
+                        else {
 
                             var oButtonDelete = new sap.m.Button({
                                 icon: "{i18n>iconDelete}",
@@ -890,7 +989,7 @@ sap.ui.define([
                         { id: "FACTUR", label: "Factura", path: "FACTUR", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "IMPORT", label: "Importe", path: "IMPORT", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "ESTADO", label: "Estado de Factura", path: "ESTADO", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "ESTADO", label: "Estado de Factura", path: "DescricionEstado", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet" },
                         { width: "5rem", path: "btnverDetalle" },
                         { width: "5rem", path: "btnEliminarSolicitud" }
                     ];
