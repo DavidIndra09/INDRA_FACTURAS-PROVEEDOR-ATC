@@ -80,10 +80,7 @@ sap.ui.define([
             if (that.getOwnerComponent().getModel("oCabecera")) {
                 var oParameters = oEvent.getParameters();
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
-                //oObject.codigo = "20297868790";
-                //oObject.proveedor = "Indra Peru S.A.";
-                oObject.total = (Number(oObject.IMPORT).toFixed(2)) /* Number(oObject.IGV)).toFixed(2)*/;
-
+                oObject.total = oObject.IMPORT /* Number(oObject.IGV)).toFixed(2)*/;
                 that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
@@ -352,6 +349,7 @@ sap.ui.define([
         actualizarFactura: async function () {
             sap.ui.core.BusyIndicator.show()
             const data = that._getDataFactura();
+            debugger
             const request = await that.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
             sap.ui.core.BusyIndicator.hide()

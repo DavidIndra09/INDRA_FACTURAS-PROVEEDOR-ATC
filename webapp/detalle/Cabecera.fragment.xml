@@ -1,14 +1,12 @@
-<core:FragmentDefinition
-    xmlns="sap.m"
+<core:FragmentDefinition xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:form="sap.ui.layout.form"
     xmlns:commons="sap.suite.ui.commons"
     xmlns:core="sap.ui.core"
     xmlns:cards="sap.f.cards">
-    <HBox 
-        direction="{= !${device/system/phone} ? 'Column' : 'Row' }">
-    
-    <!-- <f:GridContainer>
+    <HBox direction="{= !${device/system/phone} ? 'Column' : 'Row' }">
+
+        <!-- <f:GridContainer>
         <f:layout>
             <f:GridContainerSettings columnSize="9.5rem" />
         </f:layout>
@@ -16,184 +14,148 @@
             <f:GridContainerSettings columnSize="10rem"/>
         </f:layoutS>
         <f:layoutM>
-            <f:GridContainerSettings  columnSize="8rem" />
+            <f:GridContainerSettings columnSize="8rem" />
         </f:layoutM>
         <f:layoutL>
             <f:GridContainerSettings columnSize="4rem"/>
         </f:layoutL>
-        <f:Card width="100%" >
+        <f:Card width="100%">
             <f:header>
-                <cards:Header
-                    title="{facturaModel>codigoFactura}"
-                    subtitle="Factura"
-                    iconSrc="{i18n>iconDetallefactura}" />
+                <cards:Header title="{facturaModel>codigoFactura}" subtitle="Factura" iconSrc="{i18n>iconDetallefactura}" />
             </f:header>
             <f:content> -->
-                <form:Form editable="true">
-                    <form:formContainers>
-                        <form:FormContainer>
-                            <form:formElements>
-                             
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
-                                            parts:[{path:'oCabecera>/SOLFAC'}]                                            
-                                        }" enabled="true"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="Solicitud" />
-                                    </form:label>
-                                </form:FormElement>
+        <form:Form editable="true">
+            <form:formContainers>
+                <form:FormContainer>
+                    <form:formElements>
 
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
+                        <form:FormElement>
+                            <form:fields>
+                                <Input value="{
+                                            parts:[{path:'oCabecera>/SOLFAC'}]                                            
+                                        }" enabled="false"/>
+                            </form:fields>
+                            <form:label>
+                                <Label text="Solicitud" />
+                            </form:label>
+                        </form:FormElement>
+
+                        <form:FormElement>
+                            <form:fields>
+                                <Input value="{
                                             parts:[{path:'oCabecera>/FACTUR'}]
                                             
                                         }" enabled="true"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="Factura" />
-                                    </form:label>
-                                </form:FormElement>
+                            </form:fields>
+                            <form:label>
+                                <Label text="Factura" />
+                            </form:label>
+                        </form:FormElement>
 
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
+                        <form:FormElement>
+                            <form:fields>
+                                <Input value="{
                                             parts:[{path:'oCabecera>/DescripcionEstado'}]                                            
                                         }" enabled="false"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="Estado de Factura" />
-                                    </form:label>
-                                </form:FormElement>
+                            </form:fields>
+                            <form:label>
+                                <Label text="Estado de Factura" />
+                            </form:label>
+                        </form:FormElement>
 
-
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
-                                            parts:[{path:'oCabecera>/IMPORT'},{path:'oCabecera>/WAERS'}],
-                                            type: 'sap.ui.model.type.Currency',
-                                            formatOptions: {showMeasure: false}
+                        <form:FormElement>
+                            <form:fields>
+                            <DatePicker value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy" editable="true" />
+                               
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>fechaEmision}" />
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                            <DatePicker value="{oCabecera>/FKDAT}" displayFormat="dd.MM.yyyy" editable="true" />
+                              
+                            </form:fields>
+                            <form:label>
+                                <Label text="Fecha de contabilización" />
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                                <DatePicker value="{oCabecera>/FCRESO}" displayFormat="dd.MM.yyyy" editable="true" />
+                            </form:fields>
+                            <form:label>
+                                <Label text="Fecha creación solicitud" />
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                                <Input value="{
+                                            parts:[{path:'oCabecera>/IMPORT'}]     
                                         }" enabled="true"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="{i18n>importe}" />
-                                    </form:label>
-                                </form:FormElement>
-
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
-                                            path: 'oCabecera>/FEMISI',
-                                            formatter: '.formatter.formatearFechaString'
-                                        }" enabled="true"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="{i18n>fechaEmision}" />
-                                    </form:label>
-                                </form:FormElement>
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
-                                            parts:[{path:'oCabecera>/IMPORT'},{path:'oCabecera>/WAERS'}],
-                                            type: 'sap.ui.model.type.Currency',
-                                            formatOptions: {showMeasure: false}
-                                        }" enabled="true"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="{i18n>importe}" />
-                                    </form:label>
-                                </form:FormElement>
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>importe}" />
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                                <Input value="{
                                             parts:[{path:'oCabecera>/IGV'},{path:'oCabecera>/WAERS'}],
                                             type: 'sap.ui.model.type.Currency',
                                             formatOptions: {showMeasure: false}
                                         }" enabled="true"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="{i18n>igv}" />
-                                    </form:label>
-                                </form:FormElement>
-                                <form:FormElement>
-                                    <form:fields>
-                                        <Input value="{
-                                            parts:[{path:'oCabecera>/total'},{path:'oCabecera>/WAERS'}],
-                                            type: 'sap.ui.model.type.Currency',
-                                            formatOptions: {showMeasure: false}
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>igv}" />
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
+                            <form:fields>
+                                <Input value="{
+                                            parts:[{path:'oCabecera>/total'}] 
                                         }" enabled="true"/>
-                                    </form:fields>
-                                    <form:label>
-                                        <Label text="{i18n>importeTotal}" />
-                                    </form:label>
-                                </form:FormElement>
-                            </form:formElements>
-                        </form:FormContainer>
-                    </form:formContainers>
-                    <form:layout>
-                        <form:ColumnLayout
-                            columnsL="2"
-                            columnsM="1"
-                            columnsXL="4"
-                            emptyCellsLarge="0"
-                            labelCellsLarge="4"/>
-                    </form:layout>
-                    <form:title>
-                    </form:title>
-                    <form:toolbar>
-                    </form:toolbar>
-                </form:Form>
-            <!-- </f:content>
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>importeTotal}" />
+                            </form:label>
+                        </form:FormElement>
+                    </form:formElements>
+                </form:FormContainer>
+            </form:formContainers>
+            <form:layout>
+                <form:ColumnLayout columnsL="2" columnsM="1" columnsXL="4" emptyCellsLarge="0" labelCellsLarge="4"/>
+            </form:layout>
+            <form:title>
+            </form:title>
+            <form:toolbar>
+            </form:toolbar>
+        </form:Form>
+        <!-- </f:content>
             <f:layoutData>
-                <f:GridContainerItemLayoutData minRows="2"  columns="4" />
+                <f:GridContainerItemLayoutData minRows="2" columns="4" />
             </f:layoutData>
         </f:Card> -->
 
         <!-- <f:Card width="100%">
             <f:header>
-                <cards:NumericHeader 
-                    title="Flujo de aprobación" 
-                    number="Pendiente" 
-                    statusText="Estado"
-                    state="Critical"
-                    />
+                <cards:NumericHeader title="Flujo de aprobación" number="Pendiente" statusText="Estado" state="Critical" />
             </f:header>
             <f:customData>
                 <BadgeCustomData value="{facturaModel>estadoFactura_ID}" />
             </f:customData>
             <f:content> -->
-            <!--    <commons:ProcessFlow
-                    id="processflow1"
-                    scrollable="false"
-                    foldedCorners="true"
-                    nodePress="onNodePress"
-                    nodes="{/nodes}"
-                    lanes="{/lanes}">
+        <!--    <commons:ProcessFlow id="processflow1" scrollable="false" foldedCorners="true" nodePress="onNodePress" nodes="{/nodes}" lanes="{/lanes}">
                     <commons:nodes>
-                        <commons:ProcessFlowNode
-                            laneId="{lane}"
-                            nodeId="{id}"
-                            title="{title}"
-                            titleAbbreviation="{titleAbbreviation}"
-                            children="{children}"
-                            state="{state}"
-                            stateText="{stateText}"
-                            texts="{texts}"
-                            highlighted="{highlighted}"
-                            focused="{focused}" />
+                        <commons:ProcessFlowNode laneId="{lane}" nodeId="{id}" title="{title}" titleAbbreviation="{titleAbbreviation}" children="{children}" state="{state}" stateText="{stateText}" texts="{texts}" highlighted="{highlighted}" focused="{focused}" />
                     </commons:nodes>
                     <commons:lanes>
-                        <commons:ProcessFlowLaneHeader
-                            laneId="{id}"
-                            iconSrc="{icon}"
-                            text="{label}"
-                            position="{position}" />
+                        <commons:ProcessFlowLaneHeader laneId="{id}" iconSrc="{icon}" text="{label}" position="{position}" />
                     </commons:lanes>
                 </commons:ProcessFlow> -->
-        </HBox>
-            <!-- </f:content>
+    </HBox>
+    <!-- </f:content>
             <f:layoutData>
                 <f:GridContainerItemLayoutData minRows="2" columns="4" />
             </f:layoutData>

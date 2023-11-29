@@ -143,6 +143,7 @@ sap.ui.define([
             if (solicitud.estadoFactura_ID === 1) {
                 page = "factura";
             }
+
             that.getOwnerComponent().setModel(new JSONModel(solicitud), "oCabecera");
             that.getRouter().navTo(page, {
                 codigoSolicitud: codigoSolicitud,
@@ -316,7 +317,7 @@ sap.ui.define([
                     aTableSearchState = [
                         new Filter({
                             filters: [
-                                new Filter("CODEFACT", FilterOperator.Contains, query),
+                                new Filter("FACTUR", FilterOperator.Contains, query),
                                 new Filter("XBLNR", FilterOperator.Contains, query)
                             ],
                             and: false
@@ -370,14 +371,14 @@ sap.ui.define([
             const contexto = event.getSource().getBindingContext();
             const solicitud = contexto.getObject();
             const path = contexto.getPath();
-            MessageBox.confirm(`¿Está seguro de eliminar la solicitud ${solicitud.CODEFACT}?`, {
+            MessageBox.confirm(`¿Está seguro de eliminar la solicitud ${solicitud.FACTUR}?`, {
                 onClose: async function (action) {
                     if (action === "OK") {
                         // logica temporal
                         // const solicitudes = MODEL.getProperty("/Facturas");
                         const solicitudBorrar = MODEL.getProperty(path);
                         let oParameters = { filters: [] };
-                        var oFilterOne = new Filter("is_fact_prov_c", FilterOperator.EQ, solicitudBorrar.CODEFACT);
+                        var oFilterOne = new Filter("is_fact_prov_c", FilterOperator.EQ, solicitudBorrar.FACTUR);
                         oParameters.filters.push(oFilterOne);
                         var oFilterTwo = new Filter("i_accion", FilterOperator.EQ, "D");
                         oParameters.filters.push(oFilterTwo);
@@ -450,28 +451,29 @@ sap.ui.define([
             }
         },
 
-        onSolicitarPagoFactura: async function () {
+        onSolicitarPagoFactura: async function (oEvent) {
             const tableFacturas = that.getTable();
             const selectedFacturas = tableFacturas.getSelectedContextPaths();
             if (selectedFacturas.length === 0) {
                 MessageBox.error("Seleccione por lo menos una factura");
                 return;
             }
-            if (!this._validarSolicitudPago(selectedFacturas)) {
-                MessageBox.error("Seleccione solo facturas con estado Registrado");
-                return;
-            }
+            /* if (!this._validarSolicitudPago(selectedFacturas)) {
+                 MessageBox.error("Seleccione solo facturas con estado Registrado");
+                 return;
+             }*/
             MODEL.setProperty("/tituloMensaje", "¿Desea solicitar pago de facturas?");
             selectedFacturas.map(path => {
                 messageManager.addMessages(new Message({
-                    message: MODEL.getProperty(path).XBLNR,
+                    message: MODEL.getProperty(path).SOLFAC,
                     additionalText: "",
-                    description: MODEL.getProperty(path).CODEFACT,
+                    description: MODEL.getProperty(path).FACTUR,
                     type: "Warning",
                     target: "/Dummy",
                     processor: MODEL
                 }));
             });
+
             const mensajeConfirmacion = await this._mostrarMensajes("MensajeConfirmacion");
             mensajeConfirmacion.open();
         },
@@ -482,17 +484,18 @@ sap.ui.define([
             MODEL.setProperty("/stateDialog", "Success");
             MODEL.setProperty("/iconDialog", "sap-icon://message-success");
             MODEL.setProperty("/tituloMensaje", "Las Solicicitudes fueron enviadas");
-            const tableFacturas = this.getView().byId("idFacturasTable");
+            const tableFacturas = that.getTable();
             const selectedFacturas = tableFacturas.getSelectedContexts();
             if (selectedFacturas.length > 0) {
                 viewModel.setProperty("/tableBusy", true);
                 const solicitudes = await this._actualizarSolicitudes(selectedFacturas);
                 console.log(solicitudes);
+
                 selectedFacturas.map(solicitud => {
                     messageManager.addMessages(new Message({
-                        message: solicitud.getObject().XBLNR,
+                        message: solicitud.getObject().SOLFAC,
                         additionalText: "",
-                        description: solicitud.getObject().CODEFACT,
+                        description: solicitud.getObject().FACTUR,
                         type: "Success",
                         target: "/Dummy",
                         processor: MODEL
@@ -695,7 +698,11 @@ sap.ui.define([
                 value.ColorEstado = resultEstatus.state;
                 value.IconoEstado = resultEstatus.icon;
                 value.IMPORT = formatter.formatCurrency(value.IMPORT);
+                value.FKDAT = formatter.formatearFechaString(value.FKDAT);
+                value.FCRESO = formatter.formatearFechaString(value.FCRESO);
+                value.FEMISI = formatter.formatearFechaString(value.FEMISI);
             });
+            console.log(aLista)
 
             MODEL.setProperty("/Facturas", aLista);
             viewModel.setProperty("/tableBusy", false);
@@ -742,30 +749,29 @@ sap.ui.define([
 
         },
         _actualizarSolicitudes: async function (solicitudes) {
-            let solicitud;
-            const requests = solicitudes.map(item => {
-                solicitud = item.getObject();
-                let oAction = new Filter("i_action", FilterOperator.EQ, "EN"),
-                    oFactura = new Filter("it_fact_prov_c", FilterOperator.EQ, solicitud.CODEFACT),
-                    oUserScp = new Filter("i_userscp", FilterOperator.EQ, "JALZA");
-                let aFilters = [oAction, oFactura, oUserScp];
-                let oParameters = {
-                    filters: aFilters,
-                    urlParameters: {}
-                };
-                return this.readEntity(ODATA_SAP, "/statusSet", oParameters);
+            try {
+                const requests = solicitudes.map(async item => {
+                    try {
+                        const copiedObject = (({ ColorEstado, DescripcionEstado, IconoEstado, ...rest }) => rest)(item.getObject());
+                        copiedObject.ESTADO = "02";
+                        copiedObject.FCRESO = formatter.formatearFechaString(copiedObject.FCRESO);
+                        copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
+                        copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);
+                        const solicitud = { "IS_FACT_CAB": JSON.stringify(copiedObject) };
+                        return await this.createEntity(ODATA_SAP, "/solPagoFactSet", solicitud);
+                    } catch (error) {
+                        console.error("Error al procesar una solicitud individual:", error);
+                        throw error; // Propagar el error para que Promise.all lo maneje
+                    }
+                });
 
-                // return this.updateEntity(facturaModel,`/Facturas('${solicitud.codigoSolicitud}')`,{
-                //     "estadoFactura": {
-                //         "ID": 2
-                //     },
-                //     "estadoContabilizacion": {
-                //         "ID": 1
-                //     }
-                // });
-            });
-            return await Promise.all(requests);
+                return await Promise.all(requests);
+            } catch (error) {
+                console.error("Error al procesar múltiples solicitudes:", error);
+                throw error; // Propagar el error si ocurre al procesar múltiples solicitudes
+            }
         },
+
         getEstadosFactura: async function () {
             let aFilters = [
                 new Filter("i_object", FilterOperator.EQ, "ESTADO")
@@ -984,10 +990,11 @@ sap.ui.define([
                 case "Solicitudes":
                     // Crear las columnas
                     aColumns = [
-                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "10rem", design: "Bold" },
-                        { id: "FACTUR", label: "Factura", path: "FACTUR", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "8rem", design: "Bold" },
+                        { id: "FACTUR", label: "Factura", path: "FACTUR", width: "8rem", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "IMPORT", label: "Importe", path: "IMPORT", demandPopin: true, minScreenWidth: "Tablet", design: "Bold" },
+                        { id: "FKDAT", label: "Fecha de Contabilización", width: "13rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "IMPORT", label: "Importe", path: "IMPORT", width: "8rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold" },
                         { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet" },
                         { width: "5rem", path: "btnverDetalle" },
                         { width: "5rem", path: "btnEliminarSolicitud" }

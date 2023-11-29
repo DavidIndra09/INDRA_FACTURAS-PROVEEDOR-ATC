@@ -53,7 +53,7 @@ sap.ui.define([
         },
 
         formatCurrency: function (value) {
-            
+
             const formato = NumberFormat.getCurrencyInstance({
                 "currencyCode": false,
                 "groupingSeparator": ",",
@@ -67,7 +67,7 @@ sap.ui.define([
                 }
             });
             const formatValue = formato.format(value);
-            return `S/ ${formatValue}`;
+            return `${formatValue}`;
         },
 
         formatValueStateEstadoFactura: function (value) {
@@ -104,8 +104,15 @@ sap.ui.define([
                 return `${dia}.${mes}.${anio}`;
             } else if (typeof fecha === 'string') {
                 // Si la fecha es una cadena en formato "YYYY-MM-DD"
-                let [anio, mes, dia] = fecha.split('-');
-                return `${dia}.${mes}.${anio}`;
+                if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+                    let [anio, mes, dia] = fecha.split('-');
+                    return `${dia}.${mes}.${anio}`;
+                }
+                // Si la fecha es una cadena en formato "dd.MM.yyyy"
+                else if (/^\d{2}\.\d{2}\.\d{4}$/.test(fecha)) {
+                    let [dia, mes, anio] = fecha.split('.');
+                    return `${anio}${mes}${dia}`;
+                }
             } else {
                 // Manejar otros casos según sea necesario
                 return "";

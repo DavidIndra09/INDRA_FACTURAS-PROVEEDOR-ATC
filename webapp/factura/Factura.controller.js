@@ -697,12 +697,7 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.show()
             const data = this._getDataFactura();
             const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
-            const type = "success";
-            //MessageBox.success(`La solicitud ${request.codigoSolicitud}  se ha sido creada correctamente`, {
-            /*if (request.E_MSG.indexOf("exito") < 0) {
-                type = "error";
-            }*/
-            //that._mostrarMensaje()
+            const type = "success";         
             sap.ui.core.BusyIndicator.hide();
             MessageBox[type](request.E_MSG, {
                 onClose: function () {
@@ -710,8 +705,7 @@ sap.ui.define([
                     sap.ui.core.BusyIndicator.hide()
                     this.onNavSolicitudes();
                 }.bind(this)
-            });
-            // this.closeDialog("CreateInvoice");
+            });            
         },
 
         _actualizarFactura: async function () {
