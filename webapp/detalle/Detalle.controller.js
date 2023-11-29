@@ -162,6 +162,8 @@ sap.ui.define([
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
+                    that.getView().byId("btnAddPosiciones").setEnabled((oCabecera.DescripcionEstado == "Creado") ? true : false);
+                    that.getView().byId("AdjuntosUploader").setEnabled((oCabecera.DescripcionEstado == "Creado") ? true : false);
                     $.each(aListaDocumentos, function (i, item) {
 
                         adjuntos.push({
@@ -170,7 +172,7 @@ sap.ui.define([
                             "type": item.FILETYPE,
                             "mimeType": item.FILETYPE,
                             "solfac": item.SOLFAC,
-                            //"posnr": item.POSNR,
+                            "posnr": item.POSNR,
                             "base64": item.BASE64,
                             "actions": (oCabecera.DescripcionEstado == "Creado") ? true : false
                         });
@@ -209,6 +211,7 @@ sap.ui.define([
                 const file = files[0];
                 const base64String = await that.readFileAsBase64(file);
                 adjuntos.push({
+                    "posnr": 0,
                     "lastModifiedDate": new Date(),
                     "name": file.name.split(".")[0],
                     "type": "." + file.name.split(".").pop(),
@@ -218,6 +221,14 @@ sap.ui.define([
                 that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
             }
             //control.setValue("");
+        },
+        onObtenerPosicionAdjunto: function () {
+            const adjuntos = AdjuntosOriginal || [];
+            const mayorPosnr = adjuntos.reduce((max, adjunto) => {
+                const posnr = adjunto.posnr || 0;
+                return posnr > max ? posnr : max;
+            }, 0);
+            return mayorPosnr;
         },
         readFileAsBase64: function (file) {
             return new Promise((resolve, reject) => {
@@ -271,16 +282,22 @@ sap.ui.define([
             });
         },
         _getDataFactura: function () {
-
             let posiciones = that.byId("idtablaFactura").getModel().getData();
             let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             let cabecera = that.getOwnerComponent().getModel("oCabecera").getData();
-
-            let posnr = 0;
-            const adjuntoModel = adjuntos.map(item => {
-                posnr = posnr + 10
+            let PosnrMax = that.onObtenerPosicionAdjunto();
+            //let posnr = 0;
+            const adjuntoModel = adjuntos.map((item, index) => {
+                //posnr = posnr + 10
+                //PosnrMax = PosnrMax + 10;
+                let cont = 0;
+                if (index == 0) {
+                    cont = 1;
+                } else {
+                    cont = index + 1;
+                }
                 return {
-                    "POSNR": posnr,
+                    "POSNR": (item.posnr == 0) ? (PosnrMax + (cont * 10)).toString() : item.posnr.toString(),//posnr,
                     "DATUM": that.convertirFechaAFormatoYMD(item.lastModifiedDate),
                     "BASE64": item.base64,
                     "SOLFAC": cabecera.SOLFAC,
@@ -295,9 +312,9 @@ sap.ui.define([
             $.each(AdjuntosEliminados, function (i, item) {
                 let find = AdjuntosOriginal.find(element => element.base64 == item.base64);
                 if (find) {
-                    posnr = posnr + 10
+                    //posnr = posnr + 10
                     adjuntoModel.push({
-                        "POSNR": posnr,//item.posnr,
+                        "POSNR": item.posnr.toString(),
                         "DATUM": that.convertirFechaAFormatoYMD(item.lastModifiedDate),
                         "BASE64": item.base64,
                         "SOLFAC": cabecera.SOLFAC,
@@ -305,7 +322,7 @@ sap.ui.define([
                         "FILENAME": item.name,
                         "BORRADO": "X",
                         "FBORRA": that.convertirFechaAFormatoYMD(new Date()),
-                        "UBORRA": sap.ui.getCore().getModel("USERIAS").getData().USERIAS,
+                        "UBORRA": "",//sap.ui.getCore().getModel("USERIAS").getData().USERIAS,
                         "BUKRS": "1000"
                     });
                 }
@@ -334,33 +351,68 @@ sap.ui.define([
                 }
             });
 
+
+
             let oReturn = {
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": cabecera.FACTUR,
-                "I_FEMISI": cabecera.FEMISI,
-                "I_IMPORT": cabecera.IMPORT.toString(),
+                "I_FEMISI": that.formatFecha(cabecera.FEMISI),
+                "I_IMPORT": that.convertirFormato(cabecera.IMPORT.toString()),
                 "IT_DOC": JSON.stringify(adjuntoModel),
                 "IT_DET": JSON.stringify(conformidades),
+                "I_FCRESO": that.formatFecha(cabecera.FCRESO),
                 "I_SOLFAC": cabecera.SOLFAC
             }
 
             return oReturn;
         },
-        actualizarFactura: async function () {
-            sap.ui.core.BusyIndicator.show()
-            const data = that._getDataFactura();
-            debugger
-            const request = await that.createEntity(ODATA_SAP, "/crearSolFactSet", data);
-            const type = "success";
-            sap.ui.core.BusyIndicator.hide()
-            MessageBox[type](request.E_MSG, {
-                onClose: function () {
-                    ODATA_SAP.refresh();
-                    sap.ui.core.BusyIndicator.hide()
-                    that.getRouter().navTo("solicitudes", {}, false);
-                }.bind(this)
-            });
+        convertirFormato(valor) {
+            // Reemplazar las comas con una cadena vacía
+            const valorSinComas = valor.replace(/,/g, '');
 
+            // Convertir la cadena a un número
+            const numero = parseFloat(valorSinComas);
+
+            // Verificar si el valor es un número válido
+            if (!isNaN(numero)) {
+                // Formatear el número de nuevo a una cadena con dos decimales
+                const valorFormateado = numero.toFixed(2);
+                return valorFormateado;
+            } else {
+                // Manejar el caso en el que el valor no sea un número válido
+                console.error('El valor no es un número válido:', valor);
+                return valor;
+            }
+        },
+        formatFecha: function (fecha) {
+            var [dia, mes, anio] = fecha.split('.');
+            var fechaFormateada = `${anio}${mes}${dia}`;
+            return fechaFormateada;
+        },
+        actualizarFactura: async function () {
+            try {
+                sap.ui.core.BusyIndicator.show();
+
+                const data = this._getDataFactura();
+                const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
+
+                const type = "success";
+                sap.ui.core.BusyIndicator.hide();
+
+                MessageBox[type](request.E_MSG, {
+                    onClose: function () {
+                        ODATA_SAP.refresh();
+                        sap.ui.core.BusyIndicator.hide();
+                        this.getRouter().navTo("solicitudes", {}, false);
+                    }.bind(this)
+                });
+            } catch (error) {
+                console.error("Error al actualizar factura:", error);
+                sap.ui.core.BusyIndicator.hide();
+
+                const errorType = "error";
+                MessageBox[errorType]("Se produjo un error al actualizar la factura. Error: " + error.message);
+            }
         },
         convertirFechaAFormatoYMD(fecha) {
             // Asegurarse de que la entrada sea un objeto Date

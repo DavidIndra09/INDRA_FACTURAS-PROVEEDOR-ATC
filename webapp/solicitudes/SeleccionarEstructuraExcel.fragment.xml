@@ -19,13 +19,15 @@
 
         </content>
 
-        <beginButton>
-           <!-- <Button text="Procesar Archivo" press="onProcesarDataExcel" />  -->
+        <beginButton>         
 
             <Button type="Ghost" text="Seleccionar Documento" icon="sap-icon://excel-attachment"  press="onAbrirFileUploader" /> 
-        
+            
             
         </beginButton>
+        <endButton>
+        <Button     type="Ghost" text="Cerrar" icon="sap-icon://decline"  press="onCerrarSeleccionEstructuraExcel" />
+        </endButton>
         
     </Dialog>
 </core:FragmentDefinition>

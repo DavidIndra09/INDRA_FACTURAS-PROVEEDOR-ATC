@@ -290,7 +290,11 @@ sap.ui.define([
                         new Filter({
                             filters: [
                                 new Filter("SOLFAC", FilterOperator.Contains, query),
-                                new Filter("FACTUR", FilterOperator.Contains, query)
+                                new Filter("FACTUR", FilterOperator.Contains, query),
+                                new Filter("FEMISI", FilterOperator.Contains, query),
+                                new Filter("FKDAT", FilterOperator.Contains, query),
+                                new Filter("IMPORT", FilterOperator.Contains, query),
+                                new Filter("DescripcionEstado", FilterOperator.Contains, query)
                             ],
                             and: false
                         })
@@ -433,7 +437,10 @@ sap.ui.define([
                 SeleccionEstructura.open();
             }
         },
-
+        onCerrarSeleccionEstructuraExcel: async function () {
+            let SeleccionEstructura = that._dialogs["SeleccionarEstructuraExcel"];
+            SeleccionEstructura.close();
+        },
         onSeleccionarProveedor: async function (oEvent) {
             let proveedoreshelp = that.getView().getModel("proveedoreshelp").getData();
             let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();

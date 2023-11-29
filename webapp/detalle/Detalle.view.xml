@@ -123,7 +123,7 @@
                                 <OverflowToolbar>
                                     <Title text="" />
                                     <ToolbarSpacer />
-                                    <Button type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
+                                    <Button id="btnAddPosiciones" type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
                                 </OverflowToolbar>
                             </headerToolbar>
                             <columns>
@@ -194,7 +194,7 @@
                                 <OverflowToolbar >
                                     <Title text="{facturaView>/tituloListaAdjuntos}" />
                                     <ToolbarSpacer />
-                                    <u:FileUploader name="myFileUpload" placeholder="Seleccione archivos" uploadUrl="upload/" buttonText="Seleccionar Adjunto" style="Emphasized" tooltip="Adjunte sus archivos" change="onCargaAdjuntos" buttonOnly="true" icon="sap-icon://attachment" iconOnly="{device>/system/phone}" enabled="{actions}"/>
+                                    <u:FileUploader id="AdjuntosUploader" name="myFileUpload" placeholder="Seleccione archivos" uploadUrl="upload/" buttonText="Seleccionar Adjunto" style="Emphasized" tooltip="Adjunte sus archivos" change="onCargaAdjuntos" buttonOnly="true" icon="sap-icon://attachment" iconOnly="{device>/system/phone}"/>
                                 </OverflowToolbar>
                             </headerToolbar>
                             <columns>

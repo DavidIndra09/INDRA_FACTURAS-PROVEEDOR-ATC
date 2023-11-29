@@ -802,7 +802,8 @@ sap.ui.define([
                 "I_IMPORT": factura.importe,
                 "IT_DOC": JSON.stringify(adjuntoModel),
                 "IT_DET": JSON.stringify(conformidades),
-                "I_SOLFAC": ""
+                "I_SOLFAC": "",
+                "I_FCRESO":""
             }
 
             return oReturn;
