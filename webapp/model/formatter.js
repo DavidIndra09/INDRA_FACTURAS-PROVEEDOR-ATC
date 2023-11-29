@@ -113,6 +113,11 @@ sap.ui.define([
                     let [dia, mes, anio] = fecha.split('.');
                     return `${anio}${mes}${dia}`;
                 }
+                // Si la fecha es una cadena en formato "YYYY/MM/DD"
+                else if (/^\d{4}\/\d{2}\/\d{2}$/.test(fecha)) {
+                    let [anio, mes, dia] = fecha.split('/');
+                    return `${anio}${mes}${dia}`;
+                }
             } else {
                 // Manejar otros casos según sea necesario
                 return "";

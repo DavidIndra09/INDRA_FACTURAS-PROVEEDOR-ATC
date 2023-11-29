@@ -33,7 +33,7 @@
                             <form:fields>
                                 <Input value="{
                                             parts:[{path:'oCabecera>/SOLFAC'}]                                            
-                                        }" enabled="false"/>
+                                        }" enabled="{oCabecera>/enabled}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="Solicitud" />
@@ -45,7 +45,7 @@
                                 <Input value="{
                                             parts:[{path:'oCabecera>/FACTUR'}]
                                             
-                                        }" enabled="true"/>
+                                        }" enabled="{oCabecera>/enabled}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="Factura" />
@@ -65,7 +65,7 @@
 
                         <form:FormElement>
                             <form:fields>
-                            <DatePicker value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy" editable="true" />
+                            <DatePicker value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
                                
                             </form:fields>
                             <form:label>
@@ -74,7 +74,7 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                            <DatePicker value="{oCabecera>/FKDAT}" displayFormat="dd.MM.yyyy" editable="true" />
+                            <DatePicker value="{oCabecera>/FKDAT}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
                               
                             </form:fields>
                             <form:label>
@@ -83,7 +83,7 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker value="{oCabecera>/FCRESO}" displayFormat="dd.MM.yyyy" editable="true" />
+                                <DatePicker value="{oCabecera>/FCRESO}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
                             </form:fields>
                             <form:label>
                                 <Label text="Fecha creación solicitud" />
@@ -93,7 +93,7 @@
                             <form:fields>
                                 <Input value="{
                                             parts:[{path:'oCabecera>/IMPORT'}]     
-                                        }" enabled="true"/>
+                                        }" enabled="{oCabecera>/enabled}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>importe}" />
@@ -105,7 +105,7 @@
                                             parts:[{path:'oCabecera>/IGV'},{path:'oCabecera>/WAERS'}],
                                             type: 'sap.ui.model.type.Currency',
                                             formatOptions: {showMeasure: false}
-                                        }" enabled="true"/>
+                                        }" enabled="{oCabecera>/enabled}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>igv}" />
@@ -115,7 +115,7 @@
                             <form:fields>
                                 <Input value="{
                                             parts:[{path:'oCabecera>/total'}] 
-                                        }" enabled="true"/>
+                                        }" enabled="{oCabecera>/enabled}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>importeTotal}" />

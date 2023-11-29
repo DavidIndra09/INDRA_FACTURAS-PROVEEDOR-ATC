@@ -709,6 +709,7 @@ sap.ui.define([
                 value.FCRESO = formatter.formatearFechaString(value.FCRESO);
                 value.FEMISI = formatter.formatearFechaString(value.FEMISI);
             });
+            aLista.sort((a, b) => a.SOLFAC - b.SOLFAC);
             console.log(aLista)
 
             MODEL.setProperty("/Facturas", aLista);
@@ -816,6 +817,94 @@ sap.ui.define([
 
             //that.onReadExcel(oFile);
         },
+        esperarTresSegundos() {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve();
+                }, 3000);
+            });
+        },
+        onProcesarCargaFacturasMasiva: async function (Data) {
+            sap.ui.core.BusyIndicator.show();
+            let oView = this.getView();
+            let mensaje = [];
+            let FacturasConsolidadas = that.onConsolidarFacturas(Data);
+            let cantidadFacturas = FacturasConsolidadas.length;
+            for (let i = 0; i < FacturasConsolidadas.length; i++) {
+                const Item = FacturasConsolidadas[i];
+                let DataFactura = that._getDataFactura(Item);
+                oView.byId("button-message").setVisible(true);
+                oView.byId("button-message").setText("Registrando factura " + Item.Num_Fc + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
+                //await that.esperarTresSegundos();                             
+                const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", DataFactura);
+                mensaje.push(request.E_MSG);
+            }
+            oView.byId("button-message").setVisible(false);
+            oView.byId("button-message").setText("");
+            sap.ui.core.BusyIndicator.hide();
+            const type = "information";
+            let detalle = that.formatMessagesAsHTML(mensaje);
+            MessageBox[type]("", {
+                details: detalle,
+                title: "Carga Masiva de Facturas",
+                onClose: function () {
+                    ODATA_SAP.refresh();
+                    sap.ui.core.BusyIndicator.hide()
+                    that.onBuscarFacturas()
+                    //this.onNavSolicitudes();
+                }.bind(this)
+            });
+
+        },
+        onConsolidarFacturas(array) {
+            const grupos = {};
+            array.forEach(elemento => {
+                const numFc = elemento.Num_Fc;
+                const Fecha_Fc = elemento.Fecha_Fc;
+                const Fob_U = elemento.Fob_U;
+                if (!grupos[numFc]) {
+                    grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Fob_U: Fob_U, Detalle: [] };
+                }
+                grupos[numFc].Detalle.push(elemento);
+            });
+            const resultado = Object.values(grupos);
+            return resultado;
+        },
+        _getDataFactura: function (Data) {
+            /*const conformidades = Detalle.map(item => {
+                return {
+                    "mandt": "800",
+                    "bukrs": item.BUKRS,
+                    "lifnr": item.LIFNR,
+                    "codefact": "",
+                    "posnr": item.BUZEI,
+                    "datre": "20001102",
+                    "ebeln": item.EBELN,
+                    "lblni": "",
+                    "ebelp": item.EBELP,
+                    "matnr": item.MATNR,
+                    "tipod": "B",
+                    "menge": item.MENGE,
+                    "meins": item.MEINS,
+                    "netwr": item.NETWR,
+                    "waers": item.WAERS,
+                    "txz01": item.TXZ01,
+                    "belnr": item.BELNR
+                }
+            });*/
+
+            let oReturn = {
+                "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
+                "I_FACTUR": Data.Num_Fc,
+                "I_FEMISI": formatter.formatearFechaString(Data.Fecha_Fc),
+                "I_IMPORT": Data.Fob_U,
+                "IT_DOC": "",//JSON.stringify(adjuntoModel),
+                "IT_DET": "",//JSON.stringify(conformidades),
+                "I_SOLFAC": "",
+                "I_FCRESO": ""
+            }
+            return oReturn;
+        },
         onReadExcel: function (oFile, TypeTable) {
             if (window.FileReader) {
                 var reader = new FileReader();
@@ -826,11 +915,11 @@ sap.ui.define([
                     });
 
                     sXmlRead.SheetNames.forEach(function (sheetName) {
-                        var aXmlData = XLSX.utils.sheet_to_row_object_array(sXmlRead.Sheets[sheetName]);
+                        //el parámetro { defval: "" } permite considerar las filas que están vacías, sin eso, no lo devuelve y al validar el formato, no lo hace correctamente
+                        var aXmlData = XLSX.utils.sheet_to_row_object_array(sXmlRead.Sheets[sheetName], { defval: "" });
 
                         if (aXmlData[0] != "ERROR") {
                             if (aXmlData.length > 0) {
-                                //aXmlData.splice(0, 1);
                                 let result = that.onValidarFormatos((aXmlData[0] == undefined) ? aXmlData[1] : aXmlData[0], TypeTable);
 
                                 if (!result.valid) {
@@ -844,7 +933,8 @@ sap.ui.define([
                                     return
                                 }
                                 let DataValida = that.buildArrayFromDataExcel(aXmlData, TypeTable);
-                                switch (TypeTable) {
+                                that.onProcesarCargaFacturasMasiva(DataValida);
+                                /*switch (TypeTable) {
                                     case "Repuestos":
                                         MODEL.setProperty("/ExcelRepuestos", DataValida);
                                         that.MostrarTablaPorFlujo(TypeTable);
@@ -853,7 +943,7 @@ sap.ui.define([
                                         MODEL.setProperty("/ExcelVehiculos", DataValida);
                                         that.MostrarTablaPorFlujo(TypeTable);
                                         break;
-                                }
+                                }*/
 
                                 //that.MostrarTablaPorFlujo("Excel");
                                 //that.getView().setModel(new JSONModel(aProveedores), "/ExcelRepuestos");
@@ -1776,6 +1866,8 @@ sap.ui.define([
 
             let file = that.getFileFromUploader();
             if (file) {
+                var fileUploader = that.getView().byId("onFileSelectExcel");
+                fileUploader.setValue("");
                 let SeleccionEstructura = that._dialogs["SeleccionarEstructuraExcel"];
                 SeleccionEstructura.close();
                 that.onReadExcel(file, TypeTable);
@@ -1809,33 +1901,31 @@ sap.ui.define([
             DataExcel.forEach(function (item) {
                 var jsonObject = {};
                 if (TypeTable == "Repuestos") {
-                    jsonObject.Sociedad = item["SOCIEDAD"]
-                    jsonObject.Item = item["ITEM"]
-                    jsonObject.TipoDocumento = item["TIPO DE DOCUMENTO DE COMPRAS"]
-                    jsonObject.ClaseDocumento = item["CLASE DE DOCUMENTO DE COMPRAS"]
-                    jsonObject.NroPedido = item["No PEDIDO"]
-                    jsonObject.Proveedor = item["PROVEEDOR"]
-                    jsonObject.OrganizacionCompras = item["ORGANIZACIÓN DE COMPRAS"]
-                    jsonObject.GrupoCompras = item["GRUPO DE COMPRAS"]
-                    jsonObject.Material = item["MATERIAL"]
-                    jsonObject.Cantidad = item["CANTIDAD"]
-                    jsonObject.PrecioNeto = item["PRECIO NETO"]
-                    jsonObject.Solped = item["SOLPED"]
-                    jsonObject.ValorTotal = item["VALOR TOTAL"]
-                    jsonObject.Caja = item["CAJA"]
-                    jsonObject.PaisOrigen = item["PAIS DE ORIGEN"]
-                    jsonObject.Centro = item["CENTRO"]
-                    jsonObject.Almacen = item["ALMACEN"]
-                    jsonObject.Unidad = item["UNIDAD"]
-                    jsonObject.NumeroBl = item["NUMERO BL"]
-                    jsonObject.FechaBl = item["FECHA BL"]
-                    jsonObject.PuertoSalida = item["PUERTO DE SALIDA"]
-                    jsonObject.Puertollegada = item["PUERTO DE LLEGADA"]
-                    jsonObject.Icoterms = item["ICOTERMS"]
-                    jsonObject.LugarIncoterms = item["LUGAR INCOTERMS"]
-                    jsonObject.ViaTransporte = item["VIA TRANSPORTE"]
-                }
-                else {
+                    /* jsonObject.Sociedad = item["SOCIEDAD"]
+                     jsonObject.Item = item["ITEM"]
+                     jsonObject.TipoDocumento = item["TIPO DE DOCUMENTO DE COMPRAS"]
+                     jsonObject.ClaseDocumento = item["CLASE DE DOCUMENTO DE COMPRAS"]
+                     jsonObject.NroPedido = item["No PEDIDO"]
+                     jsonObject.Proveedor = item["PROVEEDOR"]
+                     jsonObject.OrganizacionCompras = item["ORGANIZACIÓN DE COMPRAS"]
+                     jsonObject.GrupoCompras = item["GRUPO DE COMPRAS"]
+                     jsonObject.Material = item["MATERIAL"]
+                     jsonObject.Cantidad = item["CANTIDAD"]
+                     jsonObject.PrecioNeto = item["PRECIO NETO"]
+                     jsonObject.Solped = item["SOLPED"]
+                     jsonObject.ValorTotal = item["VALOR TOTAL"]
+                     jsonObject.Caja = item["CAJA"]
+                     jsonObject.PaisOrigen = item["PAIS DE ORIGEN"]
+                     jsonObject.Centro = item["CENTRO"]
+                     jsonObject.Almacen = item["ALMACEN"]
+                     jsonObject.Unidad = item["UNIDAD"]
+                     jsonObject.NumeroBl = item["NUMERO BL"]
+                     jsonObject.FechaBl = item["FECHA BL"]
+                     jsonObject.PuertoSalida = item["PUERTO DE SALIDA"]
+                     jsonObject.Puertollegada = item["PUERTO DE LLEGADA"]
+                     jsonObject.Icoterms = item["ICOTERMS"]
+                     jsonObject.LugarIncoterms = item["LUGAR INCOTERMS"]
+                     jsonObject.ViaTransporte = item["VIA TRANSPORTE"]*/
                     jsonObject.NumFactura = item["N° DE FACT"]
                     jsonObject.Caja = item["CAJA"]
                     jsonObject.NumOrden = item["N° DE ORDEN"]
@@ -1847,6 +1937,41 @@ sap.ui.define([
                     jsonObject.Fob = item["FOB"]
                     jsonObject.Cant = item["CANT"]
                     jsonObject.Total = item["TOTAL"]
+                }
+                else {
+                    jsonObject.Cl_Doc = item["CL_DOC"]
+                    jsonObject.Proveedor = item["PROVEEDOR"]
+                    jsonObject.Num_Bl = item["NUM_BL"]
+                    jsonObject.Fecha_Bl = item["FECHA_BL"]
+                    jsonObject.Num_Fc = item["NUM_FC"]
+                    jsonObject.Pto_Salida = item["PTO_SALIDA"]
+                    jsonObject.Material = item["MATERIAL"]
+                    jsonObject.Cantidad = item["CANTIDAD"]
+                    jsonObject.Katashiki = item["KATASHIKI"]
+                    jsonObject.Sfx_Venta = item["SFX_VENTA"]
+                    jsonObject.Sfx_Prod = item["SFX_PROD"],
+                        jsonObject.M3_Unit = item["M3_UNIT"],
+                        jsonObject.Peso_Br = item["PESO_BR"],
+                        jsonObject.Peso_Nt_U = item["PESO_NT_U"],
+                        jsonObject.Fob_U = item["FOB_U"],
+                        jsonObject.Cond_Fob = item["COND_FOB"],
+                        jsonObject.Fecha_Fc = item["FECHA_FC"],
+                        jsonObject.Flete = item["FLETE"],
+                        jsonObject.Flete_Bl = item["FLETE_BL"],
+                        jsonObject.Pto_Llegada = item["PTO_LLEGADA"],
+                        jsonObject.Inconterms = item["INCOTERMS"],
+                        jsonObject.Via_Transp = item["VIA_TRANSP"],
+                        jsonObject.A_modelo = item["A_MODELO"],
+                        jsonObject.Num_Solped = item["NUM_SOLPED"],
+                        jsonObject.Chasis = item["CHASIS"],
+                        jsonObject.Num_Motor = item["NUM_MOTOR"],
+                        jsonObject.Color_Ext = item["COLOR_EXT"],
+                        jsonObject.Color_Int = item["COLOR_INT"],
+                        jsonObject.Num_Llave = item["NUM_LLAVE"],
+                        jsonObject.Ed_Carac = item["ED_CARAC"],
+                        jsonObject.Buque = item["BUQUE"],
+                        jsonObject.Naviera = item["NAVIERA"],
+                        jsonObject.Seguro = item["SEGURO"]
                 }
                 resultData.push(jsonObject);
             });
@@ -1861,34 +1986,6 @@ sap.ui.define([
             let mensajes = [];
             let obj = { "mensaje": [], "valid": true }
             const elementosRequeridosRepuestos = [
-                "SOCIEDAD",
-                "ITEM",
-                "TIPO DE DOCUMENTO DE COMPRAS",
-                "CLASE DE DOCUMENTO DE COMPRAS",
-                "No PEDIDO",
-                "PROVEEDOR",
-                "ORGANIZACIÓN DE COMPRAS",
-                "GRUPO DE COMPRAS",
-                "MATERIAL",
-                "CANTIDAD",
-                "PRECIO NETO",
-                "SOLPED",
-                "VALOR TOTAL",
-                "CAJA",
-                "PAIS DE ORIGEN",
-                "CENTRO",
-                "ALMACEN",
-                "UNIDAD",
-                "NUMERO BL",
-                "FECHA BL",
-                "PUERTO DE SALIDA",
-                "PUERTO DE LLEGADA",
-                "ICOTERMS",
-                "LUGAR INCOTERMS",
-                "VIA TRANSPORTE"
-            ];
-
-            const elementosRequeridosVehiculos = [
                 "N° DE FACT",
                 "CAJA",
                 "N° DE ORDEN",
@@ -1900,6 +1997,42 @@ sap.ui.define([
                 "FOB",
                 "CANT",
                 "TOTAL"
+            ];
+
+            const elementosRequeridosVehiculos = [
+                "CL_DOC",
+                "PROVEEDOR",
+                "NUM_BL",
+                "FECHA_BL",
+                "NUM_FC",
+                "PTO_SALIDA",
+                "MATERIAL",
+                "CANTIDAD",
+                "KATASHIKI",
+                "SFX_VENTA",
+                "SFX_PROD",
+                "M3_UNIT",
+                "PESO_BR",
+                "PESO_NT_U",
+                "FOB_U",
+                "COND_FOB",
+                "FECHA_FC",
+                "FLETE",
+                "FLETE_BL",
+                "PTO_LLEGADA",
+                "INCOTERMS",
+                "VIA_TRANSP",
+                "A_MODELO",
+                "NUM_SOLPED",
+                "CHASIS",
+                "NUM_MOTOR",
+                "COLOR_EXT",
+                "COLOR_INT",
+                "NUM_LLAVE",
+                "ED_CARAC",
+                "BUQUE",
+                "NAVIERA",
+                "SEGURO"
             ];
 
             let elementosRequeridos;

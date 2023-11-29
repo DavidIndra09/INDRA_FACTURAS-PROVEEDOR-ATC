@@ -65,6 +65,7 @@
 
         <f:footer>
             <OverflowToolbar>
+            <Button id="button-message" icon="sap-icon://history"  visible="false" type="Emphasized"/>
                 <ToolbarSpacer />
                 <Button
                     icon="sap-icon://accept"

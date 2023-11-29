@@ -81,6 +81,7 @@ sap.ui.define([
                 var oParameters = oEvent.getParameters();
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
                 oObject.total = oObject.IMPORT /* Number(oObject.IGV)).toFixed(2)*/;
+                oObject.enabled = (oObject.DescripcionEstado == "Creado") ? true : false;
                 that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
