@@ -146,7 +146,7 @@
                     ]
                 },
                 {
-                    "pattern": "Detalle/{codigoSolicitud}/{proveedor}",
+                    "pattern": "Detalle/{codigoSolicitud}/{proveedor}/{posiciones}",
                     "name": "detalle",
                     "target": [
                         "detalle"

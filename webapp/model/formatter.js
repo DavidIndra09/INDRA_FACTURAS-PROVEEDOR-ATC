@@ -53,6 +53,7 @@ sap.ui.define([
         },
 
         formatCurrency: function (value) {
+            
             const formato = NumberFormat.getCurrencyInstance({
                 "currencyCode": false,
                 "groupingSeparator": ",",

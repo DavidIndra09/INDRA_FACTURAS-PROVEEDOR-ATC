@@ -138,6 +138,7 @@ sap.ui.define([
             const contexto = event.getSource().getBindingContext();
             const solicitud = contexto.getObject();
             const codigoSolicitud = contexto.getProperty("SOLFAC");//codigoSolicitud
+            let array = [];
             let page = "detalle";
             if (solicitud.estadoFactura_ID === 1) {
                 page = "factura";
@@ -145,7 +146,8 @@ sap.ui.define([
             that.getOwnerComponent().setModel(new JSONModel(solicitud), "oCabecera");
             that.getRouter().navTo(page, {
                 codigoSolicitud: codigoSolicitud,
-                proveedor: that.getView().byId("ProveedorSeleccionado").getText().trim()
+                proveedor: that.getView().byId("ProveedorSeleccionado").getText().trim(),
+                posiciones: JSON.stringify(array)
             }, true);
         },
 
@@ -261,10 +263,12 @@ sap.ui.define([
 
         onLimpiarFiltros: function () {
             MODEL.setProperty("/Busqueda", {});
+            var oMultiComboBox = this.getView().byId("ComboEstados");
             const dateRangeEmision = this.getView().byId("idDateRangeEmision");
             const dateRangeRegistro = this.getView().byId("idDateRangeRegistro");
             const DateRangeContabilizacion = this.getView().byId("idDateRangeContabilizacion");
             // limpiamos fechas
+            oMultiComboBox.setSelectedKeys([]);
             dateRangeEmision.setDateValue(null);
             dateRangeEmision.setSecondDateValue(null);
             DateRangeContabilizacion.setDateValue(null);
@@ -447,7 +451,7 @@ sap.ui.define([
         },
 
         onSolicitarPagoFactura: async function () {
-            const tableFacturas = this.getView().byId("idFacturasTable");
+            const tableFacturas = that.getTable();
             const selectedFacturas = tableFacturas.getSelectedContextPaths();
             if (selectedFacturas.length === 0) {
                 MessageBox.error("Seleccione por lo menos una factura");
@@ -602,7 +606,7 @@ sap.ui.define([
                 contentType: "application/scim+json; charset=utf-8",
                 async: false,
                 success: async function (response) {
-                    
+
                 },
                 error: function (xhr) {
                 }
@@ -623,7 +627,7 @@ sap.ui.define([
         },
 
         _limpiarItemsSeleccionados: function () {
-            const tableFacturas = this.getView().byId("idFacturasTable");
+            const tableFacturas = that.getTable();
             const selectedItems = tableFacturas.getSelectedItems();
             selectedItems.forEach(element => {
                 tableFacturas.setSelectedItem(element, false);
@@ -690,6 +694,7 @@ sap.ui.define([
                 let resultEstatus = that.getColorStatus(find.TEXTO);
                 value.ColorEstado = resultEstatus.state;
                 value.IconoEstado = resultEstatus.icon;
+                value.IMPORT = formatter.formatCurrency(value.IMPORT);
             });
 
             MODEL.setProperty("/Facturas", aLista);
@@ -905,6 +910,12 @@ sap.ui.define([
                             if (oColumnData.path == "DescripcionEstado") {
                                 oCell = new sap.m.ObjectStatus({ text: "{" + oColumnData.path + "}", icon: "{" + oColumnData.icon + "}", state: "{" + oColumnData.state + "}", class: "sapUiSmallMarginBottom" });
                             }
+                            else if (oColumnData.path == "IMPORT") {
+                                oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
+                            }
+                            else if (oColumnData.path == "SOLFAC") {
+                                oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
+                            }
                             else {
                                 oCell = new sap.m.Text({ text: "{" + oColumnData.path + "}" });
                             }
@@ -973,10 +984,10 @@ sap.ui.define([
                 case "Solicitudes":
                     // Crear las columnas
                     aColumns = [
-                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "10rem" },
+                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "10rem", design: "Bold" },
                         { id: "FACTUR", label: "Factura", path: "FACTUR", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "IMPORT", label: "Importe", path: "IMPORT", demandPopin: true, minScreenWidth: "Tablet" },
+                        { id: "IMPORT", label: "Importe", path: "IMPORT", demandPopin: true, minScreenWidth: "Tablet", design: "Bold" },
                         { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet" },
                         { width: "5rem", path: "btnverDetalle" },
                         { width: "5rem", path: "btnEliminarSolicitud" }

@@ -33,20 +33,61 @@
                     <form:formContainers>
                         <form:FormContainer>
                             <form:formElements>
-                             <!--   <form:FormElement>
+                             
+                                <form:FormElement>
                                     <form:fields>
-                                        <Input value="{oCabecera>/BUKRS}" enabled="false" />
+                                        <Input value="{
+                                            parts:[{path:'oCabecera>/SOLFAC'}]                                            
+                                        }" enabled="true"/>
                                     </form:fields>
                                     <form:label>
-                                        <Label text="{i18n>sociedad}" />
+                                        <Label text="Solicitud" />
                                     </form:label>
-                                </form:FormElement> -->
+                                </form:FormElement>
+
+                                <form:FormElement>
+                                    <form:fields>
+                                        <Input value="{
+                                            parts:[{path:'oCabecera>/FACTUR'}]
+                                            
+                                        }" enabled="true"/>
+                                    </form:fields>
+                                    <form:label>
+                                        <Label text="Factura" />
+                                    </form:label>
+                                </form:FormElement>
+
+                                <form:FormElement>
+                                    <form:fields>
+                                        <Input value="{
+                                            parts:[{path:'oCabecera>/DescripcionEstado'}]                                            
+                                        }" enabled="false"/>
+                                    </form:fields>
+                                    <form:label>
+                                        <Label text="Estado de Factura" />
+                                    </form:label>
+                                </form:FormElement>
+
+
+                                <form:FormElement>
+                                    <form:fields>
+                                        <Input value="{
+                                            parts:[{path:'oCabecera>/IMPORT'},{path:'oCabecera>/WAERS'}],
+                                            type: 'sap.ui.model.type.Currency',
+                                            formatOptions: {showMeasure: false}
+                                        }" enabled="true"/>
+                                    </form:fields>
+                                    <form:label>
+                                        <Label text="{i18n>importe}" />
+                                    </form:label>
+                                </form:FormElement>
+
                                 <form:FormElement>
                                     <form:fields>
                                         <Input value="{
                                             path: 'oCabecera>/FEMISI',
                                             formatter: '.formatter.formatearFechaString'
-                                        }" enabled="false"/>
+                                        }" enabled="true"/>
                                     </form:fields>
                                     <form:label>
                                         <Label text="{i18n>fechaEmision}" />
@@ -58,7 +99,7 @@
                                             parts:[{path:'oCabecera>/IMPORT'},{path:'oCabecera>/WAERS'}],
                                             type: 'sap.ui.model.type.Currency',
                                             formatOptions: {showMeasure: false}
-                                        }" enabled="false"/>
+                                        }" enabled="true"/>
                                     </form:fields>
                                     <form:label>
                                         <Label text="{i18n>importe}" />
@@ -70,7 +111,7 @@
                                             parts:[{path:'oCabecera>/IGV'},{path:'oCabecera>/WAERS'}],
                                             type: 'sap.ui.model.type.Currency',
                                             formatOptions: {showMeasure: false}
-                                        }" enabled="false"/>
+                                        }" enabled="true"/>
                                     </form:fields>
                                     <form:label>
                                         <Label text="{i18n>igv}" />
@@ -82,7 +123,7 @@
                                             parts:[{path:'oCabecera>/total'},{path:'oCabecera>/WAERS'}],
                                             type: 'sap.ui.model.type.Currency',
                                             formatOptions: {showMeasure: false}
-                                        }" enabled="false"/>
+                                        }" enabled="true"/>
                                     </form:fields>
                                     <form:label>
                                         <Label text="{i18n>importeTotal}" />

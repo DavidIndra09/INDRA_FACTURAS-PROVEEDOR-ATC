@@ -703,6 +703,7 @@ sap.ui.define([
                 type = "error";
             }*/
             //that._mostrarMensaje()
+            sap.ui.core.BusyIndicator.hide();
             MessageBox[type](request.E_MSG, {
                 onClose: function () {
                     ODATA_SAP.refresh();
@@ -831,7 +832,7 @@ sap.ui.define([
         },
 
         formatFecha: function (fecha) {
-            // Extraer la fecha del formato "2023-11-16T05:00:00"
+            // Extraer la fecha del formato "2023-11-16T05:00:00"            
             var fechaArray = fecha.split("T");
             var fechaExtraida = fechaArray[0];
 

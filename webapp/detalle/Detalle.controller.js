@@ -84,7 +84,7 @@ sap.ui.define([
                 //oObject.proveedor = "Indra Peru S.A.";
                 oObject.total = (Number(oObject.IMPORT).toFixed(2)) /* Number(oObject.IGV)).toFixed(2)*/;
 
-                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject);
+                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
                 viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
@@ -144,7 +144,7 @@ sap.ui.define([
             viewModel.setProperty("/busy", false);
         },
 
-        mostrarDetalle: function (sCODEFACT, oCabecera) {
+        mostrarDetalle: function (sCODEFACT, oCabecera, posiciones) {
             sap.ui.core.BusyIndicator.show(0);
             let aFilters = [];
             aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
@@ -156,6 +156,10 @@ sap.ui.define([
                     let Detalle = data.results[0].ET_DET;
                     let Documentos = data.results[0].ET_DOC;
                     let aLista = JSON.parse(Detalle);
+                    if (posiciones.length > 0) {
+                        let posicionesParse = JSON.parse(posiciones);
+                        aLista.push(...posicionesParse);
+                    }
                     $.each(aLista, function (i, item) {
                         item.WAERS = oCabecera.WAERS;
                     });
@@ -176,7 +180,7 @@ sap.ui.define([
                     });
 
                     let oModelLista = new JSONModel(aLista);
-                    that.byId("reviewTable").setModel(oModelLista);
+                    that.byId("idtablaFactura").setModel(oModelLista);
 
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     AdjuntosOriginal = [...adjuntos];
@@ -271,7 +275,7 @@ sap.ui.define([
         },
         _getDataFactura: function () {
 
-            let posiciones = that.byId("reviewTable").getModel().getData();
+            let posiciones = that.byId("idtablaFactura").getModel().getData();
             let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             let cabecera = that.getOwnerComponent().getModel("oCabecera").getData();
 
@@ -375,6 +379,9 @@ sap.ui.define([
             const formatoYMD = `${year}${month}${day}`;
 
             return formatoYMD;
+        },
+        onNavOrdenes: function () {
+            this.getRouter().navTo("orden", {}, false);
         },
 
     });

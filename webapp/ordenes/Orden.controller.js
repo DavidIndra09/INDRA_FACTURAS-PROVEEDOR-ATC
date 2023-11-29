@@ -71,11 +71,24 @@ sap.ui.define([
          * If not, it will replace the current entry of the browser history with the worklist route.
          * @public
          */
-        onNavBack: function () {
+        onNavBack: function (detalleFactura) {
             var sPreviousHash = History.getInstance().getPreviousHash();
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
-                history.go(-1);
+
+                let data = JSON.stringify(detalleFactura)
+                if (sPreviousHash.includes("Detalle")) {
+                    that.getRouter().navTo("detalle", {
+                        codigoSolicitud: sPreviousHash.split("/")[1],
+                        proveedor: sPreviousHash.split("/")[2],
+                        posiciones: data
+                    },
+                        true);
+                }
+                else {
+                    history.go(-1);
+                }
+
             } else {
                 this.getRouter().navTo("factura", { codigoSolicitud: "N" }, true);
             }
@@ -113,9 +126,6 @@ sap.ui.define([
                     Netwr: 0,
                     Waers: rowInvoice.Waers
                 };
-                // MODEL.setProperty("/Factura",oFormData);
-                // sap.that.getDialog().setModel(oRowInvoiceModel, "ModelFormF");
-                // sap.that.getDialog().open();
 
                 var impTotal = 0.00;
                 var rowDetails = [];
@@ -124,29 +134,10 @@ sap.ui.define([
                     return MODEL.getProperty(item);
                 });
                 MODEL.setProperty("/Factura/conformidades/results", detalleFactura);
-                // for (var i = 0; i < selectedPaths.length; i++) {
-                // 	var row = MODEL.getProperty(selectedPaths[i]);
-                // 	rowDetails.push(row);
-                // 	impTotal = impTotal + parseFloat(row.NETWR, [2]);
 
-                // 	if(row.WAERS !== rowInvoice.WAERS) {
-                // 		sStatus.detailCurrency.value = false;
-                // 		break;
-                // 	}
-                // }
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
-                // sap.that.getDialog().setModel(oDetailInvoiceModel, "ModelDetail");
-                // sap.that.getDialog().getModel("ModelDetail").refresh();
-
-                // sap.that.updateAmount(impTotal);
-
-                // if(sStatus.detailCurrency.value !== true) {
-                // 	sap.that.fillErrorModel();
-                // 	MessageBox.error("Hubo errores de validacion. Revisar el log en la parte inferior");
-                // }
-                // this.getRouter().navTo("factura",{numSolicitud:"N"},true);
                 MODEL.setProperty("/Ordenes", []);
-                this.onNavBack();
+                this.onNavBack(detalleFactura);
             } else {
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }
@@ -248,7 +239,7 @@ sap.ui.define([
             parameters.urlParameters = {};
             const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
             var posiciones = JSON.parse(request.results[0].ET_DATA);
-            MODEL.setProperty("/Ordenes", posiciones);   
+            MODEL.setProperty("/Ordenes", posiciones);
             //this._seleccionarTabla(posiciones);
         },
 
