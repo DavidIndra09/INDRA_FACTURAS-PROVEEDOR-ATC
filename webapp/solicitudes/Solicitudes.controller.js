@@ -824,12 +824,11 @@ sap.ui.define([
                 }, 3000);
             });
         },
-        onProcesarCargaFacturasMasiva: async function (Data) {
+        onProcesarCargaFacturasMasiva: async function (Data, TypeTable) {
             sap.ui.core.BusyIndicator.show();
             let oView = this.getView();
             let mensaje = [];
-            let FacturasConsolidadas = that.onConsolidarFacturas(Data);
-            let cantidadFacturas = FacturasConsolidadas.length;
+            let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];
                 let DataFactura = that._getDataFactura(Item);
@@ -856,17 +855,34 @@ sap.ui.define([
             });
 
         },
-        onConsolidarFacturas(array) {
+        onConsolidarFacturas(array, TypeTable) {
             const grupos = {};
-            array.forEach(elemento => {
-                const numFc = elemento.Num_Fc;
-                const Fecha_Fc = elemento.Fecha_Fc;
-                const Fob_U = elemento.Fob_U;
-                if (!grupos[numFc]) {
-                    grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Fob_U: Fob_U, Detalle: [] };
-                }
-                grupos[numFc].Detalle.push(elemento);
-            });
+            switch (TypeTable) {
+                case "Repuestos":
+                    array.forEach(elemento => {
+                        const numFc = elemento.NroPedido;
+                        const Fecha_Fc = elemento.FechaBl;
+                        const Total = "1000";//elemento.Fob_U;
+                        if (!grupos[numFc]) {
+                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Detalle: [] };
+                        }
+                        grupos[numFc].Detalle.push(elemento);
+                    });
+                    break;
+                case "Vehiculos":
+                    let Total = 0;
+                    array.forEach(elemento => {
+                        const numFc = elemento.Num_Fc;
+                        const Fecha_Fc = elemento.Fecha_Fc;
+                        Total = Total + parseFloat((elemento.Fob_U != "") ? elemento.Fob_U : 0) + parseFloat((elemento.Flete != "") ? elemento.Flete : 0) + parseFloat((elemento.Seguro != "") ? elemento.Seguro : 0);
+                        if (!grupos[numFc]) {
+                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: 0, Detalle: [] };
+                        }
+                        grupos[numFc].Total = Total;
+                        grupos[numFc].Detalle.push(elemento);
+                    });
+                    break;
+            }
             const resultado = Object.values(grupos);
             return resultado;
         },
@@ -897,7 +913,7 @@ sap.ui.define([
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": Data.Num_Fc,
                 "I_FEMISI": formatter.formatearFechaString(Data.Fecha_Fc),
-                "I_IMPORT": Data.Fob_U,
+                "I_IMPORT": (Data.Total).toString(),
                 "IT_DOC": "",//JSON.stringify(adjuntoModel),
                 "IT_DET": "",//JSON.stringify(conformidades),
                 "I_SOLFAC": "",
@@ -933,17 +949,17 @@ sap.ui.define([
                                     return
                                 }
                                 let DataValida = that.buildArrayFromDataExcel(aXmlData, TypeTable);
-                                that.onProcesarCargaFacturasMasiva(DataValida);
-                                /*switch (TypeTable) {
-                                    case "Repuestos":
-                                        MODEL.setProperty("/ExcelRepuestos", DataValida);
-                                        that.MostrarTablaPorFlujo(TypeTable);
-                                        break;
-                                    case "Vehiculos":
-                                        MODEL.setProperty("/ExcelVehiculos", DataValida);
-                                        that.MostrarTablaPorFlujo(TypeTable);
-                                        break;
-                                }*/
+                                that.onProcesarCargaFacturasMasiva(DataValida, TypeTable);
+                                /* switch (TypeTable) {
+                                     case "Repuestos":
+                                         MODEL.setProperty("/ExcelRepuestos", DataValida);
+                                         that.MostrarTablaPorFlujo(TypeTable);
+                                         break;
+                                     case "Vehiculos":
+                                         MODEL.setProperty("/ExcelVehiculos", DataValida);
+                                         that.MostrarTablaPorFlujo(TypeTable);
+                                         break;
+                                 }*/
 
                                 //that.MostrarTablaPorFlujo("Excel");
                                 //that.getView().setModel(new JSONModel(aProveedores), "/ExcelRepuestos");
@@ -1901,42 +1917,31 @@ sap.ui.define([
             DataExcel.forEach(function (item) {
                 var jsonObject = {};
                 if (TypeTable == "Repuestos") {
-                    /* jsonObject.Sociedad = item["SOCIEDAD"]
-                     jsonObject.Item = item["ITEM"]
-                     jsonObject.TipoDocumento = item["TIPO DE DOCUMENTO DE COMPRAS"]
-                     jsonObject.ClaseDocumento = item["CLASE DE DOCUMENTO DE COMPRAS"]
-                     jsonObject.NroPedido = item["No PEDIDO"]
-                     jsonObject.Proveedor = item["PROVEEDOR"]
-                     jsonObject.OrganizacionCompras = item["ORGANIZACIÓN DE COMPRAS"]
-                     jsonObject.GrupoCompras = item["GRUPO DE COMPRAS"]
-                     jsonObject.Material = item["MATERIAL"]
-                     jsonObject.Cantidad = item["CANTIDAD"]
-                     jsonObject.PrecioNeto = item["PRECIO NETO"]
-                     jsonObject.Solped = item["SOLPED"]
-                     jsonObject.ValorTotal = item["VALOR TOTAL"]
-                     jsonObject.Caja = item["CAJA"]
-                     jsonObject.PaisOrigen = item["PAIS DE ORIGEN"]
-                     jsonObject.Centro = item["CENTRO"]
-                     jsonObject.Almacen = item["ALMACEN"]
-                     jsonObject.Unidad = item["UNIDAD"]
-                     jsonObject.NumeroBl = item["NUMERO BL"]
-                     jsonObject.FechaBl = item["FECHA BL"]
-                     jsonObject.PuertoSalida = item["PUERTO DE SALIDA"]
-                     jsonObject.Puertollegada = item["PUERTO DE LLEGADA"]
-                     jsonObject.Icoterms = item["ICOTERMS"]
-                     jsonObject.LugarIncoterms = item["LUGAR INCOTERMS"]
-                     jsonObject.ViaTransporte = item["VIA TRANSPORTE"]*/
-                    jsonObject.NumFactura = item["N° DE FACT"]
-                    jsonObject.Caja = item["CAJA"]
-                    jsonObject.NumOrden = item["N° DE ORDEN"]
-                    jsonObject.NumParte = item["N° DE PARTE"]
+                    jsonObject.Sociedad = item["SOCIEDAD"]
                     jsonObject.Item = item["ITEM"]
-                    jsonObject.Descripcion = item["DESCRIPCIÓN"]
-                    jsonObject.Origen = item["ORIGEN"]
-                    jsonObject.Peso = item["PESO (KGRS)"]
-                    jsonObject.Fob = item["FOB"]
-                    jsonObject.Cant = item["CANT"]
-                    jsonObject.Total = item["TOTAL"]
+                    jsonObject.TipoDocumento = item["TIPO DE DOCUMENTO DE COMPRAS"]
+                    jsonObject.ClaseDocumento = item["CLASE DE DOCUMENTO DE COMPRAS"]
+                    jsonObject.NroPedido = item["No PEDIDO"]
+                    jsonObject.Proveedor = item["PROVEEDOR"]
+                    jsonObject.OrganizacionCompras = item["ORGANIZACIÓN DE COMPRAS"]
+                    jsonObject.GrupoCompras = item["GRUPO DE COMPRAS"]
+                    jsonObject.Material = item["MATERIAL"]
+                    jsonObject.Cantidad = item["CANTIDAD"]
+                    jsonObject.PrecioNeto = item["PRECIO NETO"]
+                    jsonObject.Solped = item["SOLPED"]
+                    jsonObject.ValorTotal = item["VALOR TOTAL"]
+                    jsonObject.Caja = item["CAJA"]
+                    jsonObject.PaisOrigen = item["PAIS DE ORIGEN"]
+                    jsonObject.Centro = item["CENTRO"]
+                    jsonObject.Almacen = item["ALMACEN"]
+                    jsonObject.Unidad = item["UNIDAD"]
+                    jsonObject.NumeroBl = item["NUMERO BL"]
+                    jsonObject.FechaBl = item["FECHA BL"]
+                    jsonObject.PuertoSalida = item["PUERTO DE SALIDA"]
+                    jsonObject.Puertollegada = item["PUERTO DE LLEGADA"]
+                    jsonObject.Icoterms = item["ICOTERMS"]
+                    jsonObject.LugarIncoterms = item["LUGAR INCOTERMS"]
+                    jsonObject.ViaTransporte = item["VIA TRANSPORTE"]
                 }
                 else {
                     jsonObject.Cl_Doc = item["CL_DOC"]
@@ -1986,17 +1991,32 @@ sap.ui.define([
             let mensajes = [];
             let obj = { "mensaje": [], "valid": true }
             const elementosRequeridosRepuestos = [
-                "N° DE FACT",
-                "CAJA",
-                "N° DE ORDEN",
-                "N° DE PARTE",
+                "SOCIEDAD",
                 "ITEM",
-                "DESCRIPCIÓN",
-                "ORIGEN",
-                "PESO (KGRS)",
-                "FOB",
-                "CANT",
-                "TOTAL"
+                "TIPO DE DOCUMENTO DE COMPRAS",
+                "CLASE DE DOCUMENTO DE COMPRAS",
+                "No PEDIDO",
+                "PROVEEDOR",
+                "ORGANIZACIÓN DE COMPRAS",
+                "GRUPO DE COMPRAS",
+                "MATERIAL",
+                "CANTIDAD",
+                "PRECIO NETO",
+                "MONEDA",
+                "SOLPED",
+                "VALOR TOTAL",
+                "CAJA",
+                "PAIS DE ORIGEN",
+                "CENTRO",
+                "ALMACEN",
+                "UNIDAD",
+                "NUMERO BL",
+                "FECHA BL",
+                "PUERTO DE SALIDA",
+                "PUERTO DE LLEGADA",
+                "ICOTERMS",
+                "LUGAR INCOTERMS",
+                "VIA TRANSPORTE"
             ];
 
             const elementosRequeridosVehiculos = [
