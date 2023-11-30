@@ -81,7 +81,7 @@ sap.ui.define([
                 var oParameters = oEvent.getParameters();
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
                 oObject.total = oObject.IMPORT /* Number(oObject.IGV)).toFixed(2)*/;
-                oObject.enabled = (oObject.DescripcionEstado == "Creado") ? true : false;
+                oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false;
                 that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
@@ -163,8 +163,8 @@ sap.ui.define([
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
-                    that.getView().byId("btnAddPosiciones").setEnabled((oCabecera.DescripcionEstado == "Creado") ? true : false);
-                    that.getView().byId("AdjuntosUploader").setEnabled((oCabecera.DescripcionEstado == "Creado") ? true : false);
+                    that.getView().byId("btnAddPosiciones").setEnabled((oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false);
+                    that.getView().byId("AdjuntosUploader").setEnabled((oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false);
                     $.each(aListaDocumentos, function (i, item) {
 
                         adjuntos.push({
