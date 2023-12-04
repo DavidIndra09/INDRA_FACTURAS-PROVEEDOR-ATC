@@ -434,6 +434,9 @@ sap.ui.define([
         onNavOrdenes: function () {
             this.getRouter().navTo("orden", {}, false);
         },
+        onFileSizeExceed: function (oEvent) {            
+            sap.m.MessageToast.show("El adjunto no debe pesar más de 10 MB.");
+        }
 
     });
 

@@ -75,7 +75,7 @@ sap.ui.define([
             var sPreviousHash = History.getInstance().getPreviousHash();
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
-                if (sPreviousHash.includes("Detalle")) {
+                if (sPreviousHash.includes("Detalle")) {                    
                     let data = JSON.stringify(detalleFactura)
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],

@@ -21,6 +21,7 @@ sap.ui.define([
     let MODEL,
         nuevafacturaModel,
         facturaModel,
+        ODataUtilidadesModel,
         that,
         ODATA_SAP;
     return BaseController.extend("usil.com.createinvoice.atc.factura.Factura", {
@@ -52,6 +53,7 @@ sap.ui.define([
             MODEL = this.getOwnerComponent().getModel();
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
+            ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
         },
         /* =========================================================== */
         /* event handlers                                              */
@@ -133,13 +135,13 @@ sap.ui.define([
                     return;
                 }
 
-                let aFactura = MODEL.getProperty("/Facturas");
+                /*let aFactura = MODEL.getProperty("/Facturas");
                 let oFindFactura = aFactura.find(oPos => oPos.XBLNR == invoice.id);
                 if (oFindFactura) {
                     MessageBox.error(`La factura ya ha sido registrada. Por favor, ingresar otra factura.`);
                     fileUploader.setValue("");
                     return;
-                }
+                }*/
 
                 const datosFactura = {
                     version: invoice.ublversionid,
@@ -362,7 +364,6 @@ sap.ui.define([
                 nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", true);
             }
         },
-
         onSeleccionarFecha: function (event) {
             const date = event.getSource().getDateValue();
             MODEL.setProperty("/Factura/fechaEmisionParameter", formatter.formatDateParameter(date));
@@ -370,15 +371,8 @@ sap.ui.define([
 
         onCalcularImpuestoTotal: function (event) {
             const importeBase = event.getParameter("newValue");
-            const tipoImpuesto = MODEL.getProperty("/Factura/tipoImpuesto");
             let total;
-            if (tipoImpuesto === "1") {
-                total = importeBase * 1.18;
-            }
-            if (tipoImpuesto === "2") {
-                total = importeBase * (1 - 0.08);
-            }
-
+            total = (importeBase * 1.19).toFixed(2);
             MODEL.setProperty("/Factura/total", total);
         },
 
@@ -393,7 +387,6 @@ sap.ui.define([
             if (selectedKey === "2") {
                 total = importeBase * (1 - 0.08);
             }
-
             MODEL.setProperty("/Factura/total", total);
         },
 
@@ -697,7 +690,7 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.show()
             const data = this._getDataFactura();
             const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
-            const type = "success";         
+            const type = "success";
             sap.ui.core.BusyIndicator.hide();
             MessageBox[type](request.E_MSG, {
                 onClose: function () {
@@ -705,7 +698,7 @@ sap.ui.define([
                     sap.ui.core.BusyIndicator.hide()
                     this.onNavSolicitudes();
                 }.bind(this)
-            });            
+            });
         },
 
         _actualizarFactura: async function () {
@@ -803,7 +796,7 @@ sap.ui.define([
                 "IT_DOC": JSON.stringify(adjuntoModel),
                 "IT_DET": JSON.stringify(conformidades),
                 "I_SOLFAC": "",
-                "I_FCRESO":""
+                "I_FCRESO": ""
             }
 
             return oReturn;
@@ -909,7 +902,6 @@ sap.ui.define([
                 this._applySearch(aTableSearchState);
             }
         },
-
         _applySearch: function (aTableSearchState) {
             var oTable = this.byId("idtablaFactura");
             oTable.getBinding("items").filter(aTableSearchState, "Application");
@@ -917,10 +909,54 @@ sap.ui.define([
             //if (aTableSearchState.length !== 0) {
             //    viewModel.setProperty("/tableNoDataText", this.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
             //}
-        }
-
-
-
+        },
+        onFileSizeExceed: function (oEvent) {
+            sap.m.MessageToast.show("El adjunto no debe pesar más de 10 MB.");
+        },
+        onSuggestWaers: async function (event) {
+            var sValue = event.getParameter("suggestValue"),
+                aFilters = [];
+            sValue = sValue.toUpperCase();
+            await this.getwaershelp(sValue);
+            if (sValue) {
+                aFilters = [
+                    new Filter([
+                        new Filter("VALUE", function (sText) {
+                            return (sText || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        }),
+                        new Filter("TEXTO", function (sDes) {
+                            return (sDes || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        })
+                    ], false)
+                ];
+            }
+            if (this.byId("InputSelectWaers").getBinding("suggestionItems") != undefined) {
+                this.byId("InputSelectWaers").getBinding("suggestionItems").filter(aFilters);
+                this.byId("InputSelectWaers").suggest();
+            }
+        },
+        getwaershelp: function (sValue = "") {
+            let value = sValue.substr(0, 18);
+            return new Promise((resolve, reject) => {
+                ODataUtilidadesModel.read("/filtrosSet", {
+                    filters: [
+                        new Filter("i_value", FilterOperator.EQ, value),
+                        new Filter("i_object", FilterOperator.EQ, "WAERS")
+                    ],
+                    success: function (oData) {
+                        if (oData.results.length) {
+                            let aWaers = JSON.parse(oData.results[0].et_data);
+                            that.getView().setModel(new JSONModel(aWaers), "waershelp");
+                        }
+                        resolve(true);
+                    },
+                    error: function (oError) {
+                        MessageBox.error(oError.responseText);
+                        resolve(true);
+                    }
+                });
+            });
+        },
         //   xmlToJson('<?xml version="1.0" encoding="UTF-8"?><atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"> <atom:content type="application/xml"> <m:properties> <d:Pernr>800001</d:Pernr> <d:Approve>X</d:Approve> </m:properties> </atom:content> <atom:link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/ToLeaveItem" type="application/atom+xml;type=feed" title="ZHR_APP_SRV.Header_Item"> <m:inline> <atom:feed> <atom:entry> <atom:content type="application/xml"> <m:properties> <d:Pernr></d:Pernr> <d:Index>0</d:Index> <d:RequestId>74867AF30B3A1ED4BDA9EDC88782C0EC</d:RequestId> </m:properties> </atom:content> </atom:entry> </atom:feed> </m:inline> </atom:link> </atom:entry>');
 
 

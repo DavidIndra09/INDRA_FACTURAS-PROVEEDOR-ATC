@@ -52,6 +52,7 @@ sap.ui.define([
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
             that.MostrarTablaPorFlujo("Solicitudes");
+            that.getView().setModel(new JSONModel({}), "proveedoreshelpSelected");
             // Model used to manipulate control states
             viewModel = new JSONModel({
                 solicitudesTableTitle: this.getResourceBundle().getText("solicitudesTableTitle"),
@@ -118,7 +119,16 @@ sap.ui.define([
         },
 
         onNavFacturaNueva: function (event) {
-            that.getRouter().navTo("factura", { codigoSolicitud: "N" }, false);
+            let aFactura = MODEL.getProperty("/Facturas");
+            debugger
+            const tableFacturas = that.getTable();
+            let data = tableFacturas.getModel().getData().Facturas;
+
+            let stringFacturas = JSON.stringify(data);
+            that.getRouter().navTo("factura", {
+                codigoSolicitud: "N",
+                //facturas: stringFacturas
+            }, true);
         },
 
 
@@ -444,11 +454,27 @@ sap.ui.define([
         onSeleccionarProveedor: async function (oEvent) {
             let proveedoreshelp = that.getView().getModel("proveedoreshelp").getData();
             let proveedorSelected = that.getView().byId("InputSelectProveedor").getValue();
+            let proveedoreshelpSelected = that.getView().getModel("proveedoreshelpSelected").getData();
 
+            let findSelected = "";
+            if (proveedoreshelpSelected) {
+                if (proveedoreshelpSelected.VALUE == proveedorSelected.trim() || proveedoreshelpSelected.TEXTO == proveedorSelected.trim()) {
+                    findSelected = proveedoreshelpSelected;
+                }
+            }
             var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.trim() || element.TEXTO == proveedorSelected.trim())
             if (find != undefined) {
+                that.getView().setModel(new JSONModel(find), "proveedoreshelpSelected");
                 sap.ui.getCore().setModel(new JSONModel({ "Lifnr": find.VALUE }), "Lifnr")
-                that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " /*+ find.VALUE + " - "*/ + find.TEXTO + "    ");
+                that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " + find.TEXTO + "    ");
+                let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
+                that.onBuscarFacturas();
+                SeleccionProveedor.close();
+            }
+            else if (findSelected) {
+                that.getView().setModel(new JSONModel(findSelected), "proveedoreshelpSelected");
+                sap.ui.getCore().setModel(new JSONModel({ "Lifnr": findSelected.VALUE }), "Lifnr")
+                that.getView().byId("ProveedorSeleccionado").setText("Proveedor: " + findSelected.TEXTO + "    ");
                 let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
                 that.onBuscarFacturas();
                 SeleccionProveedor.close();
