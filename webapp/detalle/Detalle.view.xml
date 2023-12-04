@@ -201,10 +201,10 @@
                                 <Column >
                                     <Label text="Nombre" />
                                 </Column>
-                                <Column demandPopin="true" minScreenWidth="Tablet">
+                                <Column demandPopin="true" minScreenWidth="Tablet" hAlign="Center">
                                     <Label text="Fecha de modificación" />
                                 </Column>
-                                <Column demandPopin="true" minScreenWidth="Tablet">
+                                <Column demandPopin="true" minScreenWidth="Tablet" hAlign="Center">
                                     <Label text="Tipo de Archivo" />
                                 </Column>
                                 <Column width="3rem">

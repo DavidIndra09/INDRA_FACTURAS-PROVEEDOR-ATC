@@ -99,7 +99,7 @@
                                 <Label text="{i18n>importe}" />
                             </form:label>
                         </form:FormElement>
-                        <form:FormElement>
+                      <!--  <form:FormElement>
                             <form:fields>
                                 <Input value="{
                                             parts:[{path:'oCabecera>/IGV'},{path:'oCabecera>/WAERS'}],
@@ -110,7 +110,7 @@
                             <form:label>
                                 <Label text="{i18n>igv}" />
                             </form:label>
-                        </form:FormElement>
+                        </form:FormElement> -->
                         <form:FormElement>
                             <form:fields>
                                 <Input value="{

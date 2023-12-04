@@ -61,7 +61,7 @@
                                     <Label text="Fecha creación solicitud" />
                                 </form:label>
                             </form:FormElement>
-                            <form:FormElement>
+                           <!-- <form:FormElement>
                                 <form:fields>
                                     <Text text="{
                                         parts:[{path:'IGV'},{path:'WAERS'}],
@@ -72,7 +72,7 @@
                                 <form:label>
                                     <Label text="IVA" />
                                 </form:label>
-                            </form:FormElement>
+                            </form:FormElement> -->
                             <form:FormElement>
                                 <form:fields>
                                     <Text text="{WAERS}"/>

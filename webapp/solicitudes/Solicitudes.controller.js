@@ -416,11 +416,11 @@ sap.ui.define([
             let SeleccionProveedor = that._dialogs["SeleccionarProveedor"];
             if (!SeleccionProveedor) {
                 SeleccionProveedor = await that._getDialogs("SeleccionarProveedor");
-                SeleccionProveedor.setEscapeHandler(function () { });
+                //SeleccionProveedor.setEscapeHandler(function () { });
                 SeleccionProveedor.open();
             }
             else {
-                SeleccionProveedor.setEscapeHandler(function () { });
+                //SeleccionProveedor.setEscapeHandler(function () { });
                 SeleccionProveedor.open();
             }
         },
@@ -490,7 +490,7 @@ sap.ui.define([
             MODEL.setProperty("/tituloDialog", "Correcto");
             MODEL.setProperty("/stateDialog", "Success");
             MODEL.setProperty("/iconDialog", "sap-icon://message-success");
-            MODEL.setProperty("/tituloMensaje", "Las Solicicitudes fueron enviadas");
+            MODEL.setProperty("/tituloMensaje", "Las Solicitudes fueron enviadas");
             const tableFacturas = that.getTable();
             const selectedFacturas = tableFacturas.getSelectedContexts();
             if (selectedFacturas.length > 0) {
@@ -758,7 +758,9 @@ sap.ui.define([
         },
         _actualizarSolicitudes: async function (solicitudes) {
             try {
-                const requests = solicitudes.map(async item => {
+                const results = [];
+
+                for (const item of solicitudes) {
                     try {
                         const copiedObject = (({ ColorEstado, DescripcionEstado, IconoEstado, ...rest }) => rest)(item.getObject());
                         copiedObject.ESTADO = "02";
@@ -766,14 +768,15 @@ sap.ui.define([
                         copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
                         copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);
                         const solicitud = { "IS_FACT_CAB": JSON.stringify(copiedObject) };
-                        return await this.createEntity(ODATA_SAP, "/solPagoFactSet", solicitud);
+
+                        const result = await this.createEntity(ODATA_SAP, "/solPagoFactSet", solicitud);
+                        results.push(result);
                     } catch (error) {
                         console.error("Error al procesar una solicitud individual:", error);
-                        throw error; // Propagar el error para que Promise.all lo maneje
+                        throw error; // Propagar el error para manejarlo externamente
                     }
-                });
-
-                return await Promise.all(requests);
+                }
+                return results;
             } catch (error) {
                 console.error("Error al procesar múltiples solicitudes:", error);
                 throw error; // Propagar el error si ocurre al procesar múltiples solicitudes
@@ -860,7 +863,7 @@ sap.ui.define([
             switch (TypeTable) {
                 case "Repuestos":
                     array.forEach(elemento => {
-                        const numFc = elemento.NroPedido;
+                        const numFc = elemento.NroFactura;
                         const Fecha_Fc = elemento.FechaBl;
                         const Total = "1000";//elemento.Fob_U;
                         if (!grupos[numFc]) {
@@ -1160,7 +1163,7 @@ sap.ui.define([
                         { id: "Item", label: "Caja", path: "Caja", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
                         { id: "TipoDocumento", label: "Tipo Documento", path: "TipoDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
                         { id: "ClaseDocumento", label: "Clase Documento", path: "ClaseDocumento", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
-                        { id: "NroPedido", label: "Nro Pedido", path: "NroPedido", demandPopin: true, minScreenWidth: "Tablet", width: "5rem", visible: true },
+                        { id: "NroFactura", label: "Nro Pedido", path: "NroFactura", demandPopin: true, minScreenWidth: "Tablet", width: "5rem", visible: true },
                         { id: "Proveedor", label: "Proveedor", path: "Proveedor", demandPopin: true, minScreenWidth: "Tablet", width: "10rem", visible: true },
                         { id: "OrganizacionCompras", label: "Organizacion Compras", path: "OrganizacionCompras", demandPopin: true, minScreenWidth: "Tablet", width: "6rem", visible: true },
                         { id: "GrupoCompras", label: "Grupo Compras", path: "GrupoCompras", demandPopin: true, minScreenWidth: "Tablet", width: "5rem", visible: true },
@@ -1190,7 +1193,7 @@ sap.ui.define([
                         { id: "ITEM", label: "Item", path: "ITEM", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
                         { id: "TIPO_DOCUMENTO_COMPRAS", label: "Tipo Documento", path: "TIPO DE DOCUMENTO DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
                         { id: "CLASE_DE_DOCUMENTO_DE_COMPRAS", label: "Clase Documento", path: "CLASE DE DOCUMENTO DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
-                        { id: "No_PEDIDO", label: "Nro Pedido", path: "No PEDIDO", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
+                        { id: "No_PEDIDO", label: "Nro Pedido", path: "No FACTURA", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
                         { id: "PROVEEDOR", label: "Proveedor", path: "PROVEEDOR", demandPopin: true, minScreenWidth: "Tablet", width: "10rem" },
                         { id: "ORGANIZACION_DE_COMPRAS", label: "Organizacion Compras", path: "ORGANIZACIÓN DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "6rem" },
                         { id: "GRUPO_DE_COMPRAS", label: "Grupo Compras", path: "GRUPO DE COMPRAS", demandPopin: true, minScreenWidth: "Tablet", width: "5rem" },
@@ -1469,6 +1472,9 @@ sap.ui.define([
                 // Crear la tabla
                 case "Solicitudes":
                     oTable = new sap.m.Table({
+                        growingScrollToLoad: false,
+                        growingThreshold: 9,
+                        growing: true,
                         id: "idFacturasTable",
                         width: "auto",
                         items: {
@@ -1482,8 +1488,6 @@ sap.ui.define([
                         noDataText: "{solicitudesView>/tableNoDataText}",
                         busyIndicatorDelay: 0,
                         busy: "{solicitudesView>tableBusy}",
-                        growing: true,
-                        growingScrollToLoad: true,
                         updateFinished: this.onUpdateFinished,
                         mode: "MultiSelect"
                     });
@@ -1921,7 +1925,7 @@ sap.ui.define([
                     jsonObject.Item = item["ITEM"]
                     jsonObject.TipoDocumento = item["TIPO DE DOCUMENTO DE COMPRAS"]
                     jsonObject.ClaseDocumento = item["CLASE DE DOCUMENTO DE COMPRAS"]
-                    jsonObject.NroPedido = item["No PEDIDO"]
+                    jsonObject.NroFactura = item["No FACTURA"]
                     jsonObject.Proveedor = item["PROVEEDOR"]
                     jsonObject.OrganizacionCompras = item["ORGANIZACIÓN DE COMPRAS"]
                     jsonObject.GrupoCompras = item["GRUPO DE COMPRAS"]
@@ -1995,7 +1999,7 @@ sap.ui.define([
                 "ITEM",
                 "TIPO DE DOCUMENTO DE COMPRAS",
                 "CLASE DE DOCUMENTO DE COMPRAS",
-                "No PEDIDO",
+                "No FACTURA",
                 "PROVEEDOR",
                 "ORGANIZACIÓN DE COMPRAS",
                 "GRUPO DE COMPRAS",

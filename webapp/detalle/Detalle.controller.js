@@ -163,8 +163,8 @@ sap.ui.define([
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
-                    that.getView().byId("btnAddPosiciones").setEnabled((oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false);
-                    that.getView().byId("AdjuntosUploader").setEnabled((oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false);
+                    that.getView().byId("btnAddPosiciones").setEnabled((oCabecera.DescripcionEstado == "Creado" || oCabecera.DescripcionEstado == "Rechazado") ? true : false);
+                    that.getView().byId("AdjuntosUploader").setEnabled((oCabecera.DescripcionEstado == "Creado" || oCabecera.DescripcionEstado == "Rechazado") ? true : false);
                     $.each(aListaDocumentos, function (i, item) {
 
                         adjuntos.push({
