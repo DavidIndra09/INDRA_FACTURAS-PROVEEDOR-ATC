@@ -33,7 +33,7 @@
                             <form:fields>
                                 <Input value="{
                                             parts:[{path:'oCabecera>/SOLFAC'}]                                            
-                                        }" enabled="{oCabecera>/enabled}"/>
+                                        }" enabled="false"/>
                             </form:fields>
                             <form:label>
                                 <Label text="Solicitud" />
@@ -42,7 +42,7 @@
 
                         <form:FormElement>
                             <form:fields>
-                                <Input value="{
+                                <Input required="true" id="InputFactura" value="{
                                             parts:[{path:'oCabecera>/FACTUR'}]
                                             
                                         }" enabled="{oCabecera>/enabled}"/>
@@ -65,16 +65,16 @@
 
                         <form:FormElement>
                             <form:fields>
-                            <DatePicker value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
+                            <DatePicker required="true" id="FechaEmision" value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
                                
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>fechaEmision}" />
                             </form:label>
-                        </form:FormElement>
+                        </form:FormElement>                       
                         <form:FormElement>
                             <form:fields>
-                            <DatePicker value="{oCabecera>/FKDAT}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
+                            <DatePicker value="{oCabecera>/FKDAT}" displayFormat="dd.MM.yyyy" editable="false" />
                               
                             </form:fields>
                             <form:label>
@@ -83,7 +83,7 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker value="{oCabecera>/FCRESO}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
+                                <DatePicker value="{oCabecera>/FCRESO}" displayFormat="dd.MM.yyyy" editable="false" />
                             </form:fields>
                             <form:label>
                                 <Label text="Fecha creación solicitud" />
@@ -91,34 +91,41 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <Input value="{
+                                <Input required="true" id="InputImporte" value="{
                                             parts:[{path:'oCabecera>/IMPORT'}]     
                                         }" enabled="{oCabecera>/enabled}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>importe}" />
                             </form:label>
-                        </form:FormElement>
-                      <!--  <form:FormElement>
-                            <form:fields>
-                                <Input value="{
-                                            parts:[{path:'oCabecera>/IGV'},{path:'oCabecera>/WAERS'}],
-                                            type: 'sap.ui.model.type.Currency',
-                                            formatOptions: {showMeasure: false}
-                                        }" enabled="{oCabecera>/enabled}"/>
-                            </form:fields>
-                            <form:label>
-                                <Label text="{i18n>igv}" />
-                            </form:label>
-                        </form:FormElement> -->
+                        </form:FormElement>                      
                         <form:FormElement>
                             <form:fields>
                                 <Input value="{
                                             parts:[{path:'oCabecera>/total'}] 
-                                        }" enabled="{oCabecera>/enabled}"/>
+                                        }" enabled="false"/>
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>importeTotal}" />
+                            </form:label>
+                        </form:FormElement>
+                          <form:FormElement>
+                            <form:fields>
+                            <Input required="true" id="InputSelectWaers" liveChange=".onSuggestWaers" enabled="{facturaView>/isEnabledCabecera}" value="{oCabecera>/WAERS}" width="100%" showSuggestion="true" placeholder="Ingrese nombre de moneda" enableSuggestions="true" suggestionItems="{waershelp>/}">
+                                    <suggestionItems>
+                                        <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}" key="{waershelp>VALUE}" />
+                                    </suggestionItems>                                    
+                                </Input>
+                             <!--
+                             <SearchField id="InputSelectWaers" enabled="{facturaView>/isEnabledCabecera}" value="{oCabecera>/WAERS}"  width="100%" showSearchButton="false" placeholder="Ingrese nombre de moneda" enableSuggestions="true" search=".handleSearch" suggest=".onSuggestWaers" suggestionItems="{path:'waershelp>/'}">
+
+                                    <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}"  key="{waershelp>VALUE}" />
+
+                                </SearchField>    -->                       
+                               
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>moneda}" />
                             </form:label>
                         </form:FormElement>
                     </form:formElements>

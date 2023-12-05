@@ -147,7 +147,7 @@ sap.ui.define([
                     version: invoice.ublversionid,
                     numeroSerie: invoice.id,
                     fechaEmision: invoice.issuedate,
-                    fechaVencimiento: invoice.paymentterms.paymentduedate,
+                    //fechaVencimiento: invoice.paymentterms.paymentduedate,
                     tipoDocumento: invoice.invoicetypecode,
                     tipoMoneda: invoice.documentcurrencycode,
                     rucEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
@@ -173,21 +173,7 @@ sap.ui.define([
                 };
 
                 MODEL.setProperty("/facturaXml", datosFactura);
-                // nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", true);
-                // if(!dataExcel[0][campoBusqueda]){
-                //     MODEL.setProperty("/listaImportada",[]);
-                //     const nombresColumna = Object.keys(dataExcel[0]);
-                //     fileUploader.setValue("");
-                //     fileUploader.setValueState("Error");
-                //     fileUploader.setValueStateText(`Nombre de columna ${nombresColumna[0]} no es correcto: Intente con ${campoBusqueda}`);
-                //     return;
-                // }
-                // fileUploader.setValueState("Success");
-                // const data = dataExcel.map( (item) => {
-                //     return {
-                //         valor: item[campoBusqueda]
-                //     }
-                // });
+
                 const fechaEmisionView = formatter.formatDateImportacion(datosFactura.fechaEmision);
                 const fechaEmisionParamenter = formatter.formatDateParameter(fechaEmisionView);
                 MODEL.setProperty("/Factura/codigoFactura", datosFactura.numeroSerie);
@@ -195,7 +181,8 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
                 MODEL.setProperty("/Factura/importe", datosFactura.importe);
                 MODEL.setProperty("/Factura/total", datosFactura.total);
-                MODEL.setProperty("/Factura/sociedad", datosFactura.sociedad);
+                MODEL.setProperty("/Factura/moneda", datosFactura.tipoMoneda);
+                //MODEL.setProperty("/Factura/sociedad", datosFactura.sociedad);
 
                 nuevafacturaModel.setProperty("/isEnabledCabecera", false);
                 MODEL.setProperty("/Factura/estado", "No validado");
@@ -638,10 +625,13 @@ sap.ui.define([
                 },
                 tipoImpuesto: "1"
             });
+            that.getView().byId("InputFactura").setValue("");
+            that.getView().byId("FechaEmision").setValue("");
+            that.getView().byId("InputImporte").setValue("");
+            that.getView().byId("InputSelectWaers").setValue("");
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
             MODEL.setProperty("/Adjuntos", []);
         },
-
         _readFiles: async function (file) {
             const resolveImport = (evt) => {
                 const objData = this._xmlToJson(evt.target.result);
@@ -712,10 +702,48 @@ sap.ui.define([
             });
             // this.closeDialog("CreateInvoice");
         },
-
-        _getDataFactura: function () {
+        onValidarCampos: function () {
+            let valid = true;
             const factura = MODEL.getProperty("/Factura");
+            if (factura.codigoFactura == undefined) {
+                that.getView().byId("InputFactura").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputFactura").setValueState("None")
+            }
 
+            if (factura.fechaEmisionParameter == undefined) {
+                that.getView().byId("FechaEmision").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("FechaEmision").setValueState("None")
+            }
+            if (factura.importe == undefined) {
+                that.getView().byId("InputImporte").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputImporte").setValueState("None")
+            }
+            if (factura.moneda == undefined) {
+                that.getView().byId("InputSelectWaers").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputSelectWaers").setValueState("None")
+            }
+            return valid;
+        },
+        _getDataFactura: function () {
+            let valid = that.onValidarCampos();
+            if (!valid) {
+                MessageBox.warning("Completar todos los campos obligatorios");
+                sap.ui.core.BusyIndicator.hide()
+                return;
+            }
+            const factura = MODEL.getProperty("/Factura");
             let posnr = 0;
             let adjuntos = MODEL.getProperty("/Adjuntos");
             const adjuntoModel = adjuntos.map(item => {
@@ -788,7 +816,10 @@ sap.ui.define([
             const codigoSolicitud = factura.codigoSolicitud;
             if (codigoSolicitud) data.codigoSolicitud = codigoSolicitud;
 
+
+
             let oReturn = {
+                "I_WAERS": factura.moneda.split("-")[0].trim(),
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": factura.codigoFactura,
                 "I_FEMISI": that.formatFecha(factura.fechaEmisionParameter),
@@ -914,7 +945,7 @@ sap.ui.define([
             sap.m.MessageToast.show("El adjunto no debe pesar más de 10 MB.");
         },
         onSuggestWaers: async function (event) {
-            var sValue = event.getParameter("suggestValue"),
+            var sValue = event.getSource().getValue(),//event.getParameter("suggestValue"),
                 aFilters = [];
             sValue = sValue.toUpperCase();
             await this.getwaershelp(sValue);
@@ -932,7 +963,7 @@ sap.ui.define([
             }
             if (this.byId("InputSelectWaers").getBinding("suggestionItems") != undefined) {
                 this.byId("InputSelectWaers").getBinding("suggestionItems").filter(aFilters);
-                this.byId("InputSelectWaers").suggest();
+                //this.byId("InputSelectWaers").suggest();
             }
         },
         getwaershelp: function (sValue = "") {

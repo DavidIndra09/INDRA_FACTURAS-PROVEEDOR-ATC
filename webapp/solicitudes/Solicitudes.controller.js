@@ -120,7 +120,6 @@ sap.ui.define([
 
         onNavFacturaNueva: function (event) {
             let aFactura = MODEL.getProperty("/Facturas");
-            debugger
             const tableFacturas = that.getTable();
             let data = tableFacturas.getModel().getData().Facturas;
 
@@ -291,11 +290,30 @@ sap.ui.define([
             this._limpiarItemsSeleccionados();
 
         },
+        convertirFormato(valor) {
+            // Reemplazar las comas con una cadena vacía
+            const valorSinComas = valor.replace(/,/g, '');
+
+            // Convertir la cadena a un número
+            const numero = parseFloat(valorSinComas);
+
+            // Verificar si el valor es un número válido
+            if (!isNaN(numero)) {
+                // Formatear el número de nuevo a una cadena con dos decimales
+                const valorFormateado = numero.toFixed(2);
+                return valorFormateado;
+            } else {
+                // Manejar el caso en el que el valor no sea un número válido
+                console.error('El valor no es un número válido:', valor);
+                return valor;
+            }
+        },
 
         onObtenerFiltrosSearch: function (TypeTable, query) {
             let aTableSearchState = [];
             switch (TypeTable) {
                 case "Solicitudes":
+                    //let importe = (isNaN(Number(query))) ? query : that.convertirFormato(query);
                     aTableSearchState = [
                         new Filter({
                             filters: [
@@ -596,10 +614,11 @@ sap.ui.define([
             if (idTable == "idFacturasTable") {
                 table.removeSelections();
             }
-            //that.byId("idFacturasTable").removeSelections();
+
+
             const historyDirection = History.getInstance().getDirection();
 
-            if (historyDirection === "NewEntry") {
+            if (historyDirection === "Unknown" || historyDirection === "NewEntry") {
                 viewModel.setProperty("/tableBusy", true);
                 this._setListaSolicitudes({ filters: [] });
                 return;
@@ -889,11 +908,12 @@ sap.ui.define([
             switch (TypeTable) {
                 case "Repuestos":
                     array.forEach(elemento => {
+                        const Moneda = elemento.Moneda;
                         const numFc = elemento.NroFactura;
                         const Fecha_Fc = elemento.FechaBl;
                         const Total = "1000";//elemento.Fob_U;
                         if (!grupos[numFc]) {
-                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Detalle: [] };
+                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
                         }
                         grupos[numFc].Detalle.push(elemento);
                     });
@@ -901,11 +921,12 @@ sap.ui.define([
                 case "Vehiculos":
                     let Total = 0;
                     array.forEach(elemento => {
+                        const Moneda = "";
                         const numFc = elemento.Num_Fc;
                         const Fecha_Fc = elemento.Fecha_Fc;
                         Total = Total + parseFloat((elemento.Fob_U != "") ? elemento.Fob_U : 0) + parseFloat((elemento.Flete != "") ? elemento.Flete : 0) + parseFloat((elemento.Seguro != "") ? elemento.Seguro : 0);
                         if (!grupos[numFc]) {
-                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: 0, Detalle: [] };
+                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: 0, Moneda: Moneda, Detalle: [] };
                         }
                         grupos[numFc].Total = Total;
                         grupos[numFc].Detalle.push(elemento);
@@ -937,8 +958,9 @@ sap.ui.define([
                     "belnr": item.BELNR
                 }
             });*/
-
+            
             let oReturn = {
+                "I_WAERS": Data.Moneda,
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": Data.Num_Fc,
                 "I_FEMISI": formatter.formatearFechaString(Data.Fecha_Fc),
@@ -1059,7 +1081,9 @@ sap.ui.define([
                                 oCell = new sap.m.ObjectStatus({ text: "{" + oColumnData.path + "}", icon: "{" + oColumnData.icon + "}", state: "{" + oColumnData.state + "}", class: "sapUiSmallMarginBottom" });
                             }
                             else if (oColumnData.path == "IMPORT") {
-                                oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
+                                let celda = "{" + oColumnData.path + "}" + " " + "{" + oColumnData.path2 + "}";
+                                oCell = new sap.m.ObjectStatus({ text: celda, state: "Indication04" });
+                                //oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
                             }
                             else if (oColumnData.path == "SOLFAC") {
                                 oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
@@ -1136,7 +1160,7 @@ sap.ui.define([
                         { id: "FACTUR", label: "Factura", path: "FACTUR", width: "8rem", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", demandPopin: true, minScreenWidth: "Tablet" },
                         { id: "FKDAT", label: "Fecha de Contabilización", width: "13rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "IMPORT", label: "Importe", path: "IMPORT", width: "8rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold" },
+                        { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "8rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold" },
                         { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet" },
                         { width: "5rem", path: "btnverDetalle" },
                         { width: "5rem", path: "btnEliminarSolicitud" }
@@ -1958,6 +1982,7 @@ sap.ui.define([
                     jsonObject.Material = item["MATERIAL"]
                     jsonObject.Cantidad = item["CANTIDAD"]
                     jsonObject.PrecioNeto = item["PRECIO NETO"]
+                    jsonObject.Moneda = item["MONEDA"]
                     jsonObject.Solped = item["SOLPED"]
                     jsonObject.ValorTotal = item["VALOR TOTAL"]
                     jsonObject.Caja = item["CAJA"]

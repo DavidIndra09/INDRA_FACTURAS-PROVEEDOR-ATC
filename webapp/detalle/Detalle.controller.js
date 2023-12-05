@@ -12,6 +12,7 @@ sap.ui.define([
     let that,
         viewModel,
         facturaModel,
+        ODataUtilidadesModel,
         AdjuntosOriginal = [],
         AdjuntosEliminados = [],
         ODATA_SAP;
@@ -41,6 +42,7 @@ sap.ui.define([
 
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
+            ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
             this.getRouter().getRoute("detalle").attachPatternMatched(this._onDetalletMatched, this);
             this.setModel(viewModel, "detalleView");
             this.setModel(new JSONModel([]), "Adjuntos");
@@ -80,7 +82,9 @@ sap.ui.define([
             if (that.getOwnerComponent().getModel("oCabecera")) {
                 var oParameters = oEvent.getParameters();
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
-                oObject.total = oObject.IMPORT /* Number(oObject.IGV)).toFixed(2)*/;
+                oObject.total = (parseFloat(that.convertirFormato(oObject.IMPORT) * 1.19)).toFixed(2); /* Number(oObject.IGV)).toFixed(2)*/;
+                oObject.total = formatter.formatCurrency(oObject.total);
+
                 oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false;
                 that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
@@ -282,7 +286,7 @@ sap.ui.define([
                 }
             });
         },
-        _getDataFactura: function () {
+        _getDataFactura: function () {           
             let posiciones = that.byId("idtablaFactura").getModel().getData();
             let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             let cabecera = that.getOwnerComponent().getModel("oCabecera").getData();
@@ -355,6 +359,7 @@ sap.ui.define([
 
 
             let oReturn = {
+                "I_WAERS": cabecera.WAERS.split("-")[0].trim(),
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": cabecera.FACTUR,
                 "I_FEMISI": that.formatFecha(cabecera.FEMISI),
@@ -390,10 +395,49 @@ sap.ui.define([
             var fechaFormateada = `${anio}${mes}${dia}`;
             return fechaFormateada;
         },
+        onValidarCampos: function () {
+            let valid = true;
+            let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
+            if (oCabecera.FACTUR == "") {
+                that.getView().byId("InputFactura").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputFactura").setValueState("None")
+            }
+
+            if (oCabecera.FEMISI == "") {
+                that.getView().byId("FechaEmision").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("FechaEmision").setValueState("None")
+            }
+            if (oCabecera.IMPORT == "") {
+                that.getView().byId("InputImporte").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputImporte").setValueState("None")
+            }
+            if (oCabecera.WAERS == "") {
+                that.getView().byId("InputSelectWaers").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputSelectWaers").setValueState("None")
+            }
+            return valid;
+        },
         actualizarFactura: async function () {
             try {
                 sap.ui.core.BusyIndicator.show();
-
+                let valid = that.onValidarCampos();
+                if (!valid) {
+                    MessageBox.warning("Completar todos los campos obligatorios");
+                    sap.ui.core.BusyIndicator.hide()
+                    return;
+                }
                 const data = this._getDataFactura();
                 const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
 
@@ -434,10 +478,53 @@ sap.ui.define([
         onNavOrdenes: function () {
             this.getRouter().navTo("orden", {}, false);
         },
-        onFileSizeExceed: function (oEvent) {            
+        onFileSizeExceed: function (oEvent) {
             sap.m.MessageToast.show("El adjunto no debe pesar más de 10 MB.");
-        }
-
+        },
+        onSuggestWaers: async function (event) {
+            var sValue = event.getSource().getValue(),//event.getParameter("suggestValue"),
+                aFilters = [];
+            sValue = sValue.toUpperCase();
+            await this.getwaershelp(sValue);
+            if (sValue) {
+                aFilters = [
+                    new Filter([
+                        new Filter("VALUE", function (sText) {
+                            return (sText || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        }),
+                        new Filter("TEXTO", function (sDes) {
+                            return (sDes || "").toUpperCase().indexOf(sValue.toUpperCase()) > -1;
+                        })
+                    ], false)
+                ];
+            }
+            if (this.byId("InputSelectWaers").getBinding("suggestionItems") != undefined) {
+                this.byId("InputSelectWaers").getBinding("suggestionItems").filter(aFilters);
+                //this.byId("InputSelectWaers").suggest();
+            }
+        },
+        getwaershelp: function (sValue = "") {
+            let value = sValue.substr(0, 18);
+            return new Promise((resolve, reject) => {
+                ODataUtilidadesModel.read("/filtrosSet", {
+                    filters: [
+                        new Filter("i_value", FilterOperator.EQ, value),
+                        new Filter("i_object", FilterOperator.EQ, "WAERS")
+                    ],
+                    success: function (oData) {
+                        if (oData.results.length) {
+                            let aWaers = JSON.parse(oData.results[0].et_data);
+                            that.getView().setModel(new JSONModel(aWaers), "waershelp");
+                        }
+                        resolve(true);
+                    },
+                    error: function (oError) {
+                        MessageBox.error(oError.responseText);
+                        resolve(true);
+                    }
+                });
+            });
+        },
     });
 
 });

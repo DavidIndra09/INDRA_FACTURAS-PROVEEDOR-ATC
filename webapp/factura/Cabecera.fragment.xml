@@ -44,7 +44,7 @@
 
                         <form:FormElement>
                             <form:fields>
-                                <Input value="{codigoFactura}" placeholder="Ingrese Nro. factura" enabled="{facturaView>/isEnabledCabecera}" change="onIngresarCodigoFactura"/>
+                                <Input id="InputFactura" required="true" value="{codigoFactura}" placeholder="Ingrese Nro. factura" enabled="{facturaView>/isEnabledCabecera}" change="onIngresarCodigoFactura"/>
 
                             </form:fields>
                             <form:label>
@@ -54,7 +54,7 @@
 
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker placeholder="Ingrese fecha de emisión" value="{
+                                <DatePicker id="FechaEmision" required="true" placeholder="Ingrese fecha de emisión" value="{
                                         path: 'fechaEmision',
                                         formatter: '.formatter.formatDateView'
                                     }" displayFormat="dd.MM.yyyy" enabled="{facturaView>/isEnabledCabecera}" change="onSeleccionarFecha"/>
@@ -67,7 +67,7 @@
                         <form:FormElement>
                             <form:fields>
 
-                                <Input value="{importe}" placeholder="Ingrese importe" enabled="{facturaView>/isEnabledCabecera}" liveChange="onCalcularImpuestoTotal"/>
+                                <Input id="InputImporte" required="true" value="{importe}" placeholder="Ingrese importe" enabled="{facturaView>/isEnabledCabecera}" liveChange="onCalcularImpuestoTotal"/>
 
                             </form:fields>
                             <form:label>
@@ -90,13 +90,23 @@
                         </form:FormElement>
 
                         <form:FormElement>
-                            <form:fields>
+                            <form:fields >
 
-                                <SearchField id="InputSelectWaers" width="100%" showSearchButton="false" placeholder="Ingrese nombre de moneda" enableSuggestions="true" search=".handleSearch" suggest=".onSuggestWaers" suggestionItems="{path:'waershelp>/'}">
+                                <Input  required="true" id="InputSelectWaers" liveChange=".onSuggestWaers" enabled="{facturaView>/isEnabledCabecera}" value="{moneda}" width="100%" showSuggestion="true" placeholder="Ingrese nombre de moneda" enableSuggestions="true" suggestionItems="{waershelp>/}">
+                                    <suggestionItems>
+                                        <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}" key="{waershelp>VALUE}" />
+                                    </suggestionItems>                                    
+                                </Input>
 
-                                    <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}"  key="{waershelp>VALUE}" />
+                                <!--
+
+                                <SearchField id="InputSelectWaers" enabled="{facturaView>/isEnabledCabecera}" value="{moneda}" width="100%" showSearchButton="false" placeholder="Ingrese nombre de moneda" enableSuggestions="true" search=".handleSearch" suggest=".onSuggestWaers" suggestionItems="{path:'waershelp>/'}">
+
+                                    <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}" key="{waershelp>VALUE}" />
 
                                 </SearchField>
+
+                                -->
 
                             </form:fields>
                             <form:label>
