@@ -801,6 +801,24 @@ sap.ui.define([
             return object;
 
         },
+        convertirFormato(valor) {
+            // Reemplazar las comas con una cadena vacía
+            const valorSinComas = valor.replace(/,/g, '');
+
+            // Convertir la cadena a un número
+            const numero = parseFloat(valorSinComas);
+
+            // Verificar si el valor es un número válido
+            if (!isNaN(numero)) {
+                // Formatear el número de nuevo a una cadena con dos decimales
+                const valorFormateado = numero.toFixed(2);
+                return valorFormateado;
+            } else {
+                // Manejar el caso en el que el valor no sea un número válido
+                console.error('El valor no es un número válido:', valor);
+                return valor;
+            }
+        },
         _actualizarSolicitudes: async function (solicitudes) {
             try {
                 const results = [];
@@ -812,8 +830,8 @@ sap.ui.define([
                         copiedObject.FCRESO = formatter.formatearFechaString(copiedObject.FCRESO);
                         copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
                         copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);
+                        copiedObject.IMPORT = that.convertirFormato(copiedObject.IMPORT);
                         const solicitud = { "IS_FACT_CAB": JSON.stringify(copiedObject) };
-
                         const result = await this.createEntity(ODATA_SAP, "/solPagoFactSet", solicitud);
                         results.push(result);
                     } catch (error) {
@@ -958,7 +976,7 @@ sap.ui.define([
                     "belnr": item.BELNR
                 }
             });*/
-            
+
             let oReturn = {
                 "I_WAERS": Data.Moneda,
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
@@ -1521,7 +1539,7 @@ sap.ui.define([
             switch (TypeTable) {
                 // Crear la tabla
                 case "Solicitudes":
-                    oTable = new sap.m.Table({
+                    oTable = new sap.m.Table({                       
                         growingScrollToLoad: false,
                         growingThreshold: 9,
                         growing: true,
