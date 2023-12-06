@@ -978,6 +978,7 @@ sap.ui.define([
             });*/
 
             let oReturn = {
+                "I_ESTADO": "01",
                 "I_WAERS": Data.Moneda,
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": Data.Num_Fc,
@@ -1539,7 +1540,7 @@ sap.ui.define([
             switch (TypeTable) {
                 // Crear la tabla
                 case "Solicitudes":
-                    oTable = new sap.m.Table({                       
+                    oTable = new sap.m.Table({
                         growingScrollToLoad: false,
                         growingThreshold: 9,
                         growing: true,
@@ -2160,6 +2161,7 @@ sap.ui.define([
                 NuevoMensaje = NuevoMensaje + count + ". " + mensaje + ".<br>";
             });
             return NuevoMensaje;
-        }
+        },
+
     });
 });

@@ -286,7 +286,7 @@ sap.ui.define([
                 }
             });
         },
-        _getDataFactura: function () {           
+        _getDataFactura: function () {
             let posiciones = that.byId("idtablaFactura").getModel().getData();
             let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             let cabecera = that.getOwnerComponent().getModel("oCabecera").getData();
@@ -359,6 +359,7 @@ sap.ui.define([
 
 
             let oReturn = {
+                "I_ESTADO": cabecera.ESTADO,
                 "I_WAERS": cabecera.WAERS.split("-")[0].trim(),
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "I_FACTUR": cabecera.FACTUR,
@@ -524,6 +525,17 @@ sap.ui.define([
                     }
                 });
             });
+        },
+        onCalcularImpuestoTotal: function (event) {
+            const importeBase = event.getParameter("newValue");
+            let total;
+            total = (that.convertirFormato(importeBase) * 1.19).toFixed(2);
+            let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
+            oCabecera.total = total;
+            oCabecera.total = formatter.formatCurrency(oCabecera.total);
+            oCabecera.IMPORT = importeBase;
+            //oCabecera.IMPORT = formatter.formatCurrency(oCabecera.IMPORT);
+            that.getOwnerComponent().getModel("oCabecera").refresh(true);
         },
     });
 

@@ -93,7 +93,7 @@
                             <form:fields>
                                 <Input required="true" id="InputImporte" value="{
                                             parts:[{path:'oCabecera>/IMPORT'}]     
-                                        }" enabled="{oCabecera>/enabled}"/>
+                                        }" enabled="{oCabecera>/enabled}" liveChange="onCalcularImpuestoTotal"  />
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>importe}" />
