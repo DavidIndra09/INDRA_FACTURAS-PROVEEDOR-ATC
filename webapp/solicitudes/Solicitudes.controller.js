@@ -1100,7 +1100,7 @@ sap.ui.define([
                             }
                             else if (oColumnData.path == "IMPORT") {
                                 let celda = "{" + oColumnData.path + "}" + " " + "{" + oColumnData.path2 + "}";
-                                oCell = new sap.m.ObjectStatus({ text: celda, state: "Indication04" });
+                                oCell = new sap.m.ObjectStatus({ text: celda /*, state: "Indication04"*/ });
                                 //oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
                             }
                             else if (oColumnData.path == "SOLFAC") {
