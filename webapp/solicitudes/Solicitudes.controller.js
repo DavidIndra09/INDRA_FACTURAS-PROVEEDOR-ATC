@@ -734,11 +734,9 @@ sap.ui.define([
         },
 
         _setListaSolicitudes: async function (parameters) {
-
+            //that.MostrarTablaPorFlujo("Solicitudes");
             parameters.urlParameters = {};
-
             const request = await this.readEntity(ODATA_SAP, "/obtenerSolFactSet", parameters);
-
             let sJson = request.results[0].ET_DATA;
             //sJson = sJson.replace(/00000000/g, '"00000000"');
             let aLista = JSON.parse(sJson);
@@ -755,8 +753,10 @@ sap.ui.define([
                 value.FEMISI = formatter.formatearFechaString(value.FEMISI);
             });
             aLista.sort((a, b) => a.SOLFAC - b.SOLFAC);
-            console.log(aLista)
-
+            //let table = that.getTable();
+            //table.setGrowingThreshold(5);
+            //table.setGrowingScrollToLoad(false);
+            //table.setGrowing(true);
             MODEL.setProperty("/Facturas", aLista);
             viewModel.setProperty("/tableBusy", false);
         },
@@ -1175,19 +1175,20 @@ sap.ui.define([
                 case "Solicitudes":
                     // Crear las columnas
                     aColumns = [
-                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "8rem", design: "Bold" },
-                        { id: "FACTUR", label: "Factura", path: "FACTUR", width: "8rem", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "FKDAT", label: "Fecha de Contabilización", width: "13rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet" },
-                        { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "8rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold" },
-                        { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet" },
-                        { width: "5rem", path: "btnverDetalle" },
-                        { width: "5rem", path: "btnEliminarSolicitud" }
+                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        { id: "FACTUR", label: "Factura", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "End" },
+                        { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "7rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
+                        { id: "FKDAT", label: "Fecha de Cont.", width: "6rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
+                        { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold", hAlign: "End" },
+                        { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { width: "3rem", path: "btnverDetalle" },
+                        //{ width: "5rem", path: "btnEliminarSolicitud" }
                     ];
 
                     // Agregar las columnas a la tabla
                     aColumns.forEach(function (oColumnData) {
                         var oColumn = new sap.m.Column({
+                            hAlign: oColumnData.hAlign,
                             width: oColumnData.width || "auto",
                             header: new sap.m.Text({ text: oColumnData.label }),
                             id: oColumnData.id
@@ -1542,7 +1543,7 @@ sap.ui.define([
                 case "Solicitudes":
                     oTable = new sap.m.Table({
                         growingScrollToLoad: false,
-                        growingThreshold: 9,
+                        growingThreshold: 5,
                         growing: true,
                         id: "idFacturasTable",
                         width: "auto",

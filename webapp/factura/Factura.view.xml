@@ -29,14 +29,14 @@
                         press=".onNavBack"
                     />
                 </f:navigationActions>
-                <f:breadcrumbs>
+               <!-- <f:breadcrumbs>
                     <Breadcrumbs>
                         <Link
                             text="Solicitudes"
                             press="onNavBack"
                         />
                     </Breadcrumbs>
-                </f:breadcrumbs>
+                </f:breadcrumbs> -->
             </f:DynamicPageTitle>
         </f:title>
         <f:header>

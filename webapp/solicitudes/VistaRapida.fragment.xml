@@ -8,7 +8,7 @@
         id="idVistaRapida"
         placement="Left"        
         icon="sap-icon://detail-view"
-        title="Solicitud {CODEFACT}"
+        title="Solicitud {SOLFAC}"
         contentWidth="30%">
         <ScrollContainer
             height="10rem" 

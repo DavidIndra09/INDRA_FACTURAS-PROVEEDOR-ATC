@@ -39,14 +39,7 @@
                         press="onMostrarSeleccionProveedor"
                     />
                 <Title id="ProveedorSeleccionado" text=""></Title>
-                <Label text="" />
-                    <!-- <Label text="Selecciona un proveedor:" />
-                    <ComboBox id="comboBox" selectedKey="1">
-                        <items>
-                            <core:Item key="1" text="Proveedor 1" />
-                            <core:Item key="2" text="Proveedor 2" />
-                        </items>
-                    </ComboBox>-->
+                <Label text="" />                 
                     <Button
                         icon="sap-icon://create"
                         text="Crear factura manual"

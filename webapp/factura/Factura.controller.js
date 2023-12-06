@@ -38,9 +38,6 @@ sap.ui.define([
          */
         onInit: function () {
             that = this;
-            // Model used to manipulate control states. The chosen values make sure,
-            // detail page shows busy indication immediately so there is no break in
-            // between the busy indication for loading the view's meta data
             nuevafacturaModel = new JSONModel({
                 busy: true,
                 delay: 0,
@@ -48,6 +45,7 @@ sap.ui.define([
                 isBtnPosicionesEnabled: false
                 // facturaViewTitle: this.getResourceBundle().getText("facturaViewTitleCreate")
             });
+            that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": [] }));
             this.getRouter().getRoute("factura").attachPatternMatched(this._onFacturaMatched, this);
             this.setModel(nuevafacturaModel, "facturaView");
             MODEL = this.getOwnerComponent().getModel();
@@ -204,6 +202,7 @@ sap.ui.define([
             MODEL.setProperty("/Factura/estadoState", "None");
             MODEL.setProperty("/Factura/estadoIcon", "");
             MODEL.setProperty("/Factura/estadoCp", "");
+            MODEL.setProperty("/Factura/moneda", "");
             nuevafacturaModel.setProperty("/isEnabledCabecera", true);
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
 
@@ -480,11 +479,15 @@ sap.ui.define([
         onCargaAdjuntos: async function (event) {
             const adjuntos = MODEL.getProperty("/Adjuntos") || [];
             const files = event.getParameter("files");
-            const control = event.getSource();
-            const readable = await control.checkFileReadable();
-
+            const fileUploader = that.getView().byId("AdjuntosUploader");
             if (files.length > 0) {
                 const file = files[0];
+                let exist = that.onAttachmentExist(file);
+                if (exist) {
+                    sap.m.MessageToast.show("El archivo ya se encuentra cargado.");
+                    fileUploader.setValue("");
+                    return;
+                }
                 const base64String = await that.readFileAsBase64(file);
                 adjuntos.push({
                     "lastModifiedDate": new Date(),
@@ -494,7 +497,18 @@ sap.ui.define([
                     "base64": base64String
                 });
                 that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": adjuntos }));
+                fileUploader.setValue("");
             }
+        },
+        onAttachmentExist: function (file) {
+            let exist = false;
+            let adjuntos = that.getView().byId("AdjuntosFactura").getModel().getData().Adjuntos;
+            $.each(adjuntos, function (i, item) {
+                if (item.name == file.name.split(".")[0] && item.type == ("." + file.name.split(".").pop())) {
+                    exist = true;
+                }
+            });
+            return exist;
         },
         readFileAsBase64: function (file) {
             return new Promise((resolve, reject) => {
@@ -678,6 +692,12 @@ sap.ui.define([
 
         _crearFactura: async function () {
             sap.ui.core.BusyIndicator.show()
+            let valid = that.onValidarCampos();
+            if (!valid) {
+                MessageBox.warning("Completar todos los campos obligatorios");
+                sap.ui.core.BusyIndicator.hide()
+                return;
+            }
             const data = this._getDataFactura();
             const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
@@ -705,7 +725,7 @@ sap.ui.define([
         onValidarCampos: function () {
             let valid = true;
             const factura = MODEL.getProperty("/Factura");
-            if (factura.codigoFactura == undefined) {
+            if (factura.codigoFactura == undefined || factura.codigoFactura == "") {
                 that.getView().byId("InputFactura").setValueState("Error")
                 valid = false;
             }
@@ -713,21 +733,21 @@ sap.ui.define([
                 that.getView().byId("InputFactura").setValueState("None")
             }
 
-            if (factura.fechaEmisionParameter == undefined) {
+            if (factura.fechaEmisionParameter == undefined || factura.fechaEmisionParameter == "") {
                 that.getView().byId("FechaEmision").setValueState("Error")
                 valid = false;
             }
             else {
                 that.getView().byId("FechaEmision").setValueState("None")
             }
-            if (factura.importe == undefined) {
+            if (factura.importe == undefined || factura.importe == "") {
                 that.getView().byId("InputImporte").setValueState("Error")
                 valid = false;
             }
             else {
                 that.getView().byId("InputImporte").setValueState("None")
             }
-            if (factura.moneda == undefined) {
+            if (factura.moneda == undefined || factura.moneda == "") {
                 that.getView().byId("InputSelectWaers").setValueState("Error")
                 valid = false;
             }
@@ -737,12 +757,6 @@ sap.ui.define([
             return valid;
         },
         _getDataFactura: function () {
-            let valid = that.onValidarCampos();
-            if (!valid) {
-                MessageBox.warning("Completar todos los campos obligatorios");
-                sap.ui.core.BusyIndicator.hide()
-                return;
-            }
             const factura = MODEL.getProperty("/Factura");
             let posnr = 0;
             let adjuntos = MODEL.getProperty("/Adjuntos");

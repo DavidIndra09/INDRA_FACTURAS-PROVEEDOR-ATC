@@ -136,7 +136,7 @@
                     <OverflowToolbar >
                         <Title text="{facturaView>/tituloListaAdjuntos}" />
                         <ToolbarSpacer />
-                        <u:FileUploader name="myFileUpload" placeholder="Seleccione archivos" maximumFileSize="10" fileSizeExceed="onFileSizeExceed" uploadUrl="upload/" buttonText="Seleccionar Adjunto" style="Emphasized" tooltip="Adjunte sus archivos" change="onCargaAdjuntos" buttonOnly="{device>/system/phone}" icon="sap-icon://attachment" iconOnly="{device>/system/phone}"/>
+                        <u:FileUploader id="AdjuntosUploader" name="myFileUpload" placeholder="Seleccione archivos" maximumFileSize="10" fileSizeExceed="onFileSizeExceed" uploadUrl="upload/" buttonText="Seleccionar Adjunto" style="Emphasized" tooltip="Adjunte sus archivos" change="onCargaAdjuntos" buttonOnly="true" icon="sap-icon://attachment" iconOnly="{device>/system/phone}"/>
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>

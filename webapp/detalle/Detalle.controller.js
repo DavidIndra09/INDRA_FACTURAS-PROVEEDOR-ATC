@@ -210,10 +210,15 @@ sap.ui.define([
         onCargaAdjuntos: async function (event) {
             const adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             const files = event.getParameter("files");
-            const control = event.getSource();
-
+            const fileUploader = that.getView().byId("AdjuntosUploader");
             if (files.length > 0) {
                 const file = files[0];
+                let exist = that.onAttachmentExist(file);
+                if (exist) {
+                    sap.m.MessageToast.show("El archivo ya se encuentra cargado.");
+                    fileUploader.setValue("");
+                    return;
+                }
                 const base64String = await that.readFileAsBase64(file);
                 adjuntos.push({
                     "posnr": 0,
@@ -224,8 +229,19 @@ sap.ui.define([
                     "base64": base64String
                 });
                 that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
+                fileUploader.setValue("");
             }
             //control.setValue("");
+        },
+        onAttachmentExist: function (file) {
+            let exist = false;
+            let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
+            $.each(adjuntos, function (i, item) {
+                if (item.name == file.name.split(".")[0] && item.type == ("." + file.name.split(".").pop())) {
+                    exist = true;
+                }
+            });
+            return exist;
         },
         onObtenerPosicionAdjunto: function () {
             const adjuntos = AdjuntosOriginal || [];

@@ -24,7 +24,7 @@
                         level="H2"
                     />
                 </f:heading>
-                <f:breadcrumbs>
+               <!-- <f:breadcrumbs>
                     <Breadcrumbs>
                         <Link text="Solicitudes" />
                         <Link
@@ -32,12 +32,12 @@
                             press=".onNavBack"
                         />
                     </Breadcrumbs>
-                </f:breadcrumbs>
+                </f:breadcrumbs> -->
                 <f:navigationActions>
                     <Button
                         icon="sap-icon://decline"
                         type="Reject"
-                        press=".onNavBack"
+                        press=".onNavBack([])"
                     />
                 </f:navigationActions>
             </f:DynamicPageTitle>
