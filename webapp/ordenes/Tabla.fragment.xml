@@ -27,8 +27,7 @@
                 <ToolbarSpacer />
                 <SearchField
                     id="searchField"
-                    tooltip="{i18n>ordenSearchTooltip}"
-                    search=".onSearch"
+                    tooltip="{i18n>ordenSearchTooltip}"                    
                     liveChange="onBusquedaRapida">
                     <layoutData>
                         <OverflowToolbarLayoutData
@@ -85,21 +84,21 @@
                     <Text text="{MATNR}" />
                     <Text text="{TXZ01}" /> 
                     <Text text="{MEINS}" />                   
-                    <ObjectNumber
-                        number="{
-                            path: 'MENGE',
-                            formatter: '.formatter.numberUnit'
+                    <ObjectStatus
+                        text="{
+                            path: 'MENGE'
+                           
                         }"
                          />
-                        <ObjectNumber
-                            number="{
+                        <ObjectStatus
+                            text="{
                             parts:[{path:'NETWR'},{path:'WAERS'}],
                             type: 'sap.ui.model.type.Currency',
-                            formatOptions: {showMeasure: false}
+                            formatOptions: {showMeasure: true}
                         }"     
-                        unit="{WAERS}"                   
+                                          
                         state="Information" />
-                        <Text text="{WAERS}" />
+                       
                 </cells>
             </ColumnListItem>
         </items>

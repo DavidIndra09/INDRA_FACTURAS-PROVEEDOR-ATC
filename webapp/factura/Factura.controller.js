@@ -65,6 +65,8 @@ sap.ui.define([
          * @public
          */
         onNavBack: function () {
+            this.getRouter().navTo("solicitudes", {}, true);
+            /*
             var sPreviousHash = History.getInstance().getPreviousHash();
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
@@ -72,6 +74,7 @@ sap.ui.define([
             } else {
                 this.getRouter().navTo("solicitudes", {}, true);
             }
+            */
         },
 
         onNavOrdenes: function () {

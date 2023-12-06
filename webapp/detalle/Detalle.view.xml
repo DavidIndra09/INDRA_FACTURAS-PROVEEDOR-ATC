@@ -102,7 +102,7 @@
         </uxap:headerTitle> -->
         <uxap:headerContent >
             <Title text="{detalleView>/detalleViewTitle}" level="H2" width="90%"></Title>
-            <Button icon="sap-icon://decline" type="Reject" press=".onNavBack" />
+            <Button icon="sap-icon://decline" type="Reject" press="onNavBack" />
             <Text text="{detalleView>/detalleViewSubTitle}"></Text>
 
         </uxap:headerContent>
@@ -236,7 +236,7 @@
             <OverflowToolbar>
                 <ToolbarSpacer/>
                 <Button type="Accept" text="Guardar" press="actualizarFactura"/>
-                <Button type="Reject" text="Cancelar" press=".onNavBack"/>
+                <Button type="Reject" text="Cancelar" press="onNavBack"/>
             </OverflowToolbar>
         </uxap:footer>
     </uxap:ObjectPageLayout>

@@ -75,7 +75,7 @@ sap.ui.define([
             var sPreviousHash = History.getInstance().getPreviousHash();
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
-                if (sPreviousHash.includes("Detalle")) {                    
+                if (sPreviousHash.includes("Detalle")) {
                     let data = JSON.stringify(detalleFactura)
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],
@@ -89,7 +89,7 @@ sap.ui.define([
                 }
 
             } else {
-                this.getRouter().navTo("factura", { codigoSolicitud: "N" }, true);
+                this.getRouter().navTo("solicitudes", {}, true);
             }
         },
 
@@ -189,6 +189,11 @@ sap.ui.define([
 
             const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
             var posiciones = JSON.parse(request.results[0].ET_DATA);
+            $.each(posiciones, function (i, item) {
+                item.NETWR = (item.NETWR).toString();
+                item.MENGE = (item.MENGE).toString();
+            });
+            debugger
             MODEL.setProperty("/Ordenes", posiciones);
         },
         onLimpiarFiltros: function () {
@@ -200,13 +205,15 @@ sap.ui.define([
             const filters = [
                 new Filter({
                     filters: [
-                        new Filter("conformidad", "Contains", query),
-                        new Filter("posicionConformidad", "StartsWith", query),
-                        new Filter("ordenCompra", "Contains", query),
-                        new Filter("posicionOrden", "StartsWith", query),
-                        new Filter("codigoMaterial", "Contains", query),
-                        new Filter("descripcionMaterial", "Contains", query),
-                        new Filter("cantidad", "Contains", query)
+                        new Filter("BELNR", "Contains", query),
+                        new Filter("BUZEI", "Contains", query),
+                        new Filter("EBELN", "Contains", query),
+                        new Filter("EBELP", "Contains", query),
+                        new Filter("MATNR", "Contains", query),
+                        new Filter("TXZ01", "Contains", query),
+                        new Filter("MEINS", "Contains", query),
+                        new Filter("MENGE", "Contains", query),
+                        //new Filter("NETWR", "Contains", query),
                     ],
                     and: false
                 })
@@ -238,6 +245,10 @@ sap.ui.define([
             parameters.urlParameters = {};
             const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
             var posiciones = JSON.parse(request.results[0].ET_DATA);
+            $.each(posiciones, function (i, item) {
+                item.NETWR = (item.NETWR).toString();
+                item.MENGE = (item.MENGE).toString();
+            });
             MODEL.setProperty("/Ordenes", posiciones);
             //this._seleccionarTabla(posiciones);
         },
