@@ -836,6 +836,7 @@ sap.ui.define([
 
 
             let oReturn = {
+                "I_TIPODATA": "SOLAPP",
                 "I_ESTADO": "01",
                 "I_WAERS": factura.moneda.split("-")[0].trim(),
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,

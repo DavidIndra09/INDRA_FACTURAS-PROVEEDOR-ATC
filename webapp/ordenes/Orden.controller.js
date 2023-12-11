@@ -193,7 +193,7 @@ sap.ui.define([
                 item.NETWR = (item.NETWR).toString();
                 item.MENGE = (item.MENGE).toString();
             });
-            debugger
+            
             MODEL.setProperty("/Ordenes", posiciones);
         },
         onLimpiarFiltros: function () {

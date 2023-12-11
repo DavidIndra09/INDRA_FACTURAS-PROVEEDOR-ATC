@@ -1,4 +1,5 @@
-<core:FragmentDefinition xmlns="sap.m"
+<core:FragmentDefinition 
+    xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:form="sap.ui.layout.form"
     xmlns:commons="sap.suite.ui.commons"

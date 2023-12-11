@@ -898,6 +898,7 @@ sap.ui.define([
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];
                 let DataFactura = that._getDataFactura(Item);
+                debugger
                 oView.byId("button-message").setVisible(true);
                 oView.byId("button-message").setText("Registrando factura " + Item.Num_Fc + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
                 //await that.esperarTresSegundos();                             
@@ -931,7 +932,7 @@ sap.ui.define([
                         const Fecha_Fc = elemento.FechaBl;
                         const Total = "1000";//elemento.Fob_U;
                         if (!grupos[numFc]) {
-                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
+                            grupos[numFc] = { TipoData: "XLSREP", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
                         }
                         grupos[numFc].Detalle.push(elemento);
                     });
@@ -944,7 +945,7 @@ sap.ui.define([
                         const Fecha_Fc = elemento.Fecha_Fc;
                         Total = Total + parseFloat((elemento.Fob_U != "") ? elemento.Fob_U : 0) + parseFloat((elemento.Flete != "") ? elemento.Flete : 0) + parseFloat((elemento.Seguro != "") ? elemento.Seguro : 0);
                         if (!grupos[numFc]) {
-                            grupos[numFc] = { Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: 0, Moneda: Moneda, Detalle: [] };
+                            grupos[numFc] = { TipoData: "XLSVEH", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: 0, Moneda: Moneda, Detalle: [] };
                         }
                         grupos[numFc].Total = Total;
                         grupos[numFc].Detalle.push(elemento);
@@ -978,6 +979,7 @@ sap.ui.define([
             });*/
 
             let oReturn = {
+                "I_TIPODATA": Data.TipoData,
                 "I_ESTADO": "01",
                 "I_WAERS": Data.Moneda,
                 "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
