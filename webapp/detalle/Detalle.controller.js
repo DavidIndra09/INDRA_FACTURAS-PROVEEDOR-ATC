@@ -59,15 +59,7 @@ sap.ui.define([
          * @public
          */
         onNavBack: function () {
-            this.getRouter().navTo("solicitudes", {}, true);
-            /*var sPreviousHash = History.getInstance().getPreviousHash();
-            if (sPreviousHash !== undefined) {
-                // eslint-disable-next-line sap-no-history-manipulation
-                //history.go(-1);
-                this.getRouter().navTo("solicitudes", {}, true);
-            } else {
-                this.getRouter().navTo("solicitudes", {}, true);
-            }*/
+            this.getRouter().navTo("solicitudes", {}, true);           
         },
 
         /* =========================================================== */
@@ -80,15 +72,20 @@ sap.ui.define([
          * @param {sap.ui.base.Event} oEvent pattern match event in route 'object'
          * @private
          */
-        _onDetalletMatched: function (oEvent) {
+        _onDetalletMatched: async function (oEvent) {
             if (that.getOwnerComponent().getModel("oCabecera")) {
+                that.onInitStateInputs();
                 var oParameters = oEvent.getParameters();
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
                 oObject.total = (parseFloat(that.convertirFormato(oObject.IMPORT) * 1.19)).toFixed(2); /* Number(oObject.IGV)).toFixed(2)*/;
                 oObject.total = formatter.formatCurrency(oObject.total);
-
                 oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false;
-                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
+                
+                await this.getwaershelp((oObject.WAERS).split("-")[0]);                
+                let waersCollection = that.getView().getModel("waershelp").getData();
+                var find = waersCollection.find(item=> item.VALUE == oObject.WAERS);
+                oObject.WAERS =  find.VALUE + " - " +find.TEXTO;
+                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones); 
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
                 viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
@@ -98,17 +95,8 @@ sap.ui.define([
             } else {
                 viewModel.setProperty("/busy", false);
                 that.onNavBack();
-            }
-
-            // var codigoSolicitud =  oEvent.getParameter("arguments").codigoSolicitud;
-            // facturaModel.metadataLoaded().then( function () {
-            //     const detailPath = facturaModel.createKey("Facturas",{
-            //         codigoSolicitud: codigoSolicitud
-            //     });
-            //     this._bindView("/" + detailPath);
-            // }.bind(this));
+            }          
         },
-
         /**
          * Binds the view to the object path.
          * @function
@@ -163,9 +151,9 @@ sap.ui.define([
                     if (posiciones.length > 0) {
                         let posicionesParse = JSON.parse(posiciones);
                         aLista.push(...posicionesParse);
-                    }
+                    }                    
                     $.each(aLista, function (i, item) {
-                        item.WAERS = oCabecera.WAERS;
+                        item.WAERS = oCabecera.WAERS.split("-")[0];
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
@@ -370,7 +358,8 @@ sap.ui.define([
                     "waers": item.WAERS,
                     "txz01": item.TXZ01,
                     "belnr": item.BELNR,
-                    "solfac": item.SOLFAC
+                    "solfac": item.SOLFAC,
+                    "mwskz": item.MWSKZ
                 }
             });
 
@@ -417,6 +406,13 @@ sap.ui.define([
             var fechaFormateada = `${anio}${mes}${dia}`;
             return fechaFormateada;
         },
+        onInitStateInputs:function(){
+            that.getView().byId("InputFactura").setValueState("None");
+            that.getView().byId("FechaEmision").setValueState("None");
+            that.getView().byId("InputImporte").setValueState("None");
+            that.getView().byId("InputSelectWaers").setValueState("None");
+            that.getView().byId("InputPedido").setValueState("None")
+        },
         onValidarCampos: function () {
             let valid = true;
             let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
@@ -448,6 +444,13 @@ sap.ui.define([
             }
             else {
                 that.getView().byId("InputSelectWaers").setValueState("None")
+            }
+            if (oCabecera.EBELN == "") {
+                that.getView().byId("InputPedido").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputPedido").setValueState("None")
             }
             return valid;
         },

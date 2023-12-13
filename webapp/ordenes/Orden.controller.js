@@ -121,22 +121,31 @@ sap.ui.define([
                 let element = MODEL.getProperty(item);
                 if (element.MWSKZ == "") {
                     object.valid = false;
-                    object.mensaje.push("El pedido " + element.EBELN + " no cuenta con indicador de impuesto. Por favor actualizar desde la tx me22n.\n");
+                    object.mensaje.push("El pedido " + element.EBELN + " no cuenta con indicador de impuesto. Por favor actualizar desde la tx me22n");
                 }
 
             });
             return object;
         },
+        formatMessagesAsHTML: function (Mensaje) {
+            let NuevoMensaje = "";
+            let count = 0;
+            Mensaje.map((mensaje) => {
+                count++;
+                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + ".<br>";
+            });
+            return NuevoMensaje;
+        },
         onAgregarOrdenes: async function () {
             let object = that.onValidarIndicadorImpuesto();
-            if (!object.valid) {
-                debugger
+            if (!object.valid) {                
+                let htmlmessage = that.formatMessagesAsHTML(object.mensaje);
                 MessageBox.warning(
                     "Falta indicador de impuesto.",
                     {
                         title: "Validaciones",
                         actions: [MessageBox.Action.CLOSE],
-                        details: object.mensaje
+                        details: htmlmessage
                     }
                 );
                 return;
@@ -224,7 +233,7 @@ sap.ui.define([
             let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
             filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
             filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
-            //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+            filters.push(new Filter("I_LOEKZ", "EQ", "X"));
             this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
                 filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
             });

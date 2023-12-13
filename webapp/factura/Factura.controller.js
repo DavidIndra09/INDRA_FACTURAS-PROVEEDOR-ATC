@@ -123,12 +123,13 @@ sap.ui.define([
             if (files.length > 0) {
                 const file = files[0];
                 const dataXml = await this._readFiles(file);
-                if (!dataXml.invoice) {
+                debugger
+                if (!dataXml.attacheddocument && !dataXml.invoice) {//dataXml.invoice
                     MessageBox.error(`El archivo xml no cumple con el formato requerido`);
                     fileUploader.setValue("");
                     return;
                 }
-                const invoice = dataXml.invoice;
+                const invoice = (dataXml.attacheddocument)?dataXml.attacheddocument.attachment.externalreference.description.invoice :dataXml.invoice//dataXml.invoice;
                 let version = invoice.ublversionid;
                 version = parseFloat(version);
                 if (version <= 2.0) {
@@ -137,41 +138,35 @@ sap.ui.define([
                     return;
                 }
 
-                /*let aFactura = MODEL.getProperty("/Facturas");
-                let oFindFactura = aFactura.find(oPos => oPos.XBLNR == invoice.id);
-                if (oFindFactura) {
-                    MessageBox.error(`La factura ya ha sido registrada. Por favor, ingresar otra factura.`);
-                    fileUploader.setValue("");
-                    return;
-                }*/
+               
 
                 const datosFactura = {
-                    version: invoice.ublversionid,
+                    //version: invoice.ublversionid,
                     numeroSerie: invoice.id,
                     fechaEmision: invoice.issuedate,
                     //fechaVencimiento: invoice.paymentterms.paymentduedate,
-                    tipoDocumento: invoice.invoicetypecode,
-                    tipoMoneda: invoice.documentcurrencycode,
-                    rucEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
-                    nombreComercialEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
-                    numeroDocumentoReceptor: invoice.accountingcustomerparty.party.partyidentification.id,
-                    tipoDocumentoReceptor: "",
-                    nombresReceptor: invoice.accountingcustomerparty.party.partylegalentity.registrationname,
-                    unidadMedida: "",
-                    cantidad: invoice.invoiceline.invoicedquantity,
-                    codigoProducto: invoice.invoiceline.item.sellersitemidentification.id,
-                    codigoProductoSunat: "",
-                    descripcionItem: invoice.invoiceline.item.description,
-                    precioUnitario: invoice.invoiceline.price.priceamount,
-                    igvItem: invoice.invoiceline.taxtotal.taxamount,
-                    valorVentaItem: invoice.invoiceline.pricingreference.alternativeconditionprice.priceamount,
-                    descuentoItem: false,
-                    totalValorVenta: "",
-                    totalDescuentos: "",
-                    sumatoriaIgv: invoice.taxtotal.taxamount,
-                    importe: invoice.taxtotal.taxsubtotal.taxableamount, ///
-                    total: invoice.legalmonetarytotal.payableamount,
-                    sociedad: "3000"
+                    //tipoDocumento: invoice.invoicetypecode,
+                    tipoMoneda: (invoice.documentcurrencycode)?invoice.documentcurrencycode:invoice.note.documentcurrencycode,
+                    //rucEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
+                    //nombreComercialEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
+                    //numeroDocumentoReceptor: invoice.accountingcustomerparty.party.partyidentification.id,
+                    //tipoDocumentoReceptor: "",
+                    //nombresReceptor: invoice.accountingcustomerparty.party.partylegalentity.registrationname,
+                    //unidadMedida: "",
+                    //cantidad: invoice.invoiceline.invoicedquantity,
+                    //codigoProducto: invoice.invoiceline.item.sellersitemidentification.id,
+                    //codigoProductoSunat: "",
+                    //descripcionItem: invoice.invoiceline.item.description,
+                    //precioUnitario: invoice.invoiceline.price.priceamount,
+                    //igvItem: invoice.invoiceline.taxtotal.taxamount,
+                    //valorVentaItem: invoice.invoiceline.pricingreference.alternativeconditionprice.priceamount,
+                    //descuentoItem: false,
+                    //totalValorVenta: "",
+                    //totalDescuentos: "",
+                    //sumatoriaIgv: invoice.taxtotal.taxamount,
+                    importe: (invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
+                    total: (invoice.legalmonetarytotal)?invoice.legalmonetarytotal.payableamount:invoice.note.legalmonetarytotal.payableamount,
+                    //sociedad: "3000"
                 };
 
                 MODEL.setProperty("/facturaXml", datosFactura);
@@ -183,10 +178,14 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
                 MODEL.setProperty("/Factura/importe", datosFactura.importe);
                 MODEL.setProperty("/Factura/total", datosFactura.total);
-                MODEL.setProperty("/Factura/moneda", datosFactura.tipoMoneda);
+                await this.getwaershelp(datosFactura.tipoMoneda);                
+                let waersCollection = that.getView().getModel("waershelp").getData();
+                var find = waersCollection.find(item=> item.VALUE == datosFactura.tipoMoneda);
+                var moneda = (find)? (find.VALUE + " - " +find.TEXTO):datosFactura.tipoMoneda;
+                MODEL.setProperty("/Factura/moneda", moneda);
                 //MODEL.setProperty("/Factura/sociedad", datosFactura.sociedad);
 
-                nuevafacturaModel.setProperty("/isEnabledCabecera", false);
+                nuevafacturaModel.setProperty("/isEnabledCabecera", true); 
                 MODEL.setProperty("/Factura/estado", "No validado");
                 MODEL.setProperty("/Factura/estadoState", "Information");
                 MODEL.setProperty("/Factura/estadoIcon", "sap-icon://information");

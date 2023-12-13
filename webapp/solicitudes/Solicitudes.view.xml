@@ -42,7 +42,7 @@
                 <Label text="" />                 
                     <Button
                         icon="sap-icon://create"
-                        text="Crear factura manual"
+                        text="Factura Nacional"
                         type="Emphasized"
                         press="onNavFacturaNueva"
                     />

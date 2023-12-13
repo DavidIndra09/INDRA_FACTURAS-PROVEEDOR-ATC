@@ -394,6 +394,7 @@ sap.ui.define([
             if (!vistaRapida) {
                 vistaRapida = await that._getDialogs("VistaRapidaEstados");
             }
+            debugger
             vistaRapida.bindElement(path);
             vistaRapida.close();
             vistaRapida.openBy(control);
@@ -434,6 +435,7 @@ sap.ui.define([
             if (!vistaRapida) {
                 vistaRapida = await that._getDialogs(VistaRapida);
             }
+            debugger
             vistaRapida.unbindElement();
             vistaRapida.close();
             vistaRapida.bindElement(path);
@@ -781,7 +783,7 @@ sap.ui.define([
                     object.state = "Success";
                     object.icon = "sap-icon://sys-enter-2";
                     break;
-                case "Con errores":
+                case "Con Errores":
                     object.state = "Error";
                     object.icon = "sap-icon://error";
                     break;
