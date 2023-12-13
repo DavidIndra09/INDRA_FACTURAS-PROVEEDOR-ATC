@@ -85,7 +85,7 @@ sap.ui.define([
             that._dialogs = {};
             that.onMostrarSeleccionProveedor();
             // this._getDataInitial();
-            //this._setListaSolicitudes({ filters: [] });
+
 
             this.getRouter().getRoute("solicitudes").attachPatternMatched(this._onSolicitudesMatched, this);
         },
@@ -286,7 +286,7 @@ sap.ui.define([
             dateRangeRegistro.setDateValue(null);
             dateRangeRegistro.setSecondDateValue(null);
             viewModel.setProperty("/tableBusy", true);
-            this._setListaSolicitudes({ filters: [] });
+            //this._setListaSolicitudes({ filters: [] });
             this._limpiarItemsSeleccionados();
 
         },
@@ -418,7 +418,8 @@ sap.ui.define([
                         const request = await this.readEntity(ODATA_SAP, "/facturaSet", oParameters);
                         MessageBox[request.results[0].e_subrc](request.results[0].e_msg);
                         viewModel.setProperty("/tableBusy", true);
-                        this._setListaSolicitudes({ filters: [] });
+                        that.onBuscarFacturas();
+                        //this._setListaSolicitudes({ filters: [] });
                     }
                 }.bind(this)
             });
@@ -555,7 +556,8 @@ sap.ui.define([
                 const mensajeInformativo = await this._mostrarMensajes("MensajeInformativo");
                 mensajeInformativo.open();
                 // viewModel.setProperty("/tableBusy", false);
-                this._setListaSolicitudes({ filters: [] });
+                //this._setListaSolicitudes({ filters: [] });
+                that.onBuscarFacturas();
             }
         },
 
@@ -614,13 +616,12 @@ sap.ui.define([
             if (idTable == "idFacturasTable") {
                 table.removeSelections();
             }
-
-
             const historyDirection = History.getInstance().getDirection();
 
             if (historyDirection === "Unknown" || historyDirection === "NewEntry") {
                 viewModel.setProperty("/tableBusy", true);
-                this._setListaSolicitudes({ filters: [] });
+                //this._setListaSolicitudes({ filters: [] });
+                that.onBuscarFacturas();
                 return;
             }
         },
@@ -753,10 +754,6 @@ sap.ui.define([
                 value.FEMISI = formatter.formatearFechaString(value.FEMISI);
             });
             aLista.sort((a, b) => a.SOLFAC - b.SOLFAC);
-            //let table = that.getTable();
-            //table.setGrowingThreshold(5);
-            //table.setGrowingScrollToLoad(false);
-            //table.setGrowing(true);
             MODEL.setProperty("/Facturas", aLista);
             viewModel.setProperty("/tableBusy", false);
         },
@@ -898,7 +895,6 @@ sap.ui.define([
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];
                 let DataFactura = that._getDataFactura(Item);
-                debugger
                 oView.byId("button-message").setVisible(true);
                 oView.byId("button-message").setText("Registrando factura " + Item.Num_Fc + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
                 //await that.esperarTresSegundos();                             
@@ -979,19 +975,23 @@ sap.ui.define([
             });*/
 
             let oReturn = {
-                "I_TIPODATA": Data.TipoData,
-                "I_ESTADO": "01",
-                "I_WAERS": Data.Moneda,
-                "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
-                "I_FACTUR": Data.Num_Fc,
-                "I_FEMISI": formatter.formatearFechaString(Data.Fecha_Fc),
-                "I_IMPORT": (Data.Total).toString(),
-                "IT_DOC": "",//JSON.stringify(adjuntoModel),
-                "IT_DET": "",//JSON.stringify(conformidades),
-                "I_SOLFAC": "",
-                "I_FCRESO": ""
+                "EBELN": "",
+                "TIPDAT": Data.TipoData,
+                "ESTADO": "01",
+                "WAERS": Data.Moneda,
+                "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
+                "FACTUR": Data.Num_Fc,
+                "FEMISI": formatter.formatearFechaString(Data.Fecha_Fc),
+                "IMPORT": (Data.Total).toString(),
+                "SOLFAC": "",
+                "FCRESO": ""
             }
-            return oReturn;
+            let obj = {
+                "IS_CAB": JSON.stringify(oReturn),
+                "IT_DET": JSON.stringify(conformidades),
+                "IT_DOC": JSON.stringify(adjuntoModel)
+            };
+            return obj;
         },
         onReadExcel: function (oFile, TypeTable) {
             if (window.FileReader) {
@@ -1103,7 +1103,7 @@ sap.ui.define([
                             }
                             else if (oColumnData.path == "IMPORT") {
                                 let celda = "{" + oColumnData.path + "}" + " " + "{" + oColumnData.path2 + "}";
-                                oCell = new sap.m.ObjectStatus({ text: celda /*, state: "Indication04"*/ });
+                                oCell = new sap.m.ObjectStatus({ text: celda, state: "Information" });
                                 //oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
                             }
                             else if (oColumnData.path == "SOLFAC") {
@@ -1655,7 +1655,7 @@ sap.ui.define([
             var oView = this.getView();
             oView.addDependent(oTable);
             oView.byId("ContenedorTabla").addContent(oTable);
-            //this._setListaSolicitudes({ filters: [] });
+
         },
         MostrarTablaPorFlujo: function (TypeTable) {
             var oView = this.getView();

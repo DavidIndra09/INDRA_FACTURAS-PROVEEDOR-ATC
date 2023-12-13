@@ -1,45 +1,22 @@
-<core:FragmentDefinition
-	xmlns="sap.m"
-	xmlns:core="sap.ui.core">
-    <Table
-        id="idtablaFactura"
-        width="auto"
-        items="{
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Table id="idtablaFactura" width="auto" items="{
             path: 'conformidades/results',
             sorter: {
                 path: 'conformidad',
                 descending: false
             }
-        }"
-        noDataText="{facturaView>/tableNoDataText}"
-        busyIndicatorDelay="{facturaView>/tableBusyDelay}"
-        growing="true"
-        growingScrollToLoad="true"
-        updateFinished=".onUpdateFinished"
-        mode="None">
+        }" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingScrollToLoad="true" updateFinished=".onUpdateFinished" mode="None">
 
         <headerToolbar>
             <OverflowToolbar>
-                <Title
-                    id="tableHeader"
-                    text="{facturaView>/facturaTableTitle}"
-                    level="H3"/>
+                <Title id="tableHeader" text="{facturaView>/facturaTableTitle}" level="H3"/>
                 <ToolbarSpacer />
-                <Button 
-                    type="Emphasized" 
-                    text="{i18n>agregarPosiciones}" 
-                    icon="{i18n>iconAgregar}" 
-                    press="onNavOrdenes"
-                      />
-                      <!--enabled="{facturaView>/isBtnPosicionesEnabled}"-->
-                <SearchField
-                    id="searchField"
-                    tooltip="{i18n>ordenSearchTooltip}"
-                    liveChange="onBusquedaRapida">
+                <Button type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
+                <!--enabled="{facturaView>/isBtnPosicionesEnabled}"-->
+                <SearchField id="searchField" tooltip="{i18n>ordenSearchTooltip}" liveChange="onBusquedaRapida">
                     <layoutData>
-                        <OverflowToolbarLayoutData
-                            maxWidth="200px"
-                            priority="NeverOverflow"/>
+                        <OverflowToolbarLayoutData maxWidth="200px" priority="NeverOverflow"/>
                     </layoutData>
                 </SearchField>
             </OverflowToolbar>
@@ -52,7 +29,7 @@
             <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>posConformidad}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet"  width="9rem">
+            <Column demandPopin="true" minScreenWidth="Tablet" width="9rem">
                 <Label text="{i18n>ordenCompra}" design="Bold"/>
             </Column>
             <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
@@ -62,10 +39,10 @@
             <Column demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>material}" design="Bold"/>
             </Column>
-             <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
+            <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
                 <Label text="{i18n>descmaterial}" design="Bold"/>
             </Column>
-             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
                 <Label text="{i18n>unidadMedida}" design="Bold"/>
             </Column>
             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="6rem">
@@ -73,38 +50,34 @@
             </Column>
             <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                 <Label text="{i18n>importe}" design="Bold"/>
-            </Column>            
+                <footer>
+                   <!--<Text id="sumatoriaImporte" text="0.00"/> -->
+                   <ObjectStatus text="0.00"  id="sumatoriaImporte" state="Information"  />
+                </footer>
+            </Column>
             <Column hAlign="Center" width="5rem">
                 <Label text="" />
             </Column>
         </columns>
 
         <items>
-            <ColumnListItem
-                press=".onPress">
+            <ColumnListItem press=".onPress">
                 <cells>
-                    <ObjectIdentifier
-                        title="{BELNR}"/>
+                    <ObjectIdentifier title="{BELNR}"/>
                     <Text text="{BUZEI}" />
                     <Text text="{EBELN}" />
                     <Text text="{EBELP}" />
                     <Text text="{MATNR}" />
-                    <Text text="{TXZ01}" />  
-                    <Text text="{MEINS}" />                   
-                    <ObjectNumber
-                        number="{
+                    <Text text="{TXZ01}" />
+                    <Text text="{MEINS}" />
+                    <ObjectNumber number="{
                             path: 'MENGE',
                             formatter: '.formatter.numberUnit'
-                        }"
-                         />
-                        <ObjectNumber
-                            number="{
-                            parts:[{path:'NETWR'},{path:'WAERS'}],
-                            type: 'sap.ui.model.type.Currency',
-                            formatOptions: {showMeasure: false}
-                        }"
-                        unit="{WAERS}"
-                        state="Information" />                        
+                        }" />
+                    <ObjectNumber number="{
+                            parts:[{path:'NETWR',formatter: '.formatter.formatCurrency'}]                                                        
+                        }" unit="{WAERS}" state="Information" />
+                        
                     <Button type="Reject" icon="sap-icon://delete" press="onEliminarRegistro"/>
                 </cells>
             </ColumnListItem>

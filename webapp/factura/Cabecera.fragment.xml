@@ -11,7 +11,7 @@
                     <form:formElements>
                         <form:FormElement>
                             <form:fields>
-                                <u:FileUploader id="fileUploader" name="myFileUpload" icon="" uploadUrl="upload/" tooltip="Validar archivo xml" uploadComplete="handleUploadComplete" change="onImportarArchivoXml" typeMissmatch="handleTypeMissmatch" style="Accept" width="100%" fileType="xml" buttonText="{= ${device>/system/phone} ? 'Importar' : 'Importar xml'}" buttonOnly="{device>/system/phone}">
+                                <u:FileUploader id="fileUploader" name="myFileUpload" icon="" uploadUrl="upload/" tooltip="Validar archivo xml" uploadComplete="handleUploadComplete" change="onImportarArchivoXml" typeMissmatch="handleTypeMissmatch" style="Accept" width="100%" fileType="xml" buttonText="{= ${device>/system/phone} ? 'Importar xml' : 'Importar xml'}" buttonOnly="{device>/system/phone}">
                                 </u:FileUploader>
                             </form:fields>
                             <form:label>
@@ -20,9 +20,9 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <Button id="btnFactElect" text="Validar" press="onValidarArchivoXml" type="Attention">
-                                </Button>
-                                <Button id="btnFactElectClear" icon="sap-icon://clear-filter" press="onClearArchivoXml" tooltip="Limpiar" text="Limpiar" type="Ghost">
+                              <!--  <Button id="btnFactElect" visible="false" text="Validar" press="onValidarArchivoXml" type="Attention">
+                                </Button> -->
+                                <Button id="btnFactElectClear" icon="sap-icon://clear-filter" press="onClearArchivoXml" tooltip="Limpiar" text="Limpiar" type="Ghost" width="100%">
                                 </Button>
                             </form:fields>
 
@@ -31,10 +31,19 @@
                         </form:FormElement>
 
                     </form:formElements>
-                    <form:FormElement>
+                  <!-- <form:FormElement visible="false">
                         <form:fields>
-                            <ObjectStatus class="sapUiSmallMarginBottom" title="Estado XML" text="{estado}" active="true" state="{estadoState}" press="handleStatusPressed" icon="{estadoIcon}" />
+                            <ObjectStatus class="sapUiSmallMarginTop" title="Estado XML" text="{estado}" active="true" state="{estadoState}" press="handleStatusPressed" icon="{estadoIcon}" />
                         </form:fields>
+                    </form:FormElement> -->
+                    <form:FormElement >
+                        <form:fields >
+                        <Input id="pedido"  required="true" value="{pedido}" placeholder="Ingrese Nro. pedido" enabled="{facturaView>/isEnabledCabecera}" />
+                          <!-- <ObjectStatus class="sapUiSmallMarginBottom" title="Pedido" text="{pedido}" active="false"  /> -->
+                        </form:fields>
+                         <form:label>
+                                <Label class="sapUiSmallMarginTop" text="{i18n>Pedido}"/>
+                            </form:label>
                     </form:FormElement>
                     <form:formElements>
 
@@ -91,26 +100,28 @@
 
                         <form:FormElement>
                             <form:fields >
-
                                 <Input  required="true" id="InputSelectWaers" liveChange=".onSuggestWaers" enabled="{facturaView>/isEnabledCabecera}" value="{moneda}" width="100%" showSuggestion="true" placeholder="Ingrese nombre de moneda" enableSuggestions="true" suggestionItems="{waershelp>/}">
                                     <suggestionItems>
                                         <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}" key="{waershelp>VALUE}" />
                                     </suggestionItems>                                    
-                                </Input>
-
-                                <!--
-
-                                <SearchField id="InputSelectWaers" enabled="{facturaView>/isEnabledCabecera}" value="{moneda}" width="100%" showSearchButton="false" placeholder="Ingrese nombre de moneda" enableSuggestions="true" search=".handleSearch" suggest=".onSuggestWaers" suggestionItems="{path:'waershelp>/'}">
-
-                                    <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}" key="{waershelp>VALUE}" />
-
-                                </SearchField>
-
-                                -->
+                                </Input>                 
 
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>moneda}"/>
+
+                            </form:label>
+
+                        </form:FormElement>
+
+                         <form:FormElement>
+                            <form:fields>
+
+                                <Input value="{diferencia}" placeholder="" enabled="false"/>
+
+                            </form:fields>
+                            <form:label>
+                                <Label text="{i18n>diferencia}"/>
 
                             </form:label>
 

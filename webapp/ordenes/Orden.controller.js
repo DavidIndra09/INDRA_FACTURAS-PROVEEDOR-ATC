@@ -36,6 +36,7 @@ sap.ui.define([
          */
         onInit: function () {
             that = this;
+            MODEL = this.getOwnerComponent().getModel();
             // Model used to manipulate control states. The chosen values make sure,
             // detail page shows busy indication immediately so there is no break in
             // between the busy indication for loading the view's meta data
@@ -54,11 +55,13 @@ sap.ui.define([
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
             ordenModel = new JSONModel({
                 busy: true,
-                delay: 0
+                delay: 0,
+                ordenCompra: MODEL.getProperty("/Factura/pedido")
             });
-            sap.ui.core.UIComponent.getRouterFor(this).getRoute("orden").attachPatternMatched(this._onOrdenMatched, this);
+
             this.setModel(ordenModel, "ordenView");
-            MODEL = this.getOwnerComponent().getModel();
+            sap.ui.core.UIComponent.getRouterFor(this).getRoute("orden").attachPatternMatched(this._onOrdenMatched, this);
+
         },
         /* =========================================================== */
         /* event handlers                                              */
@@ -109,12 +112,39 @@ sap.ui.define([
             ordenModel.setProperty("/ordenTableTitle", sTitle);
         },
 
+        onValidarIndicadorImpuesto: function () {
+            let object = { "valid": true, "mensaje": [] };
+            const table = this.getView().byId("idTableOrdenes");
+            let data = table.getSelectedContextPaths();
+
+            $.each(data, function (i, item) {
+                let element = MODEL.getProperty(item);
+                if (element.MWSKZ == "") {
+                    object.valid = false;
+                    object.mensaje.push("El pedido " + element.EBELN + " no cuenta con indicador de impuesto. Por favor actualizar desde la tx me22n.\n");
+                }
+
+            });
+            return object;
+        },
         onAgregarOrdenes: async function () {
+            let object = that.onValidarIndicadorImpuesto();
+            if (!object.valid) {
+                debugger
+                MessageBox.warning(
+                    "Falta indicador de impuesto.",
+                    {
+                        title: "Validaciones",
+                        actions: [MessageBox.Action.CLOSE],
+                        details: object.mensaje
+                    }
+                );
+                return;
+            }
             const table = this.getView().byId("idTableOrdenes");
             const selectedPaths = table.getSelectedContextPaths();
             let detalleFactura;
             let sStatus;
-
             if (selectedPaths.length > 0) {
                 var rowInvoice = MODEL.getProperty(selectedPaths[0]);
                 var oFormData = {
@@ -125,15 +155,18 @@ sap.ui.define([
                     Netwr: 0,
                     Waers: rowInvoice.Waers
                 };
-
                 var impTotal = 0.00;
                 var rowDetails = [];
-
+                let sumatoria = 0;
                 detalleFactura = selectedPaths.map(item => {
+                    let element = MODEL.getProperty(item);
+                    sumatoria = sumatoria + parseFloat(that.convertirFormato(element.NETWR));
+                    MODEL.setProperty("/Factura/pedido", element.EBELN);
                     return MODEL.getProperty(item);
                 });
                 MODEL.setProperty("/Factura/conformidades/results", detalleFactura);
 
+                sap.ui.getCore().setModel(new JSONModel({ "TotalNetwr": sumatoria }), "TotalNetwr")
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
                 MODEL.setProperty("/Ordenes", []);
                 this.onNavBack(detalleFactura);
@@ -141,7 +174,24 @@ sap.ui.define([
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }
         },
+        convertirFormato(valor) {
+            // Reemplazar las comas con una cadena vacía
+            const valorSinComas = valor.replace(/,/g, '');
 
+            // Convertir la cadena a un número
+            const numero = parseFloat(valorSinComas);
+
+            // Verificar si el valor es un número válido
+            if (!isNaN(numero)) {
+                // Formatear el número de nuevo a una cadena con dos decimales
+                const valorFormateado = numero.toFixed(2);
+                return valorFormateado;
+            } else {
+                // Manejar el caso en el que el valor no sea un número válido
+                console.error('El valor no es un número válido:', valor);
+                return valor;
+            }
+        },
         onDeleteItemFactura: function (oEvent) {
             var impTotalDel = 0;
             const table = sap.ui.getCore().byId("container-usil.com.createinvoice.atc---factura--OrdenesCompra");
@@ -193,12 +243,15 @@ sap.ui.define([
                 item.NETWR = (item.NETWR).toString();
                 item.MENGE = (item.MENGE).toString();
             });
-            
+
             MODEL.setProperty("/Ordenes", posiciones);
         },
         onLimpiarFiltros: function () {
-            ordenModel.setProperty("/Busqueda", {});
-            this._applySearch([]);
+            that.byId("mtIptOrdenCompra").setTokens([]);
+            that.byId("mtIptDescMaterial").setTokens([]);
+            that.byId("mtIptConformidades").setTokens([]);
+            //ordenModel.setProperty("/Busqueda", {});
+            //this._applySearch([]);
         },
         onBusquedaRapida: function (event) {
             const query = event.getParameter("newValue");
@@ -239,7 +292,18 @@ sap.ui.define([
             ordenModel.setProperty("/Busqueda", {});
             let parameters = { filters: [] };
             let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
-            parameters.filters.push(new Filter("IR_BUKRS", FilterOperator.EQ, "1000"));
+            let oMultiInput1 = that.byId("mtIptOrdenCompra");
+            oMultiInput1.setTokens([]);
+            if (MODEL.getProperty("/Factura/pedido") != "" && MODEL.getProperty("/Factura/pedido") != undefined) {
+                let oNewToken = new sap.m.Token({
+                    key: MODEL.getProperty("/Factura/pedido"), // Asigna el valor deseado para la key
+                    text: MODEL.getProperty("/Factura/pedido") // Puedes asignar un texto opcional al token
+                });
+                oMultiInput1.addToken(oNewToken);
+            }
+
+
+            /*parameters.filters.push(new Filter("IR_BUKRS", FilterOperator.EQ, "1000"));
             parameters.filters.push(new Filter("IR_LIFNR", FilterOperator.EQ, lifnr));
             //parameters.filters.push(new Filter("I_LOEKZ", FilterOperator.EQ, "X"));
             parameters.urlParameters = {};
@@ -251,6 +315,8 @@ sap.ui.define([
             });
             MODEL.setProperty("/Ordenes", posiciones);
             //this._seleccionarTabla(posiciones);
+            */
+            that.onBuscarOrdenes();
         },
 
         _seleccionarTabla: function (posiciones) {

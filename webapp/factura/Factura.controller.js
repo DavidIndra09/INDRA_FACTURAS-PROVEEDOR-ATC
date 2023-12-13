@@ -45,6 +45,7 @@ sap.ui.define([
                 isBtnPosicionesEnabled: false
                 // facturaViewTitle: this.getResourceBundle().getText("facturaViewTitleCreate")
             });
+            sap.ui.getCore().setModel(new JSONModel({ "TotalNetwr": 0 }), "TotalNetwr");
             that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": [] }));
             this.getRouter().getRoute("factura").attachPatternMatched(this._onFacturaMatched, this);
             this.setModel(nuevafacturaModel, "facturaView");
@@ -363,8 +364,13 @@ sap.ui.define([
             let total;
             total = (importeBase * 1.19).toFixed(2);
             MODEL.setProperty("/Factura/total", total);
+            that.onCalcularDiferencia(importeBase);
         },
-
+        onCalcularDiferencia: function (importeBase) {
+            let TotalNetwr = sap.ui.getCore().getModel("TotalNetwr").getData().TotalNetwr;
+            let diferencia = (importeBase - TotalNetwr).toFixed(2);
+            MODEL.setProperty("/Factura/diferencia", diferencia);
+        },
         onSeleccionarTipoImpuesto: function (event) {
             const selectedKey = event.getSource().getSelectedKey();
             // const inputImporteTotal = this.getView().byId("idInputImporteTotal");
@@ -393,9 +399,23 @@ sap.ui.define([
                 return;
             }*/
             //if (!factura.codigoSolicitud) {
+            let valid = that.onValidarCampos();
+            if (!valid) {
+                MessageBox.warning("Completar todos los campos obligatorios");
+                sap.ui.core.BusyIndicator.hide()
+                return;
+            }
+            let validDiferencia = that.validarDiferencia();
+            if (!validDiferencia) {
+                MessageBox.warning("La diferencia entre el importe y el total de posiciones debe ser 0.");
+                sap.ui.core.BusyIndicator.hide()
+                return;
+            }
             MessageBox.confirm(`¿Está seguro que desea crear esta factura?`, {
                 onClose: function (action) {
-                    if (action === "OK") this._crearFactura();
+                    if (action === "OK") {
+                        this._crearFactura();
+                    }
                 }.bind(this)
             });
             //return;
@@ -470,6 +490,9 @@ sap.ui.define([
                         const index = posiciones.findIndex(item => item.conformidad === ordenBorrar.conformidad);
                         posiciones.splice(index, 1);
                         MODEL.setProperty(path.slice(0, -2), posiciones);
+                        let importeBase = MODEL.getProperty("/Factura/importe");
+                        that.onCalcularSumaPosiciones();
+                        that.onCalcularDiferencia((importeBase == undefined) ? 0.00 : importeBase);
                     }
                 }.bind(this)
             });
@@ -542,7 +565,6 @@ sap.ui.define([
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = fila.name + fila.type;
-
             // Simular un clic en el enlace para iniciar la descarga
             link.click();
         },
@@ -575,6 +597,14 @@ sap.ui.define([
          * @private
          */
         _onFacturaMatched: async function (oEvent) {
+            let lifnr = sap.ui.getCore().getModel("Lifnr");
+            if (lifnr == undefined) {
+                that.onNavBack();
+            }
+            let TotalNetwr = sap.ui.getCore().getModel("TotalNetwr").getData().TotalNetwr;
+            that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNetwr));
+            let importeBase = MODEL.getProperty("/Factura/importe");
+            that.onCalcularDiferencia((importeBase == undefined) ? 0.00 : importeBase);
             const historyDirection = History.getInstance().getDirection();
             if (historyDirection === "Backwards") {
                 return;
@@ -594,6 +624,15 @@ sap.ui.define([
 
             nuevafacturaModel.setProperty("/facturaViewTitle", viewTitle);
             this._bindView("/Factura");
+        },
+        onCalcularSumaPosiciones: function () {
+            let suma = 0;
+            let posiciones = MODEL.getProperty("/Factura/conformidades/results");
+            $.each(posiciones, function (i, item) {
+                suma = suma + parseFloat(item.NETWR);
+            });
+            sap.ui.getCore().setModel(new JSONModel({ "TotalNetwr": suma }), "TotalNetwr");
+            that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(suma));
         },
 
         /**
@@ -692,15 +731,13 @@ sap.ui.define([
             });
             oDialog.open();
         },
-
+        validarDiferencia: function () {
+            let diferencia = MODEL.getProperty("/Factura/diferencia");
+            let valid = (diferencia == 0) ? true : false;
+            return valid;
+        },
         _crearFactura: async function () {
-            sap.ui.core.BusyIndicator.show()
-            let valid = that.onValidarCampos();
-            if (!valid) {
-                MessageBox.warning("Completar todos los campos obligatorios");
-                sap.ui.core.BusyIndicator.hide()
-                return;
-            }
+            sap.ui.core.BusyIndicator.show();
             const data = this._getDataFactura();
             const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
@@ -757,6 +794,13 @@ sap.ui.define([
             else {
                 that.getView().byId("InputSelectWaers").setValueState("None")
             }
+            if (factura.pedido == undefined || factura.pedido == "") {
+                that.getView().byId("pedido").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("pedido").setValueState("None")
+            }
             return valid;
         },
         _getDataFactura: function () {
@@ -792,9 +836,12 @@ sap.ui.define([
                     "netwr": item.NETWR,
                     "waers": item.WAERS,
                     "txz01": item.TXZ01,
-                    "belnr": item.BELNR
+                    "belnr": item.BELNR,
+                    "mwskz": item.MWSKZ
                 }
             });
+
+            
 
 
 
@@ -833,23 +880,24 @@ sap.ui.define([
             const codigoSolicitud = factura.codigoSolicitud;
             if (codigoSolicitud) data.codigoSolicitud = codigoSolicitud;
 
-
-
             let oReturn = {
-                "I_TIPODATA": "SOLAPP",
-                "I_ESTADO": "01",
-                "I_WAERS": factura.moneda.split("-")[0].trim(),
-                "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
-                "I_FACTUR": factura.codigoFactura,
-                "I_FEMISI": that.formatFecha(factura.fechaEmisionParameter),
-                "I_IMPORT": factura.importe,
-                "IT_DOC": JSON.stringify(adjuntoModel),
-                "IT_DET": JSON.stringify(conformidades),
-                "I_SOLFAC": "",
-                "I_FCRESO": ""
+                "EBELN": factura.pedido,
+                "TIPDAT": "SOLAPP",
+                "ESTADO": "01",
+                "WAERS": factura.moneda.split("-")[0].trim(),
+                "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
+                "FACTUR": factura.codigoFactura,
+                "FEMISI": that.formatFecha(factura.fechaEmisionParameter),
+                "IMPORT": factura.importe,
+                "SOLFAC": "",
+                "FCRESO": ""
             }
-
-            return oReturn;
+            let obj = {
+                "IS_CAB": JSON.stringify(oReturn),
+                "IT_DET": JSON.stringify(conformidades),
+                "IT_DOC": JSON.stringify(adjuntoModel)
+            };
+            return obj;
         },
 
         convertirFechaAFormatoYMD(fecha) {

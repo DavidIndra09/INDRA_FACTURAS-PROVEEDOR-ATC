@@ -90,14 +90,9 @@
                            
                         }"
                          />
-                        <ObjectStatus
-                            text="{
-                            parts:[{path:'NETWR'},{path:'WAERS'}],
-                            type: 'sap.ui.model.type.Currency',
-                            formatOptions: {showMeasure: true}
-                        }"     
-                                          
-                        state="Information" />
+                         <ObjectNumber number="{
+                            parts:[{path:'NETWR',formatter: '.formatter.formatCurrency'}]                                                        
+                        }" unit="{WAERS}" state="Information" />
                        
                 </cells>
             </ColumnListItem>

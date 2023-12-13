@@ -377,19 +377,22 @@ sap.ui.define([
 
 
             let oReturn = {
-                "I_ESTADO": cabecera.ESTADO,
-                "I_WAERS": cabecera.WAERS.split("-")[0].trim(),
-                "I_LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
-                "I_FACTUR": cabecera.FACTUR,
-                "I_FEMISI": that.formatFecha(cabecera.FEMISI),
-                "I_IMPORT": that.convertirFormato(cabecera.IMPORT.toString()),
-                "IT_DOC": JSON.stringify(adjuntoModel),
-                "IT_DET": JSON.stringify(conformidades),
-                "I_FCRESO": that.formatFecha(cabecera.FCRESO),
-                "I_SOLFAC": cabecera.SOLFAC
+                "ESTADO": cabecera.ESTADO,
+                "WAERS": cabecera.WAERS.split("-")[0].trim(),
+                "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
+                "FACTUR": cabecera.FACTUR,
+                "FEMISI": that.formatFecha(cabecera.FEMISI),
+                "IMPORT": that.convertirFormato(cabecera.IMPORT.toString()),
+                "FCRESO": that.formatFecha(cabecera.FCRESO),
+                "SOLFAC": cabecera.SOLFAC
             }
+            let obj = {
+                "IS_CAB": JSON.stringify(oReturn),
+                "IT_DET": JSON.stringify(conformidades),
+                "IT_DOC": JSON.stringify(adjuntoModel)
+            };
 
-            return oReturn;
+            return obj;
         },
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
