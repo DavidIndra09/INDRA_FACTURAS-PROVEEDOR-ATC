@@ -9,7 +9,8 @@ sap.ui.define([
     "sap/ui/core/message/Message",
     "sap/ui/core/routing/History",
     "sap/ui/export/Spreadsheet",
-    "sap/m/MessageToast"
+    "sap/m/MessageToast",
+    "sap/ui/Device"
 ], function (
     BaseController,
     JSONModel,
@@ -21,7 +22,8 @@ sap.ui.define([
     Message,
     History,
     Spreadsheet,
-    MessageToast
+    MessageToast,
+    Device
 ) {
     "use strict";
 
@@ -48,6 +50,7 @@ sap.ui.define([
          */
         onInit: function () {
             that = this;
+            
             MODEL = this.getOwnerComponent().getModel();
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
@@ -89,6 +92,7 @@ sap.ui.define([
 
             this.getRouter().getRoute("solicitudes").attachPatternMatched(this._onSolicitudesMatched, this);
         },
+       
 
         /* =========================================================== */
         /* event handlers                                              */
@@ -394,7 +398,7 @@ sap.ui.define([
             if (!vistaRapida) {
                 vistaRapida = await that._getDialogs("VistaRapidaEstados");
             }
-            debugger
+            
             vistaRapida.bindElement(path);
             vistaRapida.close();
             vistaRapida.openBy(control);
@@ -435,10 +439,12 @@ sap.ui.define([
             if (!vistaRapida) {
                 vistaRapida = await that._getDialogs(VistaRapida);
             }
-            debugger
+            
             vistaRapida.unbindElement();
             vistaRapida.close();
+            
             vistaRapida.bindElement(path);
+            
             vistaRapida.openBy(btnVistaRapida);
         },
 
@@ -448,10 +454,12 @@ sap.ui.define([
             if (!SeleccionProveedor) {
                 SeleccionProveedor = await that._getDialogs("SeleccionarProveedor");
                 //SeleccionProveedor.setEscapeHandler(function () { });
+                that.getView().byId("InputSelectProveedor").setValue("")
                 SeleccionProveedor.open();
             }
             else {
                 //SeleccionProveedor.setEscapeHandler(function () { });
+                that.getView().byId("InputSelectProveedor").setValue("")
                 SeleccionProveedor.open();
             }
         },
@@ -894,9 +902,11 @@ sap.ui.define([
             let oView = this.getView();
             let mensaje = [];
             let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);
+            
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];
                 let DataFactura = that._getDataFactura(Item);
+                
                 oView.byId("button-message").setVisible(true);
                 oView.byId("button-message").setText("Registrando factura " + Item.Num_Fc + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
                 //await that.esperarTresSegundos();                             
@@ -920,23 +930,58 @@ sap.ui.define([
             });
 
         },
+        onCalcularTotalPosiciones: function(array){
+            let Total = 0;
+            array.forEach(elemento => {
+                Total = Total + parseFloat(elemento.PrecioNeto);
+            })
+            return (Total.toFixed(2)).toString();
+        },
         onConsolidarFacturas(array, TypeTable) {
             const grupos = {};
+            let Total = 0;
             switch (TypeTable) {
-                case "Repuestos":
+                case "Repuestos":  
+                    Total = that.onCalcularTotalPosiciones(array);                  
                     array.forEach(elemento => {
+                        const Pedido = elemento.Solped;
                         const Moneda = elemento.Moneda;
                         const numFc = elemento.NroFactura;
                         const Fecha_Fc = elemento.FechaBl;
-                        const Total = "1000";//elemento.Fob_U;
+                        const ClaseDocumento = elemento.ClaseDocumento;
+                        const OrganizacionCompras = elemento.OrganizacionCompras
+                        const GrupoCompras = elemento.GrupoCompras;                     
+                        
                         if (!grupos[numFc]) {
-                            grupos[numFc] = { TipoData: "XLSREP", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
+                            grupos[numFc] = {GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
                         }
-                        grupos[numFc].Detalle.push(elemento);
+                        
+                        //grupos[numFc].Detalle.push(elemento);
+                        grupos[numFc].Detalle.push({
+                            "werks": elemento.Centro,
+                            "lgort": elemento.Almacen,
+                            "mandt": "800",
+                            "bukrs": elemento.Sociedad,
+                            "lifnr": "",//item.LIFNR,
+                            "codefact": "",
+                            "posnr": parseFloat(elemento.Item) * 10,
+                            "datre": "",
+                            "ebeln": "",//item.EBELN,
+                            "lblni": "",
+                            "ebelp": elemento.Item,
+                            "matnr": elemento.Material,
+                            "tipod": "B",
+                            "menge": elemento.Cantidad,
+                            "meins": elemento.Unidad,
+                            "netwr": elemento.PrecioNeto,
+                            "waers": elemento.Moneda,
+                            "txz01": "",//item.TXZ01,
+                            "belnr": "",//item.BELNR,
+                            "mwskz": "I0"
+                        });
                     });
                     break;
-                case "Vehiculos":
-                    let Total = 0;
+                case "Vehiculos":                    
                     array.forEach(elemento => {
                         const Moneda = "";
                         const numFc = elemento.Num_Fc;
@@ -946,38 +991,67 @@ sap.ui.define([
                             grupos[numFc] = { TipoData: "XLSVEH", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: 0, Moneda: Moneda, Detalle: [] };
                         }
                         grupos[numFc].Total = Total;
-                        grupos[numFc].Detalle.push(elemento);
+                        //grupos[numFc].Detalle.push(elemento);
+                        grupos[numFc].Detalle.push({
+                            "mandt": "800",
+                            "bukrs": "",
+                            "lifnr": "",//item.LIFNR,
+                            "codefact": "",
+                            "posnr": "",
+                            "datre": "",
+                            "ebeln": "",//item.EBELN,
+                            "lblni": "",
+                            "ebelp": elemento.Item,
+                            "matnr": elemento.Material,
+                            "tipod": "B",
+                            "menge": elemento.Cantidad,
+                            "meins": elemento.Unidad,
+                            "netwr": elemento.M3_Unit,
+                            "waers": "COP",//elemento.Moneda,
+                            "txz01": "",//item.TXZ01,
+                            "belnr": "",//item.BELNR,
+                            "mwskz": "I0"
+                        });
                     });
                     break;
             }
-            const resultado = Object.values(grupos);
+            const resultado = Object.values(grupos);            
             return resultado;
         },
         _getDataFactura: function (Data) {
-            /*const conformidades = Detalle.map(item => {
+            
+            const conformidades = Data.Detalle.map(item => {
+                
                 return {
+                    "werks": item.werks,
+                    "lgort": item.lgort,
                     "mandt": "800",
-                    "bukrs": item.BUKRS,
-                    "lifnr": item.LIFNR,
+                    "bukrs": item.bukrs,
+                    "lifnr": "",//item.LIFNR,
                     "codefact": "",
-                    "posnr": item.BUZEI,
+                    "posnr": item.posnr,
                     "datre": "20001102",
-                    "ebeln": item.EBELN,
+                    "ebeln": "",//item.EBELN,
                     "lblni": "",
-                    "ebelp": item.EBELP,
-                    "matnr": item.MATNR,
+                    "ebelp": item.ebelp,
+                    "matnr": item.matnr,
                     "tipod": "B",
-                    "menge": item.MENGE,
-                    "meins": item.MEINS,
-                    "netwr": item.NETWR,
-                    "waers": item.WAERS,
-                    "txz01": item.TXZ01,
-                    "belnr": item.BELNR
+                    "menge": item.menge,
+                    "meins": item.meins,
+                    "netwr": item.netwr,
+                    "waers": item.waers,
+                    "txz01": "",//item.TXZ01,
+                    "belnr": "",//item.BELNR,
+                    "mwskz": item.mwskz
                 }
-            });*/
+            });
+
+            
 
             let oReturn = {
-                "EBELN": "",
+                "EKGRP": Data.GrupoCompras,
+                "EKORG": Data.OrganizacionCompras,
+                "EBELN": Data.Pedido,
                 "TIPDAT": Data.TipoData,
                 "ESTADO": "01",
                 "WAERS": Data.Moneda,
@@ -986,12 +1060,13 @@ sap.ui.define([
                 "FEMISI": formatter.formatearFechaString(Data.Fecha_Fc),
                 "IMPORT": (Data.Total).toString(),
                 "SOLFAC": "",
-                "FCRESO": ""
+                "FCRESO": "",
+                "BSART" : Data.ClaseDocumento
             }
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
                 "IT_DET": JSON.stringify(conformidades),
-                "IT_DOC": JSON.stringify(adjuntoModel)
+                "IT_DOC": ""//JSON.stringify(adjuntoModel)
             };
             return obj;
         },
@@ -1180,6 +1255,7 @@ sap.ui.define([
                     // Crear las columnas
                     aColumns = [
                         { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        //{ id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
                         { id: "FACTUR", label: "Factura", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "End" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "7rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FKDAT", label: "Fecha de Cont.", width: "6rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },

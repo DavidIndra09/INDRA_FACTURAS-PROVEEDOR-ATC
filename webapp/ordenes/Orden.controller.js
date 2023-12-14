@@ -233,7 +233,8 @@ sap.ui.define([
             let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
             filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
             filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
-            filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+            //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+            filters.push(new Filter("I_ELIKZ", "EQ", "X"));
             this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
                 filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
             });
@@ -245,14 +246,25 @@ sap.ui.define([
             });
 
             let parameters = { filters: filters };
-
             const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
-            var posiciones = JSON.parse(request.results[0].ET_DATA);
-            $.each(posiciones, function (i, item) {
-                item.NETWR = (item.NETWR).toString();
-                item.MENGE = (item.MENGE).toString();
-            });
-
+            var posiciones = [];
+            if(request.results.length>0){
+                posiciones = JSON.parse(request.results[0].ET_DATA);
+                $.each(posiciones, function (i, item) {
+                    item.NETWR = (item.NETWR).toString();
+                    item.MENGE = (item.MENGE).toString();
+                });
+            }
+            else{
+                MessageBox.information(
+                    "No existen pedidos confirmados para el proveedor seleccionado.",
+                    {
+                        title: "No se encontraron resultados",
+                        actions: [MessageBox.Action.CLOSE],
+                        //details: htmlmessage
+                    }
+                );
+            }  
             MODEL.setProperty("/Ordenes", posiciones);
         },
         onLimpiarFiltros: function () {

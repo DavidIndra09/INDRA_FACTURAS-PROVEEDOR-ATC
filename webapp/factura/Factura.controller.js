@@ -123,13 +123,14 @@ sap.ui.define([
             if (files.length > 0) {
                 const file = files[0];
                 const dataXml = await this._readFiles(file);
-                debugger
-                if (!dataXml.attacheddocument && !dataXml.invoice) {//dataXml.invoice
+                
+                if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice) {//dataXml.invoice
                     MessageBox.error(`El archivo xml no cumple con el formato requerido`);
                     fileUploader.setValue("");
                     return;
                 }
-                const invoice = (dataXml.attacheddocument)?dataXml.attacheddocument.attachment.externalreference.description.invoice :dataXml.invoice//dataXml.invoice;
+                const invoice = (dataXml.attacheddocument)?((dataXml.attacheddocument.attachment.externalreference.description.invoice)?dataXml.attacheddocument.attachment.externalreference.description.invoice:dataXml.attacheddocument.attachment.externalreference.description) :dataXml.invoice//dataXml.invoice;
+                debugger
                 let version = invoice.ublversionid;
                 version = parseFloat(version);
                 if (version <= 2.0) {
@@ -164,6 +165,8 @@ sap.ui.define([
                     //totalValorVenta: "",
                     //totalDescuentos: "",
                     //sumatoriaIgv: invoice.taxtotal.taxamount,
+                    ordenReference: (invoice.orderreference)?invoice.orderreference.id:"",
+                    nitproovedor: invoice.accountingsupplierparty.party.partytaxscheme.companyid ,
                     importe: (invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
                     total: (invoice.legalmonetarytotal)?invoice.legalmonetarytotal.payableamount:invoice.note.legalmonetarytotal.payableamount,
                     //sociedad: "3000"
@@ -738,6 +741,7 @@ sap.ui.define([
         _crearFactura: async function () {
             sap.ui.core.BusyIndicator.show();
             const data = this._getDataFactura();
+            
             const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
             const type = "success";
             sap.ui.core.BusyIndicator.hide();
@@ -878,10 +882,13 @@ sap.ui.define([
             }
             const codigoSolicitud = factura.codigoSolicitud;
             if (codigoSolicitud) data.codigoSolicitud = codigoSolicitud;
-
+            let facturxml = (MODEL.getProperty("/facturaXml")==undefined || MODEL.getProperty("/facturaXml")=="" || MODEL.getProperty("/facturaXml") == null)?"":MODEL.getProperty("/facturaXml");
+            
             let oReturn = {
+                "STCD1": (facturxml!="")?facturxml.nitproovedor:"",
+                "ZNUMFACBL":(facturxml!="")?facturxml.ordenReference:"",
                 "EBELN": factura.pedido,
-                "TIPDAT": "SOLAPP",
+                "TIPDAT": "NACION",
                 "ESTADO": "01",
                 "WAERS": factura.moneda.split("-")[0].trim(),
                 "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
