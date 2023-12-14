@@ -951,9 +951,10 @@ sap.ui.define([
                         const ClaseDocumento = elemento.ClaseDocumento;
                         const OrganizacionCompras = elemento.OrganizacionCompras
                         const GrupoCompras = elemento.GrupoCompras;                     
-                        
+                        const INCO1 = elemento.Icoterms;
+                        const INCO2 = elemento.LugarIncoterms;
                         if (!grupos[numFc]) {
-                            grupos[numFc] = {GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
+                            grupos[numFc] = {INCO1: INCO1,INCO2: INCO2, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
                         }
                         
                         //grupos[numFc].Detalle.push(elemento);
@@ -1049,6 +1050,8 @@ sap.ui.define([
             
 
             let oReturn = {
+                "INCO1": Data.INCO1,
+                "INCO2": Data.INCO2,
                 "EKGRP": Data.GrupoCompras,
                 "EKORG": Data.OrganizacionCompras,
                 "EBELN": Data.Pedido,
@@ -1255,6 +1258,7 @@ sap.ui.define([
                     // Crear las columnas
                     aColumns = [
                         { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        //{ id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
                         //{ id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
                         { id: "FACTUR", label: "Factura", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "End" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "7rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },

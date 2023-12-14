@@ -130,7 +130,7 @@ sap.ui.define([
                     return;
                 }
                 const invoice = (dataXml.attacheddocument)?((dataXml.attacheddocument.attachment.externalreference.description.invoice)?dataXml.attacheddocument.attachment.externalreference.description.invoice:dataXml.attacheddocument.attachment.externalreference.description) :dataXml.invoice//dataXml.invoice;
-                debugger
+                
                 let version = invoice.ublversionid;
                 version = parseFloat(version);
                 if (version <= 2.0) {
@@ -602,6 +602,7 @@ sap.ui.define([
             let lifnr = sap.ui.getCore().getModel("Lifnr");
             if (lifnr == undefined) {
                 that.onNavBack();
+                return;
             }
             let TotalNetwr = sap.ui.getCore().getModel("TotalNetwr").getData().TotalNetwr;
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNetwr));
@@ -886,7 +887,7 @@ sap.ui.define([
             
             let oReturn = {
                 "STCD1": (facturxml!="")?facturxml.nitproovedor:"",
-                "ZNUMFACBL":(facturxml!="")?facturxml.ordenReference:"",
+                "NUMFA":(facturxml!="")?facturxml.ordenReference:"",
                 "EBELN": factura.pedido,
                 "TIPDAT": "NACION",
                 "ESTADO": "01",

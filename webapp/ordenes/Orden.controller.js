@@ -95,8 +95,9 @@ sap.ui.define([
                 this.getRouter().navTo("solicitudes", {}, true);
             }
         },
-
-
+        onNavSolicitudes: function(){
+            this.getRouter().navTo("solicitudes", {}, true);
+        },
         onUpdateFinished: function (oEvent) {
             // update the worklist's object counter after the table update
             var sTitle,
@@ -307,12 +308,17 @@ sap.ui.define([
          * @private
          */
         _onOrdenMatched: async function (oEvent) {
+            let lifnr = sap.ui.getCore().getModel("Lifnr");
+            if (lifnr == undefined) {
+                that.onNavSolicitudes();
+                return;
+            }            
             MODEL.setProperty("/Ordenes", []);
             this.byId("idTableOrdenes").removeSelections();
             ordenModel.setProperty("/busy", false);
             ordenModel.setProperty("/Busqueda", {});
             let parameters = { filters: [] };
-            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
+            lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
             let oMultiInput1 = that.byId("mtIptOrdenCompra");
             oMultiInput1.setTokens([]);
             if (MODEL.getProperty("/Factura/pedido") != "" && MODEL.getProperty("/Factura/pedido") != undefined) {
