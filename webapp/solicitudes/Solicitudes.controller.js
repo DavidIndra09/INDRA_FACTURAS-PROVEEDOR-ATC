@@ -746,28 +746,65 @@ sap.ui.define([
 
         _setListaSolicitudes: async function (parameters) {
             //that.MostrarTablaPorFlujo("Solicitudes");
+            sap.ui.core.BusyIndicator.show();
             parameters.urlParameters = {};
             const request = await this.readEntity(ODATA_SAP, "/obtenerSolFactSet", parameters);
             let sJson = request.results[0].ET_DATA;
             //sJson = sJson.replace(/00000000/g, '"00000000"');
             let aLista = JSON.parse(sJson);
             let EstadosFactura = that.getModel("EstadosFactura").getData();
-            $.each(aLista, (idx, value) => {
+           /* $.each(aLista, async (idx, value) => {
                 let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
                 value.DescripcionEstado = find.TEXTO;
                 let resultEstatus = that.getColorStatus(find.TEXTO);
+                await that.getProveedorText(value.LIFNR);
+                let Proveedor = that.getView().getModel("proveedorText").getData();
+                value.LIFNRTEXT = (Proveedor.length > 0) ? Proveedor[0].TEXTO : "";
                 value.ColorEstado = resultEstatus.state;
                 value.IconoEstado = resultEstatus.icon;
+                value.TIPDAT = that.ongetOrigenText(value.TIPDAT);
                 value.IMPORT = formatter.formatCurrency(value.IMPORT);
                 value.FKDAT = formatter.formatearFechaString(value.FKDAT);
                 value.FCRESO = formatter.formatearFechaString(value.FCRESO);
                 value.FEMISI = formatter.formatearFechaString(value.FEMISI);
             });
+            */
+            for (let i = 0; i < aLista.length; i++) {
+                let value = aLista[i];
+                let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
+                value.DescripcionEstado = find.TEXTO;
+                let resultEstatus = that.getColorStatus(find.TEXTO);
+                await that.getProveedorText(value.LIFNR);
+                let Proveedor = that.getView().getModel("proveedorText").getData();
+                value.LIFNRTEXT = (Proveedor.length > 0) ? Proveedor[0].TEXTO : "";
+                value.ColorEstado = resultEstatus.state;
+                value.IconoEstado = resultEstatus.icon;
+                value.TIPDAT = that.ongetOrigenText(value.TIPDAT);
+                value.IMPORT = formatter.formatCurrency(value.IMPORT);
+                value.FKDAT = formatter.formatearFechaString(value.FKDAT);
+                value.FCRESO = formatter.formatearFechaString(value.FCRESO);
+                value.FEMISI = formatter.formatearFechaString(value.FEMISI);
+            }
             aLista.sort((a, b) => a.SOLFAC - b.SOLFAC);
             MODEL.setProperty("/Facturas", aLista);
+            sap.ui.core.BusyIndicator.hide();
             viewModel.setProperty("/tableBusy", false);
         },
-
+        ongetOrigenText: function (value) {
+            let descripcion = "";
+            switch (value) {
+                case "NACION":
+                    descripcion = "Nacional";
+                    break;
+                case "XLSREP":
+                    descripcion = "Repuesto";
+                    break;
+                case "XLSVEH":
+                    descripcion = "Vehículos";
+                    break;
+            }
+            return descripcion;
+        },
         getColorStatus: function (Estado) {
             let object = { "state": "", "icon": "" };
             switch (Estado) {
@@ -945,20 +982,25 @@ sap.ui.define([
                     Total = that.onCalcularTotalPosiciones(array);                  
                     array.forEach(elemento => {
                         const Pedido = elemento.Solped;
-                        const Moneda = elemento.Moneda;
-                        const numFc = elemento.NroFactura;
-                        const Fecha_Fc = elemento.FechaBl;
+                        const Moneda = elemento.Moneda; 
                         const ClaseDocumento = elemento.ClaseDocumento;
                         const OrganizacionCompras = elemento.OrganizacionCompras
                         const GrupoCompras = elemento.GrupoCompras;                     
-                        const INCO1 = elemento.Icoterms;
-                        const INCO2 = elemento.LugarIncoterms;
-                        if (!grupos[numFc]) {
-                            grupos[numFc] = {INCO1: INCO1,INCO2: INCO2, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Num_Fc: numFc, Fecha_Fc: Fecha_Fc, Total: Total, Moneda: Moneda, Detalle: [] };
+                        const Inco1 = elemento.Icoterms;
+                        const Inco2 = elemento.LugarIncoterms;
+                        const Numfa = elemento.NroFactura;
+                        const Numbl = elemento.NumeroBl;
+                        const DatBl = elemento.FechaBl;
+                        const Prtsl = elemento.PuertoSalida;
+                        const Prten = elemento.Puertollegada;
+                        const Tptra = elemento.ViaTransporte;
+                       
+                        if (!grupos[Numfa]) {
+                            grupos[Numfa] = {Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,DatBl:DatBl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: Total, Moneda: Moneda, Detalle: [] };
                         }
                         
                         //grupos[numFc].Detalle.push(elemento);
-                        grupos[numFc].Detalle.push({
+                        grupos[Numfa].Detalle.push({
                             "werks": elemento.Centro,
                             "lgort": elemento.Almacen,
                             "mandt": "800",
@@ -978,7 +1020,9 @@ sap.ui.define([
                             "waers": elemento.Moneda,
                             "txz01": "",//item.TXZ01,
                             "belnr": "",//item.BELNR,
-                            "mwskz": "I0"
+                            "mwskz": "I0",
+                            "banfn": elemento.Solped,
+                            "psorn": elemento.PaisOrigen
                         });
                     });
                     break;
@@ -1011,7 +1055,8 @@ sap.ui.define([
                             "waers": "COP",//elemento.Moneda,
                             "txz01": "",//item.TXZ01,
                             "belnr": "",//item.BELNR,
-                            "mwskz": "I0"
+                            "mwskz": "I0",
+                            "psorn":"pais/region"
                         });
                     });
                     break;
@@ -1043,23 +1088,30 @@ sap.ui.define([
                     "waers": item.waers,
                     "txz01": "",//item.TXZ01,
                     "belnr": "",//item.BELNR,
-                    "mwskz": item.mwskz
+                    "mwskz": item.mwskz,
+                    "banfn": item.banfn,
+                    "psorn": item.psorn
                 }
             });
 
             
 
             let oReturn = {
-                "INCO1": Data.INCO1,
-                "INCO2": Data.INCO2,
+                "INCO1": Data.Inco1,
+                "INCO2": Data.Inco2,
+                "NUMFA": Data.Numfa,
+                "NUMBL": Data.Numbl,
+                "DATBL": Data.Datbl,
+                "PRTSL": Data.Prtsl,
+                "PRTEN": Data.Prten,
+                "TPTRA": Data.Tptra, 
                 "EKGRP": Data.GrupoCompras,
                 "EKORG": Data.OrganizacionCompras,
                 "EBELN": Data.Pedido,
                 "TIPDAT": Data.TipoData,
                 "ESTADO": "01",
                 "WAERS": Data.Moneda,
-                "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
-                "FACTUR": Data.Num_Fc,
+                "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,                
                 "FEMISI": formatter.formatearFechaString(Data.Fecha_Fc),
                 "IMPORT": (Data.Total).toString(),
                 "SOLFAC": "",
@@ -1258,8 +1310,8 @@ sap.ui.define([
                     // Crear las columnas
                     aColumns = [
                         { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
-                        //{ id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
-                        //{ id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        { id: "TIPDAT", label: "Origen", path: "TIPDAT", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        { id: "LIFNRTEXT", label: "Proveedor", path: "LIFNRTEXT", width: "4rem", design: "Bold", hAlign: "Begin" },
                         { id: "FACTUR", label: "Factura", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "End" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "7rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FKDAT", label: "Fecha de Cont.", width: "6rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
@@ -1907,6 +1959,32 @@ sap.ui.define([
                                 aProveedores[i].VALUE = parseInt(aProveedores[i].VALUE).toString();
                             }
                             that.getView().setModel(new JSONModel(aProveedores), "proveedoreshelp");
+                        }
+                        resolve(true);
+                    },
+                    error: function (oError) {
+                        MessageBox.error(oError.responseText);
+                        resolve(true);
+                    }
+                });
+            });
+        },
+        getProveedorText: function (sValue = "") {
+            let value = sValue.substr(0, 18);
+            return new Promise((resolve, reject) => {
+                ODataUtilidadesModel.read("/filtrosSet", {
+                    filters: [
+                        new Filter("i_value", FilterOperator.EQ, value),
+                        new Filter("i_object", FilterOperator.EQ, "LIFNR"),
+                        //new Filter("i_filter", FilterOperator.EQ, keyCentro)
+                    ],
+                    success: function (oData) {
+                        if (oData.results.length) {
+                            let aProveedores = JSON.parse(oData.results[0].et_data);
+                            for (let i = 0; i < aProveedores.length; i++) {
+                                aProveedores[i].VALUE = parseInt(aProveedores[i].VALUE).toString();
+                            }
+                            that.getView().setModel(new JSONModel(aProveedores), "proveedorText");
                         }
                         resolve(true);
                     },
