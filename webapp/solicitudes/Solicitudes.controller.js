@@ -221,6 +221,7 @@ sap.ui.define([
                 InputCodigoFactura = that.byId("InputCodigoFactura").getValue(),
                 InputCodigoSolicitud = that.byId("InputCodigoSolicitud").getValue(),
                 ComboEstados = that.byId("ComboEstados").getSelectedKeys().join(","),
+                ComboOrigen = that.byId("Origen").getSelectedKeys().join(","),
                 Proveedor = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
 
             if (dFechaEmision.getValue() !== "") {
@@ -258,6 +259,8 @@ sap.ui.define([
             }
 
             if (Proveedor) filters.push(new Filter("I_LIFNR", "EQ", Proveedor));
+
+            if (ComboOrigen) filters.push(new Filter("I_ORIGEN", "EQ", ComboOrigen));
 
             if (InputCodigoSolicitud) filters.push(new Filter("I_SOLFAC", "EQ", InputCodigoSolicitud)); //codigoSolicitud
             if (InputCodigoFactura) filters.push(new Filter("I_FACTUR", "EQ", InputCodigoFactura)); // codigoFactura

@@ -73,6 +73,16 @@
                         </form:label>
                     </form:FormElement>
 
+                    <form:FormElement label="Origen">
+                                                <form:fields>
+                                                    <MultiComboBox id="Origen">
+                                                        <core:ListItem text="Repuesto" key="XLSREP" />
+                                                        <core:ListItem text="Vehículos" key="XLSVEH" />
+                                                        <core:ListItem text="Nacional" key="NACION" />
+                                                    </MultiComboBox>
+                                                </form:fields>
+                    </form:FormElement>
+
                     <form:FormElement>
                         <form:fields>
                             <Button text="Buscar" type="Emphasized" icon="sap-icon://search" press="onBuscarFacturas" class="sapUiSmallMarginTop" />
