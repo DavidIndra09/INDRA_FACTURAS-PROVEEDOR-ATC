@@ -128,6 +128,7 @@ sap.ui.define([
             let data = tableFacturas.getModel().getData().Facturas;
 
             let stringFacturas = JSON.stringify(data);
+            sap.ui.core.BusyIndicator.show();
             that.getRouter().navTo("factura", {
                 codigoSolicitud: "N",
                 //facturas: stringFacturas
@@ -158,6 +159,7 @@ sap.ui.define([
             }
 
             that.getOwnerComponent().setModel(new JSONModel(solicitud), "oCabecera");
+            sap.ui.core.BusyIndicator.show();
             that.getRouter().navTo(page, {
                 codigoSolicitud: codigoSolicitud,
                 proveedor: that.getView().byId("ProveedorSeleccionado").getText().trim(),
@@ -326,7 +328,9 @@ sap.ui.define([
                                 new Filter("FEMISI", FilterOperator.Contains, query),
                                 new Filter("FKDAT", FilterOperator.Contains, query),
                                 new Filter("IMPORT", FilterOperator.Contains, query),
-                                new Filter("DescripcionEstado", FilterOperator.Contains, query)
+                                new Filter("DescripcionEstado", FilterOperator.Contains, query),
+                                new Filter("TIPDATTEXT", FilterOperator.Contains, query),
+                                new Filter("LIFNRTEXT", FilterOperator.Contains, query)
                             ],
                             and: false
                         })
@@ -794,8 +798,8 @@ sap.ui.define([
             switch (Estado) {
 
                 case "Creado":
-                    object.state = "Indication05";
-                    object.icon = "sap-icon://information";
+                    object.state = "Success";
+                    object.icon = "sap-icon://sys-enter-2";
                     break;
 
                 case "Liberado para pago":
@@ -930,7 +934,7 @@ sap.ui.define([
             let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);            
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];
-                debugger
+                
                 let DataFactura = that._getDataFactura(Item,TypeTable);                
                 oView.byId("button-message").setVisible(true);
                 oView.byId("button-message").setText("Registrando factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
@@ -942,9 +946,9 @@ sap.ui.define([
             oView.byId("button-message").setText("");
             sap.ui.core.BusyIndicator.hide();
             const type = "information";
-            let detalle = that.formatMessagesAsHTML(mensaje);
-            MessageBox[type]("", {
-                details: detalle,
+            let detalle = that.formatMessages(mensaje);
+            MessageBox[type](detalle, {
+                //details: detalle,
                 title: "Carga Masiva de Facturas",
                 onClose: function () {
                     ODATA_SAP.refresh();
@@ -1099,7 +1103,7 @@ sap.ui.define([
                         "COLOR_INT_ATC":"",
                         "EKORG":elemento.Ekorg,
                         "EKGRP":elemento.Ekgrp,
-                        "EINDT":elemento.Eindt,
+                        "EINDT":formatter.formatearFechaString(elemento.Eindt),
                         });
                     });
                     break;
@@ -1355,7 +1359,7 @@ sap.ui.define([
             let indicador = ""
               switch (value) {
                   case "NACION":
-                      indicador = "Indication07";
+                      indicador = "Success";
                       break;
                   case "XLSREP":
                       indicador = "Indication08";
@@ -2487,6 +2491,15 @@ sap.ui.define([
             Mensaje.map((mensaje) => {
                 count++;
                 NuevoMensaje = NuevoMensaje + count + ". " + mensaje + ".<br>";
+            });
+            return NuevoMensaje;
+        },
+        formatMessages: function (Mensaje) {
+            let NuevoMensaje = "";
+            let count = 0;
+            Mensaje.map((mensaje) => {
+                count++;
+                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + "\n" /*.<br>"*/; 
             });
             return NuevoMensaje;
         },

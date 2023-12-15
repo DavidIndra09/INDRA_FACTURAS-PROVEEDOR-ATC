@@ -80,6 +80,7 @@ sap.ui.define([
                 // eslint-disable-next-line sap-no-history-manipulation
                 if (sPreviousHash.includes("Detalle")) {
                     let data = JSON.stringify(detalleFactura)
+                    sap.ui.core.BusyIndicator.show();
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],
                         proveedor: sPreviousHash.split("/")[2],
@@ -92,10 +93,12 @@ sap.ui.define([
                 }
 
             } else {
+                sap.ui.core.BusyIndicator.show();
                 this.getRouter().navTo("solicitudes", {}, true);
             }
         },
         onNavSolicitudes: function(){
+            sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("solicitudes", {}, true);
         },
         onUpdateFinished: function (oEvent) {
@@ -128,25 +131,25 @@ sap.ui.define([
             });
             return object;
         },
-        formatMessagesAsHTML: function (Mensaje) {
+        formatMessages: function (Mensaje) {
             let NuevoMensaje = "";
             let count = 0;
             Mensaje.map((mensaje) => {
                 count++;
-                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + ".<br>";
+                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + "\n" /*.<br>"*/; 
             });
             return NuevoMensaje;
         },
         onAgregarOrdenes: async function () {
             let object = that.onValidarIndicadorImpuesto();
             if (!object.valid) {                
-                let htmlmessage = that.formatMessagesAsHTML(object.mensaje);
+                let formattermessage = that.formatMessages(object.mensaje);
                 MessageBox.warning(
-                    "Falta indicador de impuesto.",
+                    formattermessage,
                     {
-                        title: "Validaciones",
+                        title: "Falta indicador de impuesto.",
                         actions: [MessageBox.Action.CLOSE],
-                        details: htmlmessage
+                        //details: htmlmessage
                     }
                 );
                 return;
@@ -229,6 +232,7 @@ sap.ui.define([
             }
         },
         onBuscarOrdenes: async function () {
+            sap.ui.core.BusyIndicator.show();
             const busqueda = ordenModel.getProperty("/Busqueda");
             const filters = [];
             let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
@@ -267,6 +271,7 @@ sap.ui.define([
                 );
             }  
             MODEL.setProperty("/Ordenes", posiciones);
+            sap.ui.core.BusyIndicator.hide();
         },
         onLimpiarFiltros: function () {
             that.byId("mtIptOrdenCompra").setTokens([]);
@@ -343,6 +348,7 @@ sap.ui.define([
             MODEL.setProperty("/Ordenes", posiciones);
             //this._seleccionarTabla(posiciones);
             */
+            
             that.onBuscarOrdenes();
         },
 

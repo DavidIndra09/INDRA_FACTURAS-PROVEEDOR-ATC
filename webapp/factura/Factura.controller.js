@@ -66,6 +66,7 @@ sap.ui.define([
          * @public
          */
         onNavBack: function () {
+            sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("solicitudes", {}, true);
             /*
             var sPreviousHash = History.getInstance().getPreviousHash();
@@ -79,10 +80,12 @@ sap.ui.define([
         },
 
         onNavOrdenes: function () {
+            sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("orden", {}, false);
         },
 
         onNavSolicitudes: function () {
+            sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("solicitudes", {}, false);
             MODEL.setProperty("/Factura", {});
         },
@@ -604,6 +607,7 @@ sap.ui.define([
                 that.onNavBack();
                 return;
             }
+            sap.ui.core.BusyIndicator.hide();
             let TotalNetwr = sap.ui.getCore().getModel("TotalNetwr").getData().TotalNetwr;
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNetwr));
             let importeBase = MODEL.getProperty("/Factura/importe");

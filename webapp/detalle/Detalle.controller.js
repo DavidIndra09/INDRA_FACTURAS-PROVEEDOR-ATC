@@ -59,6 +59,7 @@ sap.ui.define([
          * @public
          */
         onNavBack: function () {
+            sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("solicitudes", {}, true);           
         },
 
@@ -83,7 +84,7 @@ sap.ui.define([
                 
                 await this.getwaershelp((oObject.WAERS).split("-")[0]);                
                 let waersCollection = that.getView().getModel("waershelp").getData();
-                var find = waersCollection.find(item=> item.VALUE == oObject.WAERS);
+                var find = waersCollection.find(item=> item.VALUE == oObject.WAERS.split("-")[0].trim());
                 oObject.WAERS =  find.VALUE + " - " +find.TEXTO;
                 that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones); 
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
@@ -501,21 +502,19 @@ sap.ui.define([
                 }
                 const data = this._getDataFactura();
                 const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
-
                 const type = "success";
                 sap.ui.core.BusyIndicator.hide();
 
                 MessageBox[type](request.E_MSG, {
                     onClose: function () {
                         ODATA_SAP.refresh();
-                        sap.ui.core.BusyIndicator.hide();
+                        //sap.ui.core.BusyIndicator.hide();
                         this.getRouter().navTo("solicitudes", {}, false);
                     }.bind(this)
                 });
             } catch (error) {
                 console.error("Error al actualizar factura:", error);
                 sap.ui.core.BusyIndicator.hide();
-
                 const errorType = "error";
                 MessageBox[errorType]("Se produjo un error al actualizar la factura. Error: " + error.message);
             }
@@ -537,6 +536,7 @@ sap.ui.define([
             return formatoYMD;
         },
         onNavOrdenes: function () {
+            sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("orden", {}, false);
         },
         onFileSizeExceed: function (oEvent) {
