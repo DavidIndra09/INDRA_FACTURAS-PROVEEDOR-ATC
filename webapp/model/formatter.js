@@ -123,7 +123,14 @@ sap.ui.define([
                 return "";
             }
         },
+        onSetColorImport: function (pValue) {
 
+            if (pValue == "05" || pValue == "08" ) {
+                return "red";
+            } else {
+                return "gray";
+            }
+        },
         formatEstados: function (value) {
             const valueState = coreLibrary.MessageType;
             let estado;

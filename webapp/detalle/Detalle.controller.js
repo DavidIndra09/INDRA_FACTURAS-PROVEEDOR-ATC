@@ -365,7 +365,9 @@ sap.ui.define([
 
 
 
-            let oReturn = {
+            let oReturn = that.ongetModelCabecera(cabecera);
+            
+            /*{
                 "ESTADO": cabecera.ESTADO,
                 "WAERS": cabecera.WAERS.split("-")[0].trim(),
                 "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
@@ -375,6 +377,7 @@ sap.ui.define([
                 "FCRESO": that.formatFecha(cabecera.FCRESO),
                 "SOLFAC": cabecera.SOLFAC
             }
+            */
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
                 "IT_DET": JSON.stringify(conformidades),
@@ -382,6 +385,32 @@ sap.ui.define([
             };
 
             return obj;
+        },
+        ongetModelCabecera:function(Data){
+            
+            return {
+                "INCO1": Data.INCO1,
+                "INCO2": Data.INCO2,
+                "NUMFA": Data.NUMFA,
+                "NUMBL": Data.NUMBL,
+                "DATBL": Data.DATBL,
+                "PRTSL": Data.PRTSL,
+                "PRTEN": Data.PRTEN,
+                "TPTRA": Data.TPTRA, 
+                "EKGRP": Data.EKGRP,
+                "EKORG": Data.EKORG,
+                "EBELN": Data.EBELN,
+                "TIPDAT": Data.TIPDAT,
+                "ESTADO": Data.ESTADO,
+                "WAERS": Data.WAERS.split("-")[0].trim() ,
+                "LIFNR": Data.LIFNR,                
+                "FEMISI": that.formatFecha(Data.FEMISI),
+                "IMPORT": that.convertirFormato((Data.IMPORT).toString()),
+                "SOLFAC": Data.SOLFAC,
+                "FCRESO": that.formatFecha(Data.FCRESO),
+                "BSART" : Data.BSART
+            }
+
         },
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
@@ -402,8 +431,15 @@ sap.ui.define([
             }
         },
         formatFecha: function (fecha) {
-            var [dia, mes, anio] = fecha.split('.');
-            var fechaFormateada = `${anio}${mes}${dia}`;
+            var fechaFormateada = "";
+            if(fecha.includes("/")){
+                var [dia, mes, anio] = fecha.split('/');
+                fechaFormateada = `${anio}${mes}${dia}`; 
+            }
+            else{
+             var [dia, mes, anio] = fecha.split('.');
+             fechaFormateada = `${anio}${mes}${dia}`;  
+            }          
             return fechaFormateada;
         },
         onInitStateInputs:function(){

@@ -65,7 +65,7 @@
 
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker required="true" id="FechaEmision" value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
+                                <DatePicker required="true" id="FechaEmision" value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy"  valueFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
 
                             </form:fields>
                             <form:label>
@@ -85,7 +85,7 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker value="{oCabecera>/FKDAT}" displayFormat="dd.MM.yyyy" editable="false" />
+                                <DatePicker value="{oCabecera>/FKDAT}" displayFormat="dd.MM.yyyy" valueFormat="yyyy.MM.dd" editable="false" />
 
                             </form:fields>
                             <form:label>
@@ -94,7 +94,7 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker value="{oCabecera>/FCRESO}" displayFormat="dd.MM.yyyy" editable="false" />
+                                <DatePicker value="{oCabecera>/FCRESO}" displayFormat="dd.MM.yyyy" valueFormat="yyyy.MM.dd" editable="false" />
                             </form:fields>
                             <form:label>
                                 <Label text="Fecha creación solicitud" />

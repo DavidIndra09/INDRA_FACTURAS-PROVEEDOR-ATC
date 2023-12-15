@@ -6,11 +6,27 @@
         <content>
          
             <!-- SearchField -->
-            <SearchField  id="InputSelectProveedor" width="100%"  showSearchButton="false" placeholder="Ingrese el código o nombre de un proveedor" enableSuggestions="true" search=".handleSearch" suggest=".onSuggest" suggestionItems="{path:'proveedoreshelp>/'}">
+          <SearchField  id="InputSelectProveedor" width="100%"  showSearchButton="false" placeholder="Ingrese el código o nombre de un proveedor" enableSuggestions="true" search=".handleSearch" suggest=".onSuggest" suggestionItems="{path:'proveedoreshelp>/'}">
 
                 <SuggestionItem text="{proveedoreshelp>TEXTO}"  />
 
-            </SearchField>
+            </SearchField> 
+
+  <!--          <Input
+    id="InputSelectProveedor"
+    width="100%"
+    showSuggestion="true"
+    suggestionItems="{path: 'proveedoreshelp>/'}"
+   
+    placeholder="Ingrese el código o nombre de un proveedor"
+    liveChange=".onSuggest"
+    value="{proveedoreshelp>TEXTO}"
+>
+    <suggestionItems>
+        <SuggestionItem text="{proveedoreshelp>TEXTO}" />
+    </suggestionItems>
+</Input>-->
+
 
         </content>
 

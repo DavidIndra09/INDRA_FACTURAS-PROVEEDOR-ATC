@@ -740,20 +740,28 @@ sap.ui.define([
             return valid;
         },
         _crearFactura: async function () {
-            sap.ui.core.BusyIndicator.show();
-            const data = this._getDataFactura();
-            
-            const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
-            const type = "success";
-            sap.ui.core.BusyIndicator.hide();
-            MessageBox[type](request.E_MSG, {
-                onClose: function () {
-                    ODATA_SAP.refresh();
-                    sap.ui.core.BusyIndicator.hide()
-                    this.onNavSolicitudes();
-                }.bind(this)
-            });
+            try {
+                sap.ui.core.BusyIndicator.show();
+                const data = this._getDataFactura();
+                
+                const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
+                const type = "success";
+                sap.ui.core.BusyIndicator.hide();
+                MessageBox[type](request.E_MSG, {
+                    onClose: function () {
+                        ODATA_SAP.refresh();
+                        sap.ui.core.BusyIndicator.hide();
+                        this.onNavSolicitudes();
+                    }.bind(this)
+                });
+            } catch (error) {
+                console.error("Error al crear factura:", error);
+                sap.ui.core.BusyIndicator.hide();
+                const type = "error";
+                MessageBox[type]("Ocurrió un error al crear la factura. Por favor, inténtelo nuevamente.");
+            }
         },
+        
 
         _actualizarFactura: async function () {
             const data = this._getDataFactura();
@@ -923,6 +931,8 @@ sap.ui.define([
 
             return formatoYMD;
         },
+
+       
 
         formatFecha: function (fecha) {
             // Extraer la fecha del formato "2023-11-16T05:00:00"            
