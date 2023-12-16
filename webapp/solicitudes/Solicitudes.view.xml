@@ -62,7 +62,7 @@
                 <ToolbarSpacer />
                 <Button
                     icon="sap-icon://accept"
-                    text="Solicitar Pago de Factura"
+                    text="Liberar para crear Factura"
                     type="Success"
                     press="onSolicitarPagoFactura"
                 />

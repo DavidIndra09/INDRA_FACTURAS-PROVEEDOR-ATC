@@ -45,7 +45,7 @@
                                 <Input required="true" id="InputFactura" value="{
                                             parts:[{path:'oCabecera>/FACTUR'}]
                                             
-                                        }" enabled="{oCabecera>/enabled}"/>
+                                        }" enabled="{oCabecera>/Edit}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="Factura" />
@@ -65,7 +65,7 @@
 
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker required="true" id="FechaEmision" value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy"  valueFormat="dd.MM.yyyy" editable="{oCabecera>/enabled}" />
+                                <DatePicker required="true" id="FechaEmision" value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy"  valueFormat="dd.MM.yyyy" editable="{oCabecera>/Edit}" />
 
                             </form:fields>
                             <form:label>
@@ -77,7 +77,7 @@
                                 <Input required="true" id="InputPedido" value="{
                                             parts:[{path:'oCabecera>/EBELN'}]
                                             
-                                        }" enabled="{oCabecera>/enabled}"/>
+                                        }" enabled="{oCabecera>/Edit}"/>
                             </form:fields>
                             <form:label>
                                 <Label text="Pedido" />
@@ -104,7 +104,7 @@
                             <form:fields>
                                 <Input required="true" id="InputImporte" value="{
                                             parts:[{path:'oCabecera>/IMPORT'}]     
-                                        }" enabled="{oCabecera>/enabled}" liveChange="onCalcularImpuestoTotal" />
+                                        }" enabled="{oCabecera>/Edit}" liveChange="onCalcularImpuestoTotal" />
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>importe}" />
@@ -122,7 +122,7 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <Input required="true" id="InputSelectWaers" liveChange=".onSuggestWaers" enabled="{oCabecera>/enabled}" value="{oCabecera>/WAERS}" width="100%" showSuggestion="true" placeholder="Ingrese nombre de moneda" enableSuggestions="true" suggestionItems="{waershelp>/}">
+                                <Input required="true" id="InputSelectWaers" liveChange=".onSuggestWaers" enabled="{oCabecera>/Edit}" value="{oCabecera>/WAERS}" width="100%" showSuggestion="true" placeholder="Ingrese nombre de moneda" enableSuggestions="true" suggestionItems="{waershelp>/}">
                                     <suggestionItems>
                                         <SuggestionItem text="{waershelp>VALUE} - {waershelp>TEXTO}" key="{waershelp>VALUE}" />
                                     </suggestionItems>

@@ -81,6 +81,15 @@
                                     <Label text="Moneda" />
                                 </form:label>
                             </form:FormElement>
+  <form:FormElement>
+                                <form:fields>
+                                    <Text text="{EBELN}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Pedido" />
+                                </form:label>
+                            </form:FormElement>
+                            
                           <!--  <form:FormElement>
                                 <form:fields>
                                     <Text text="{BUKRS}"/>

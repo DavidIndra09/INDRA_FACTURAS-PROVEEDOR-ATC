@@ -148,7 +148,7 @@ sap.ui.define([
          * @param {sap.ui.base.Event} event
          * @public 
          */
-        onDetalleSolicitud: function (event) {
+        onDetalleSolicitud: function (flujo,event) {
             const contexto = event.getSource().getBindingContext();
             const solicitud = contexto.getObject();
             const codigoSolicitud = contexto.getProperty("SOLFAC");//codigoSolicitud
@@ -157,7 +157,13 @@ sap.ui.define([
             if (solicitud.estadoFactura_ID === 1) {
                 page = "factura";
             }
-
+            if(flujo == "X"){
+                solicitud.Edit = true  
+            }
+            else{
+                solicitud.Edit = false 
+            }
+            
             that.getOwnerComponent().setModel(new JSONModel(solicitud), "oCabecera");
             sap.ui.core.BusyIndicator.show();
             that.getRouter().navTo(page, {
@@ -333,7 +339,7 @@ sap.ui.define([
                                 new Filter("IMPORT", FilterOperator.Contains, query),
                                 new Filter("DescripcionEstado", FilterOperator.Contains, query),
                                 new Filter("TIPDATTEXT", FilterOperator.Contains, query),
-                                new Filter("LIFNRTEXT", FilterOperator.Contains, query)
+                                //new Filter("LIFNRTEXT", FilterOperator.Contains, query)
                             ],
                             and: false
                         })
@@ -531,7 +537,7 @@ sap.ui.define([
                  MessageBox.error("Seleccione solo facturas con estado Registrado");
                  return;
              }*/
-            MODEL.setProperty("/tituloMensaje", "¿Desea solicitar pago de facturas?");
+            MODEL.setProperty("/tituloMensaje", "¿Desea Liberar para crear Factura?");
             selectedFacturas.map(path => {
                 messageManager.addMessages(new Message({
                     message: MODEL.getProperty(path).SOLFAC,
@@ -758,9 +764,11 @@ sap.ui.define([
                 let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
                 value.DescripcionEstado = find.TEXTO;
                 let resultEstatus = that.getColorStatus(find.TEXTO);
-                await that.getProveedorText(value.LIFNR);
-                let Proveedor = that.getView().getModel("proveedorText").getData();
-                value.LIFNRTEXT = (Proveedor.length > 0) ? Proveedor[0].TEXTO : "";
+                //await that.getProveedorText(value.LIFNR);
+                //let Proveedor = that.getView().getModel("proveedorText").getData();
+                //value.LIFNRTEXT = (Proveedor.length > 0) ? Proveedor[0].TEXTO : "";
+                value.Edit = (value.ESTADO == "03" || value.ESTADO == "05" || value.ESTADO == "07") ? true : false;
+                
                 value.ColorEstado = resultEstatus.state;
                 value.ColorOrigen = that.obtenerValorAleatorio(value.TIPDAT);
                 value.IconoEstado = resultEstatus.icon;
@@ -801,8 +809,8 @@ sap.ui.define([
             switch (Estado) {
 
                 case "Creado":
-                    object.state = "Success";
-                    object.icon = "sap-icon://sys-enter-2";
+                    object.state = "Information";
+                    object.icon = "sap-icon://information";
                     break;
 
                 case "Liberado para pago":
@@ -1307,7 +1315,7 @@ sap.ui.define([
                 case "Solicitudes":
                     oColumnListItem = new sap.m.ColumnListItem({
                         type: "Navigation",
-                        press: this.onDetalleSolicitud,
+                        press: this.onDetalleSolicitud.bind(that,""),
                         highlight: {
                             path: 'BESTU',
                             formatter: '.formatter.formatEstados'
@@ -1410,7 +1418,16 @@ sap.ui.define([
                                 oCell = new sap.m.Text({ text: "{" + oColumnData.path + "}" });
                             }
                         }
+                       
                         else {
+
+                            var btnEditar = new sap.m.Button({
+                                icon: "sap-icon://edit",
+                                press: that.onDetalleSolicitud.bind(that,"X"),
+                                type: "Reject",
+                                tooltip: "Editar",
+                                enabled: "{= (${ESTADO} === '03' || ${ESTADO} === '05' || ${ESTADO} === '07') ? true : false }"                               
+                            });
 
                             var oButtonDelete = new sap.m.Button({
                                 icon: "{i18n>iconDelete}",
@@ -1428,7 +1445,19 @@ sap.ui.define([
                                 ariaHasPopup: "Dialog",
                                 tooltip: "{i18n>vistaRapidaTooltip}"
                             });
-                            oCell = (oColumnData.path == "btnverDetalle") ? oButtonDetailView : oButtonDelete;
+
+                           switch(oColumnData.path){
+
+                            case "btnverDetalle":
+                                oCell =  oButtonDetailView;
+                                break;
+
+                            case "btnEditar":
+                                oCell = btnEditar;
+                                break;
+                           }
+
+                            //oCell = (oColumnData.path == "btnverDetalle") ? oButtonDetailView : oButtonDelete;
                             //oCell = new sap.m.Text({ text: "" });
                         }
                         oColumnListItem.addCell(oCell);
@@ -1476,12 +1505,13 @@ sap.ui.define([
                     aColumns = [
                         { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
                         { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT",path2: "ColorOrigen", width: "4rem", design: "Bold", hAlign: "Begin" },
-                        { id: "LIFNRTEXT", label: "Proveedor", path: "LIFNRTEXT", width: "4rem", design: "Bold", hAlign: "Begin" },
-                        { id: "FACTUR", label: "Factura", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "End" },
+                        //{ id: "LIFNRTEXT", label: "Proveedor", path: "LIFNRTEXT", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        { id: "FACTUR", label: "Factura", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "7rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FKDAT", label: "Fecha de Cont.", width: "6rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold", hAlign: "End" },
                         { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { width: "3rem", path: "btnEditar" },
                         { width: "3rem", path: "btnverDetalle" },
                         { width: "3rem", path: "iconErrores" },
                         //{ width: "5rem", path: "btnEliminarSolicitud" }
@@ -2506,6 +2536,9 @@ sap.ui.define([
             });
             return NuevoMensaje;
         },
+        onEditar:function(){
+
+        }
 
     });
 });

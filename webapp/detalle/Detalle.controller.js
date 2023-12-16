@@ -80,7 +80,7 @@ sap.ui.define([
                 let oObject = that.getOwnerComponent().getModel("oCabecera").getData();
                 oObject.total = (parseFloat(that.convertirFormato(oObject.IMPORT) * 1.19)).toFixed(2); /* Number(oObject.IGV)).toFixed(2)*/;
                 oObject.total = formatter.formatCurrency(oObject.total);
-                oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado") ? true : false;
+                oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado" || oObject.DescripcionEstado == "Con Errores") ? true : false;
                 
                 await this.getwaershelp((oObject.WAERS).split("-")[0]);                
                 let waersCollection = that.getView().getModel("waershelp").getData();
@@ -158,8 +158,8 @@ sap.ui.define([
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
-                    that.getView().byId("btnAddPosiciones").setEnabled((oCabecera.DescripcionEstado == "Creado" || oCabecera.DescripcionEstado == "Rechazado") ? true : false);
-                    that.getView().byId("AdjuntosUploader").setEnabled((oCabecera.DescripcionEstado == "Creado" || oCabecera.DescripcionEstado == "Rechazado") ? true : false);
+                    that.getView().byId("btnAddPosiciones").setEnabled(oCabecera.Edit);
+                    that.getView().byId("AdjuntosUploader").setEnabled(oCabecera.Edit);
                     $.each(aListaDocumentos, function (i, item) {
 
                         adjuntos.push({

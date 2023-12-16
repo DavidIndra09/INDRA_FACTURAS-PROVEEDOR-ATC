@@ -235,7 +235,7 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.show();
             const busqueda = ordenModel.getProperty("/Busqueda");
             const filters = [];
-            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;            
             filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
             filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
             //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
@@ -286,14 +286,12 @@ sap.ui.define([
                 new Filter({
                     filters: [
                         new Filter("BELNR", "Contains", query),
-                        new Filter("BUZEI", "Contains", query),
+                        //new Filter("BUZEI", "Contains", query),
                         new Filter("EBELN", "Contains", query),
-                        new Filter("EBELP", "Contains", query),
+                        //new Filter("EBELP", "Contains", query),
                         new Filter("MATNR", "Contains", query),
-                        new Filter("TXZ01", "Contains", query),
-                        new Filter("MEINS", "Contains", query),
-                        new Filter("MENGE", "Contains", query),
-                        //new Filter("NETWR", "Contains", query),
+                        new Filter("TXZ01", "Contains", query),                      
+                       
                     ],
                     and: false
                 })
@@ -317,7 +315,8 @@ sap.ui.define([
             if (lifnr == undefined) {
                 that.onNavSolicitudes();
                 return;
-            }            
+            }       
+                 
             MODEL.setProperty("/Ordenes", []);
             this.byId("idTableOrdenes").removeSelections();
             ordenModel.setProperty("/busy", false);
