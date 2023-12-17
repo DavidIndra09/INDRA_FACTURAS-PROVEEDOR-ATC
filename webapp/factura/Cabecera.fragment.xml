@@ -38,7 +38,7 @@
                     </form:FormElement> -->
                     <form:FormElement >
                         <form:fields >
-                        <Input id="pedido"  required="true" value="{pedido}" placeholder="Ingrese Nro. pedido" enabled="{facturaView>/isEnabledCabecera}" />
+                        <Input id="pedido"  required="false" value="{pedido}" placeholder="Ingrese Nro. pedido" enabled="{facturaView>/isEnabledCabecera}" />
                           <!-- <ObjectStatus class="sapUiSmallMarginBottom" title="Pedido" text="{pedido}" active="false"  /> -->
                         </form:fields>
                          <form:label>
@@ -53,7 +53,7 @@
 
                         <form:FormElement>
                             <form:fields>
-                                <Input id="InputFactura" required="true" value="{codigoFactura}" placeholder="Ingrese Nro. factura" enabled="{facturaView>/isEnabledCabecera}" change="onIngresarCodigoFactura"/>
+                                <Input id="InputFactura" required="false" value="{codigoFactura}" placeholder="Ingrese Nro. factura" enabled="{facturaView>/isEnabledCabecera}" change="onIngresarCodigoFactura"/>
 
                             </form:fields>
                             <form:label>
@@ -85,7 +85,7 @@
                             </form:label>
 
                         </form:FormElement>
-                        <form:FormElement>
+                     <!--  <form:FormElement>
                             <form:fields>
 
                                 <Input value="{total}" placeholder="" enabled="false"/>
@@ -96,7 +96,7 @@
 
                             </form:label>
 
-                        </form:FormElement>
+                        </form:FormElement> -->
 
                         <form:FormElement>
                             <form:fields >

@@ -445,22 +445,22 @@ sap.ui.define([
             return fechaFormateada;
         },
         onInitStateInputs:function(){
-            that.getView().byId("InputFactura").setValueState("None");
+            //that.getView().byId("InputFactura").setValueState("None");
             that.getView().byId("FechaEmision").setValueState("None");
             that.getView().byId("InputImporte").setValueState("None");
             that.getView().byId("InputSelectWaers").setValueState("None");
-            that.getView().byId("InputPedido").setValueState("None")
+            //that.getView().byId("InputPedido").setValueState("None")
         },
         onValidarCampos: function () {
             let valid = true;
             let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
-            if (oCabecera.FACTUR == "") {
+           /* if (oCabecera.FACTUR == "") {
                 that.getView().byId("InputFactura").setValueState("Error")
                 valid = false;
             }
             else {
                 that.getView().byId("InputFactura").setValueState("None")
-            }
+            }*/
 
             if (oCabecera.FEMISI == "") {
                 that.getView().byId("FechaEmision").setValueState("Error")
@@ -483,13 +483,14 @@ sap.ui.define([
             else {
                 that.getView().byId("InputSelectWaers").setValueState("None")
             }
-            if (oCabecera.EBELN == "") {
+          /*  if (oCabecera.EBELN == "") {
                 that.getView().byId("InputPedido").setValueState("Error")
                 valid = false;
             }
             else {
                 that.getView().byId("InputPedido").setValueState("None")
             }
+            */
             return valid;
         },
         actualizarFactura: async function () {

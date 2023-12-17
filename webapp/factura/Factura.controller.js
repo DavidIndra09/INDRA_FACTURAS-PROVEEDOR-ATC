@@ -169,7 +169,7 @@ sap.ui.define([
                     //totalDescuentos: "",
                     //sumatoriaIgv: invoice.taxtotal.taxamount,
                     ordenReference: (invoice.orderreference)?invoice.orderreference.id:"",
-                    nitproovedor: invoice.accountingsupplierparty.party.partytaxscheme.companyid ,
+                    nitproovedor: (invoice.accountingsupplierparty)?invoice.accountingsupplierparty.party.partytaxscheme.companyid:"" ,
                     importe: (invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
                     total: (invoice.legalmonetarytotal)?invoice.legalmonetarytotal.payableamount:invoice.note.legalmonetarytotal.payableamount,
                     //sociedad: "3000"
@@ -810,13 +810,14 @@ sap.ui.define([
             else {
                 that.getView().byId("InputSelectWaers").setValueState("None")
             }
-            if (factura.pedido == undefined || factura.pedido == "") {
+        /*    if (factura.pedido == undefined || factura.pedido == "") {
                 that.getView().byId("pedido").setValueState("Error")
                 valid = false;
             }
             else {
                 that.getView().byId("pedido").setValueState("None")
             }
+            */
             return valid;
         },
         _getDataFactura: function () {
