@@ -146,9 +146,10 @@ sap.ui.define([
                 filters: aFilters,
                 success: function (data) {
                     sap.ui.core.BusyIndicator.hide();
-                    let Detalle = data.results[0].ET_DET;
+                    let Detalle = (oCabecera.TIPDAT== "XLSREP")?data.results[0].ET_DET:data.results[0].ET_DETVE;
                     let Documentos = data.results[0].ET_DOC;
                     let aLista = JSON.parse(Detalle);
+                    
                     if (posiciones.length > 0) {
                         let posicionesParse = JSON.parse(posiciones);
                         aLista.push(...posicionesParse);

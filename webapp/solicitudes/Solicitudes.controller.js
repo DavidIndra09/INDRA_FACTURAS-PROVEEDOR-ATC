@@ -763,11 +763,11 @@ sap.ui.define([
                 let value = aLista[i];
                 let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
                 value.DescripcionEstado = find.TEXTO;
-                let resultEstatus = that.getColorStatus(find.TEXTO);
+                let resultEstatus = that.getColorStatus(value.ESTADO);
                 //await that.getProveedorText(value.LIFNR);
                 //let Proveedor = that.getView().getModel("proveedorText").getData();
                 //value.LIFNRTEXT = (Proveedor.length > 0) ? Proveedor[0].TEXTO : "";
-                value.Edit = (value.ESTADO == "03" || value.ESTADO == "05" || value.ESTADO == "07") ? true : false;
+                value.Edit = (value.ESTADO == "01" || value.ESTADO == "03" || value.ESTADO == "05" || value.ESTADO == "07") ? true : false;
                 
                 value.ColorEstado = resultEstatus.state;
                 value.ColorOrigen = that.obtenerValorAleatorio(value.TIPDAT);
@@ -808,46 +808,50 @@ sap.ui.define([
             let object = { "state": "None", "icon": "sap-icon://information" };
             switch (Estado) {
 
-                case "Creado":
+                case "01":
+                    object.state = "None";
+                    object.icon = "sap-icon://information";
+                    break;
+
+                case "02":
                     object.state = "Information";
                     object.icon = "sap-icon://information";
                     break;
 
-                case "Liberado para pago":
-                    object.state = "Information";
-                    object.icon = "sap-icon://information";
-                    break;
-
-                case "Factura Registrada":
-                    object.state = "Success";
+                case "03":
+                    object.state = "Warning";
                     object.icon = "sap-icon://sys-enter-2";
                     break;
 
-                case "Factura Pagada":
-                    object.state = "Success";
+                case "04":
+                    object.state = "None";
                     object.icon = "sap-icon://sys-enter-2";
                     break;
-                case "Con Errores":
+                case "05":
                     object.state = "Error";
                     object.icon = "sap-icon://error";
                     break;
-                    case "Con Diferencia de Precio":
-                        object.state = "Error";
-                        object.icon = "sap-icon://error";
+                case "06":
+                        object.state = "Success";
+                        object.icon = "sap-icon://sys-enter-2";
                         break;
-                case "Factura Contabilizada":
-                    object.state = "Indication08";
+                case "07":
+                    object.state = "Indication03";
                     object.icon = "sap-icon://information";
                     break;
 
-                case "Rechazado":
-                    object.state = "Warning";
-                    object.icon = "sap-icon://alert";
+                case "08":
+                    object.state = "Error";
+                    object.icon = "sap-icon://Error";
                     break;
+                case "09":
+                        object.state = "Indication08";
+                        object.icon = "sap-icon://sys-enter-2";
+                        break;
             }
             return object;
 
-        },
+        },  
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
             const valorSinComas = valor.replace(/,/g, '');
@@ -942,11 +946,11 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.show();
             let oView = this.getView();
             let mensaje = [];
-            let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);            
+            let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);   
+            debugger         
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
-                const Item = FacturasConsolidadas[i];
-                
-                let DataFactura = that._getDataFactura(Item,TypeTable);                
+                const Item = FacturasConsolidadas[i];                
+                let DataFactura = that._getDataFactura(Item,TypeTable);                                
                 oView.byId("button-message").setVisible(true);
                 oView.byId("button-message").setText("Registrando factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
                 //await that.esperarTresSegundos();                             
@@ -979,12 +983,12 @@ sap.ui.define([
         }
 
         },
-        onCalcularTotalPosiciones: function(array,TypeTable){
+        /*onCalcularTotalPosiciones: function(array,TypeTable){
             let Total = 0;
             switch(TypeTable){
                 case "Repuestos":
                     array.forEach(elemento => {
-                        Total = Total + parseFloat(elemento.PrecioNeto);
+                        Total = Total + parseFloat(isNaN(elemento.PrecioNeto)?0:elemento.PrecioNeto);
                     })
                     break;
                 case "Vehiculos":
@@ -995,13 +999,44 @@ sap.ui.define([
             }
            
             return (Total.toFixed(2)).toString();
-        },
+        },*/
+        onCalcularTotalPosiciones: function (array, TypeTable) {
+            let fieldToGroupBy = (TypeTable === "Repuestos") ? "NroFactura" : "Num_Fc";
+            let totalsByField = {};
+        
+            array.forEach(elemento => {
+                let fieldValue = elemento[fieldToGroupBy] || 'SinFactura'; // Si el campo es null o undefined, se usa 'SinFactura'
+                if (!totalsByField[fieldValue]) {
+                    totalsByField[fieldValue] = 0;
+                }
+        
+                switch (TypeTable) {
+                    case "Repuestos":
+                        totalsByField[fieldValue] += parseFloat(isNaN(elemento.ValorTotal) ? 0 : elemento.ValorTotal);
+                        break;
+                    case "Vehiculos":
+                        totalsByField[fieldValue] += parseFloat(elemento.Fob_U || 0) + parseFloat(elemento.Flete || 0) + parseFloat(elemento.Seguro || 0);
+                        break;
+                }
+            });
+        
+            // Convertir el objeto a un array de objetos para devolver el resultado deseado
+            let resultArray = Object.keys(totalsByField).map((fieldValue, index) => {
+                return {
+                     Total: totalsByField[fieldValue].toFixed(2).toString(), Numfa:fieldValue 
+                };
+            });
+        
+            return resultArray;
+        },       
+        
         onConsolidarFacturas(array, TypeTable) {
-            const grupos = {};
+            var grupos = {};
             let Total = 0;
             switch (TypeTable) {
                 case "Repuestos":  
-                    Total = that.onCalcularTotalPosiciones(array,TypeTable);                  
+                    Total = that.onCalcularTotalPosiciones(array,TypeTable); 
+                                     
                     array.forEach(elemento => {
                         const Pedido = elemento.Solped;
                         const Moneda = elemento.Moneda; 
@@ -1016,9 +1051,10 @@ sap.ui.define([
                         const Prtsl = elemento.PuertoSalida;
                         const Prten = elemento.Puertollegada;
                         const Tptra = elemento.ViaTransporte;
+                       if(Numfa!=""){
                        
                         if (!grupos[Numfa]) {
-                            grupos[Numfa] = {Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: Total, Moneda: Moneda, Detalle: [] };
+                            grupos[Numfa] = {Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
                         }
                         
                         //grupos[numFc].Detalle.push(elemento);
@@ -1046,10 +1082,15 @@ sap.ui.define([
                             "banfn": elemento.Solped,
                             "psorn": elemento.PaisOrigen
                         });
+
+                    }
+
                     });
+
                     break;
                 case "Vehiculos":  
-                Total = that.onCalcularTotalPosiciones(array,TypeTable);                    
+                Total = that.onCalcularTotalPosiciones(array,TypeTable);   
+                                 
                     array.forEach(elemento => {
                         const Pedido = elemento.Num_Solped;
                         const Moneda = "COP"; 
@@ -1066,11 +1107,12 @@ sap.ui.define([
                         const Tptra = elemento.Via_Transp;                       
                         
                         //Total = Total + parseFloat((elemento.Fob_U != "") ? elemento.Fob_U : 0) + parseFloat((elemento.Flete != "") ? elemento.Flete : 0) + parseFloat((elemento.Seguro != "") ? elemento.Seguro : 0);
-                                                
-                        if (!grupos[Numfa]) {
+                        if(Numfa!=""){
+                        
+                        if (!grupos[Numfa] ) {
                             grupos[Numfa] = {Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSVEH",  Total: 0, Moneda: Moneda, Detalle: [] };
                         }
-                        grupos[Numfa].Total = Total;
+                        //grupos[Numfa].Total = Total;
                         //grupos[numFc].Detalle.push(elemento);
                         grupos[Numfa].Detalle.push({                            
                         "BUKRS":"1000",
@@ -1116,10 +1158,20 @@ sap.ui.define([
                         "EKGRP":elemento.Ekgrp,
                         "EINDT":formatter.formatearFechaString(elemento.Eindt),
                         });
+
+                    }
                     });
                     break;
             }
-            const resultado = Object.values(grupos);            
+                       
+            const resultado = Object.values(grupos);     
+            $.each(resultado,function(i,item){                
+                var find = Total.find(elemento=> elemento.Numfa == item.Numfa);
+               if(find){
+                item.Total = find.Total
+               }
+            });    
+              
             return resultado;
         },
         _getDataFactura: function (Data,TypeTable) {
@@ -1205,7 +1257,7 @@ sap.ui.define([
                     break;             
             }    
 
-            let oReturn = that.ongetModelCabecera(Data);
+            let oReturn = that.ongetModelCabecera(Data,TypeTable);
             
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
@@ -1222,9 +1274,9 @@ sap.ui.define([
         
             return `${year}${month}${day}`;
         },
-        ongetModelCabecera:function(Data){
+        ongetModelCabecera:function(Data,TypeTable){
             return {
-                "FACTUR":"Factura_repuestos",
+                "FACTUR": (TypeTable=="Repuestos")?"Factura_repuestos":"Factura_Vehículos",
                 "INCO1": Data.Inco1,
                 "INCO2": Data.Inco2,
                 "NUMFA": Data.Numfa,
@@ -1426,7 +1478,7 @@ sap.ui.define([
                                 press: that.onDetalleSolicitud.bind(that,"X"),
                                 type: "Reject",
                                 tooltip: "Editar",
-                                enabled: "{= (${ESTADO} === '03' || ${ESTADO} === '05' || ${ESTADO} === '07') ? true : false }"                               
+                                enabled: "{= (${ESTADO} === '01' || ${ESTADO} === '03' || ${ESTADO} === '05' || ${ESTADO} === '07') ? true : false }"                               
                             });
 
                             var oButtonDelete = new sap.m.Button({
@@ -2412,7 +2464,8 @@ sap.ui.define([
                     jsonObject.Seguro = item["SEGURO"],
                     jsonObject.Ekorg = item["EKORG"],
                     jsonObject.Ekgrp = item["EKGRP"],
-                    jsonObject.Eindt = item["EINDT"]
+                    jsonObject.Eindt = item["EINDT"],
+                    jsonObject.Moneda = item["MONEDA"]
                 }
                 resultData.push(jsonObject);
             });
@@ -2491,7 +2544,8 @@ sap.ui.define([
                 "SEGURO",
                 "EKORG",
                 "EKGRP",
-                "EINDT"
+                "EINDT",
+                "MONEDA"
             ];
 
             let elementosRequeridos;
