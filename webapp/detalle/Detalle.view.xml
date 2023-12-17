@@ -130,9 +130,9 @@
                                 <Column>
                                     <Label text="{i18n>conformidad}" design="Bold" />
                                 </Column>
-                                <Column demandPopin="true" minScreenWidth="Tablet">
+                              <!--  <Column demandPopin="true" minScreenWidth="Tablet">
                                     <Label text="{i18n>posConformidad}" design="Bold" />
-                                </Column>
+                                </Column> -->
                                 <Column demandPopin="true" minScreenWidth="Tablet">
                                     <Label text="{i18n>ordenCompra}" design="Bold" />
                                 </Column>
@@ -161,7 +161,7 @@
                                 <ColumnListItem press=".onPress">
                                     <cells>
                                         <ObjectIdentifier title="{BELNR}" />
-                                        <Text text="{POSNR}" />
+                                      <!--  <Text text="{POSNR}" /> -->
                                         <Text text="{EBELN}" />
                                         <Text text="{EBELP}" />
                                         <Text text="{MATNR}" />

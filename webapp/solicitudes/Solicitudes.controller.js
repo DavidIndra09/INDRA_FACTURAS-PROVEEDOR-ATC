@@ -947,10 +947,11 @@ sap.ui.define([
             let oView = this.getView();
             let mensaje = [];
             let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);   
-            debugger         
+                     
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];                
-                let DataFactura = that._getDataFactura(Item,TypeTable);                                
+                let DataFactura = that._getDataFactura(Item,TypeTable);   
+                                             
                 oView.byId("button-message").setVisible(true);
                 oView.byId("button-message").setText("Registrando factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
                 //await that.esperarTresSegundos();                             
@@ -1192,7 +1193,7 @@ sap.ui.define([
                             "ebeln": "",//item.EBELN,
                             "lblni": "",
                             "ebelp": item.ebelp,
-                            "matnr": item.matnr,
+                            "matnr": that.agregarZAlPrimerCaracter(item.matnr),
                             "tipod": "B",
                             "menge": item.menge,
                             "meins": item.meins,
@@ -1219,7 +1220,7 @@ sap.ui.define([
                             "FECHA_BL":elemento.FECHA_BL,
                             "NUM_FC":elemento.NUM_FC,
                             "PTO_SALIDA":elemento.PTO_SALIDA,
-                            "MATERIAL":elemento.MATERIAL,
+                            "MATERIAL": that.agregarZAlPrimerCaracter(elemento.MATERIAL),
                             "CANTIDAD":elemento.CANTIDAD,
                             "KATASHIKI":elemento.KATASHIKI,
                             "SFX_VENTA":elemento.SFX_VENTA,
@@ -1252,6 +1253,7 @@ sap.ui.define([
                             "EKORG":elemento.EKORG,
                             "EKGRP":elemento.EKGRP,
                             "EINDT":elemento.EINDT,
+                            //"MONEDA":elemento.MONEDA,
                             }
                     });
                     break;             
@@ -1266,6 +1268,12 @@ sap.ui.define([
                 "IT_DOC": ""//JSON.stringify(adjuntoModel)
             };
             return obj;
+        },
+        agregarZAlPrimerCaracter(texto) {            
+            if (texto.charAt(0) === '0') {              
+                return 'Z' + texto;
+            }            
+            return texto;
         },
         formatDateToyyyyMMdd: function (date) {
             const year = date.getFullYear();

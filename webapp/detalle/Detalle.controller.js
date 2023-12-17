@@ -192,7 +192,6 @@ sap.ui.define([
         convertirCadenaAFecha(cadenaFecha) {
             // Dividir la cadena en partes: año, mes, día
             const partesFecha = cadenaFecha.split('-');
-
             // Crear un objeto Date con las partes de la fecha
             // Nota: El mes en JavaScript es 0-indexado, por lo que restamos 1 al mes
             const fecha = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
@@ -215,7 +214,7 @@ sap.ui.define([
                 adjuntos.push({
                     "posnr": 0,
                     "lastModifiedDate": new Date(),
-                    "name": file.name.split(".")[0],
+                    "name": that.obtenerNombreSinExtension(file.name),//file.name.split(".")[0],
                     "type": "." + file.name.split(".").pop(),
                     "mimeType": file.type,
                     "base64": base64String
@@ -224,6 +223,12 @@ sap.ui.define([
                 fileUploader.setValue("");
             }
             //control.setValue("");
+        },
+        obtenerNombreSinExtension(nombreArchivo) {
+            const partes = nombreArchivo.split(".");
+            // Obtener todos los elementos excepto el último
+            const nombreSinExtension = partes.slice(0, -1).join(".");
+            return nombreSinExtension;
         },
         onAttachmentExist: function (file) {
             let exist = false;
