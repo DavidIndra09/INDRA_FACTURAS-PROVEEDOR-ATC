@@ -125,9 +125,16 @@ sap.ui.define([
         },
         onSetColorImport: function (pValue) {
 
-            if (pValue == "05" || pValue == "08" ) {
+            if (pValue == "05" || pValue == "08"  ) {
                 return "red";
-            } else {
+            }
+            else if( pValue == "10"){
+                return "blue";
+            }
+            else if(pValue == "06" || pValue == "09"){
+                return "green"; 
+            }
+            else {
                 return "gray";
             }
         },

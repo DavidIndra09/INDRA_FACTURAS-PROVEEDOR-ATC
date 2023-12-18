@@ -50,7 +50,7 @@ sap.ui.define([
          */
         onInit: function () {
             that = this;
-            
+
             MODEL = this.getOwnerComponent().getModel();
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
@@ -92,7 +92,7 @@ sap.ui.define([
 
             this.getRouter().getRoute("solicitudes").attachPatternMatched(this._onSolicitudesMatched, this);
         },
-       
+
 
         /* =========================================================== */
         /* event handlers                                              */
@@ -148,7 +148,7 @@ sap.ui.define([
          * @param {sap.ui.base.Event} event
          * @public 
          */
-        onDetalleSolicitud: function (flujo,event) {
+        onDetalleSolicitud: function (flujo, event) {
             const contexto = event.getSource().getBindingContext();
             const solicitud = contexto.getObject();
             const codigoSolicitud = contexto.getProperty("SOLFAC");//codigoSolicitud
@@ -157,13 +157,13 @@ sap.ui.define([
             if (solicitud.estadoFactura_ID === 1) {
                 page = "factura";
             }
-            if(flujo == "X"){
-                solicitud.Edit = true  
+            if (flujo == "X") {
+                solicitud.Edit = true
             }
-            else{
-                solicitud.Edit = false 
+            else {
+                solicitud.Edit = false
             }
-            
+
             that.getOwnerComponent().setModel(new JSONModel(solicitud), "oCabecera");
             sap.ui.core.BusyIndicator.show();
             that.getRouter().navTo(page, {
@@ -411,7 +411,7 @@ sap.ui.define([
             if (!vistaRapida) {
                 vistaRapida = await that._getDialogs("VistaRapidaEstados");
             }
-            
+
             vistaRapida.bindElement(path);
             vistaRapida.close();
             vistaRapida.openBy(control);
@@ -452,12 +452,12 @@ sap.ui.define([
             if (!vistaRapida) {
                 vistaRapida = await that._getDialogs(VistaRapida);
             }
-            
+
             vistaRapida.unbindElement();
             vistaRapida.close();
-            
+
             vistaRapida.bindElement(path);
-            
+
             vistaRapida.openBy(btnVistaRapida);
         },
 
@@ -526,6 +526,10 @@ sap.ui.define([
             }
         },
 
+        onValidarEstadoParaLiberar: function(selectedFacturas) {
+            return selectedFacturas.every(item => ["01", "07"].includes(MODEL.getProperty(item).ESTADO));
+        },            
+
         onSolicitarPagoFactura: async function (oEvent) {
             const tableFacturas = that.getTable();
             const selectedFacturas = tableFacturas.getSelectedContextPaths();
@@ -533,16 +537,17 @@ sap.ui.define([
                 MessageBox.error("Seleccione por lo menos una factura");
                 return;
             }
-            /* if (!this._validarSolicitudPago(selectedFacturas)) {
-                 MessageBox.error("Seleccione solo facturas con estado Registrado");
+            var valid = that.onValidarEstadoParaLiberar(selectedFacturas);
+             if (!valid) {
+                 MessageBox.error("No puede liberar solicitudes con un estado distinto a 'Solicitud Creada' o 'Rechazado' ");
                  return;
-             }*/
+             }
             MODEL.setProperty("/tituloMensaje", "¿Desea liberar para procesar?");
             selectedFacturas.map(path => {
                 messageManager.addMessages(new Message({
-                    message: MODEL.getProperty(path).SOLFAC,
+                    message: MODEL.getProperty(path).FACTUR,
                     additionalText: "",
-                    description: MODEL.getProperty(path).FACTUR,
+                    description: MODEL.getProperty(path).SOLFAC ,
                     type: "Warning",
                     target: "/Dummy",
                     processor: MODEL
@@ -747,7 +752,7 @@ sap.ui.define([
         },
 
         _getDataInitial: async function () {
-            
+
         },
 
         _setListaSolicitudes: async function (parameters) {
@@ -756,9 +761,9 @@ sap.ui.define([
             parameters.urlParameters = {};
             const request = await this.readEntity(ODATA_SAP, "/obtenerSolFactSet", parameters);
             let sJson = request.results[0].ET_DATA;
-           
+
             let aLista = JSON.parse(sJson);
-            let EstadosFactura = that.getModel("EstadosFactura").getData();          
+            let EstadosFactura = that.getModel("EstadosFactura").getData();
             for (let i = 0; i < aLista.length; i++) {
                 let value = aLista[i];
                 let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
@@ -768,7 +773,7 @@ sap.ui.define([
                 //let Proveedor = that.getView().getModel("proveedorText").getData();
                 //value.LIFNRTEXT = (Proveedor.length > 0) ? Proveedor[0].TEXTO : "";
                 value.Edit = (value.ESTADO == "01" || value.ESTADO == "03" || value.ESTADO == "05" || value.ESTADO == "07") ? true : false;
-                
+
                 value.ColorEstado = resultEstatus.state;
                 value.ColorOrigen = that.obtenerValorAleatorio(value.TIPDAT);
                 value.IconoEstado = resultEstatus.icon;
@@ -779,10 +784,10 @@ sap.ui.define([
                 value.FKDAT = formatter.formatearFechaString(value.FKDAT);
                 value.FCRESO = formatter.formatearFechaString(value.FCRESO);
                 value.FEMISI = formatter.formatearFechaString(value.FEMISI);
-                (value.ESTADO == "05" || value.ESTADO == "08") ? value.Tooltip = "Haz clic para obtener más detalles." : "";
+                (value.ESTADO == "05" || value.ESTADO == "08" || value.ESTADO == "10" || value.ESTADO == "06" || value.ESTADO == "09") ? value.Tooltip = "Haz clic para obtener más detalles." : "";
             }
-            
-            
+
+
             aLista.sort((a, b) => b.SOLFAC - a.SOLFAC);
 
             MODEL.setProperty("/Facturas", aLista);
@@ -832,9 +837,9 @@ sap.ui.define([
                     object.icon = "sap-icon://error";
                     break;
                 case "06":
-                        object.state = "Success";
-                        object.icon = "sap-icon://sys-enter-2";
-                        break;
+                    object.state = "Success";
+                    object.icon = "sap-icon://sys-enter-2";
+                    break;
                 case "07":
                     object.state = "Indication03";
                     object.icon = "sap-icon://information";
@@ -845,13 +850,17 @@ sap.ui.define([
                     object.icon = "sap-icon://Error";
                     break;
                 case "09":
-                        object.state = "Indication08";
-                        object.icon = "sap-icon://sys-enter-2";
-                        break;
+                    object.state = "Indication08";
+                    object.icon = "sap-icon://sys-enter-2";
+                    break;
+                case "10":
+                    object.state = "Warning";
+                    object.icon = "sap-icon://synchronize";
+                    break;
             }
             return object;
 
-        },  
+        },
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
             const valorSinComas = valor.replace(/,/g, '');
@@ -877,9 +886,9 @@ sap.ui.define([
                 for (const item of solicitudes) {
                     try {
                         const copiedObject = (({ ColorEstado, DescripcionEstado, IconoEstado, ...rest }) => rest)(item.getObject());
-                        
 
-                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION")?"03":"02";
+
+                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "03" : "02";
                         copiedObject.FCRESO = formatter.formatearFechaString(copiedObject.FCRESO);
                         copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
                         copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);
@@ -943,58 +952,58 @@ sap.ui.define([
                 }, 3000);
             });
         },
-        onValidarProveedorExcel: function(Data) {
-            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;  
-            let valid = Data.every(item => item.Proveedor == lifnr);        
+        onValidarProveedorExcel: function (Data) {
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
+            let valid = Data.every(item => item.Proveedor == lifnr);
             return valid;
-        },        
+        },
         onProcesarCargaFacturasMasiva: async function (Data, TypeTable) {
             try {
-            sap.ui.core.BusyIndicator.show();
-            let oView = this.getView();
-            let mensaje = [];
-            let valid = that.onValidarProveedorExcel(Data);
-            if(!valid){
-                MessageBox.error("El proveedor seleccionado no es el mismo que se intenta cargar en el archivo Excel.");
+                sap.ui.core.BusyIndicator.show();
+                let oView = this.getView();
+                let mensaje = [];
+                let valid = that.onValidarProveedorExcel(Data);
+                if (!valid) {
+                    MessageBox.error("El proveedor seleccionado no es el mismo que se intenta cargar en el archivo Excel.");
+                    sap.ui.core.BusyIndicator.hide();
+                    return;
+                }
+
+                let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);
+                for (let i = 0; i < FacturasConsolidadas.length; i++) {
+                    const Item = FacturasConsolidadas[i];
+                    let DataFactura = that._getDataFactura(Item, TypeTable);
+
+                    oView.byId("button-message").setVisible(true);
+                    oView.byId("button-message").setText("Registrando solicitud para la factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
+                    //await that.esperarTresSegundos();                             
+                    const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", DataFactura);
+                    mensaje.push(request.E_MSG);
+                }
+                oView.byId("button-message").setVisible(false);
+                oView.byId("button-message").setText("");
                 sap.ui.core.BusyIndicator.hide();
-                return;
+                const type = "information";
+                let detalle = that.formatMessages(mensaje);
+                MessageBox[type](detalle, {
+                    //details: detalle,
+                    title: "Carga Masiva de Facturas",
+                    onClose: function () {
+                        ODATA_SAP.refresh();
+                        sap.ui.core.BusyIndicator.hide()
+                        that.onBuscarFacturas()
+                        //this.onNavSolicitudes();
+                    }.bind(this)
+                });
+            } catch (error) {
+                console.error("Error en la carga masiva de facturas:", error);
+                sap.ui.core.BusyIndicator.hide();
+                const type = "error";
+                MessageBox[type]("Ocurrió un error en la carga masiva de facturas. Por favor, inténtelo nuevamente.");
+                let oView = that.getView();
+                oView.byId("button-message").setVisible(false);
+                oView.byId("button-message").setText("");
             }
-            
-            let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);
-            for (let i = 0; i < FacturasConsolidadas.length; i++) {
-                const Item = FacturasConsolidadas[i];                
-                let DataFactura = that._getDataFactura(Item,TypeTable);  
-                                             
-                oView.byId("button-message").setVisible(true);
-                oView.byId("button-message").setText("Registrando solicitud para la factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
-                //await that.esperarTresSegundos();                             
-                const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", DataFactura);
-                mensaje.push(request.E_MSG);
-            }
-            oView.byId("button-message").setVisible(false);
-            oView.byId("button-message").setText("");
-            sap.ui.core.BusyIndicator.hide();
-            const type = "information";
-            let detalle = that.formatMessages(mensaje);
-            MessageBox[type](detalle, {
-                //details: detalle,
-                title: "Carga Masiva de Facturas",
-                onClose: function () {
-                    ODATA_SAP.refresh();
-                    sap.ui.core.BusyIndicator.hide()
-                    that.onBuscarFacturas()
-                    //this.onNavSolicitudes();
-                }.bind(this)
-            });
-        }catch (error) {
-            console.error("Error en la carga masiva de facturas:", error);
-            sap.ui.core.BusyIndicator.hide();
-            const type = "error";
-            MessageBox[type]("Ocurrió un error en la carga masiva de facturas. Por favor, inténtelo nuevamente.");
-            let oView = that.getView();
-            oView.byId("button-message").setVisible(false);
-            oView.byId("button-message").setText("");
-        }
 
         },
         /*onCalcularTotalPosiciones: function(array,TypeTable){
@@ -1017,13 +1026,13 @@ sap.ui.define([
         onCalcularTotalPosiciones: function (array, TypeTable) {
             let fieldToGroupBy = (TypeTable === "Repuestos") ? "NroFactura" : "Num_Fc";
             let totalsByField = {};
-        
+
             array.forEach(elemento => {
                 let fieldValue = elemento[fieldToGroupBy] || 'SinFactura'; // Si el campo es null o undefined, se usa 'SinFactura'
                 if (!totalsByField[fieldValue]) {
                     totalsByField[fieldValue] = 0;
                 }
-        
+
                 switch (TypeTable) {
                     case "Repuestos":
                         totalsByField[fieldValue] += parseFloat(isNaN(elemento.ValorTotal) ? 0 : elemento.ValorTotal);
@@ -1033,30 +1042,30 @@ sap.ui.define([
                         break;
                 }
             });
-        
+
             // Convertir el objeto a un array de objetos para devolver el resultado deseado
             let resultArray = Object.keys(totalsByField).map((fieldValue, index) => {
                 return {
-                     Total: totalsByField[fieldValue].toFixed(2).toString(), Numfa:fieldValue 
+                    Total: totalsByField[fieldValue].toFixed(2).toString(), Numfa: fieldValue
                 };
             });
-        
+
             return resultArray;
-        },       
-        
+        },
+
         onConsolidarFacturas(array, TypeTable) {
             var grupos = {};
             let Total = 0;
             switch (TypeTable) {
-                case "Repuestos":  
-                    Total = that.onCalcularTotalPosiciones(array,TypeTable); 
-                                     
+                case "Repuestos":
+                    Total = that.onCalcularTotalPosiciones(array, TypeTable);
+
                     array.forEach(elemento => {
                         const Pedido = elemento.Solped;
-                        const Moneda = elemento.Moneda; 
+                        const Moneda = elemento.Moneda;
                         const ClaseDocumento = elemento.ClaseDocumento;
                         const OrganizacionCompras = elemento.OrganizacionCompras
-                        const GrupoCompras = elemento.GrupoCompras;                     
+                        const GrupoCompras = elemento.GrupoCompras;
                         const Inco1 = elemento.Icoterms;
                         const Inco2 = elemento.LugarIncoterms;
                         const Numfa = elemento.NroFactura;
@@ -1066,52 +1075,52 @@ sap.ui.define([
                         const Prten = elemento.Puertollegada;
                         const Tptra = elemento.ViaTransporte;
                         const Proveedor = elemento.Proveedor;
-                       if(Numfa!=""){
-                       
-                        if (!grupos[Numfa]) {
-                            grupos[Numfa] = {Proveedor:Proveedor,Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
-                        }
-                        
-                        //grupos[numFc].Detalle.push(elemento);
-                        grupos[Numfa].Detalle.push({
-                            "werks": elemento.Centro,
-                            "lgort": elemento.Almacen,
-                            "mandt": "800",
-                            "bukrs": elemento.Sociedad,
-                            "lifnr": "",//item.LIFNR,
-                            "codefact": "",
-                            "posnr": parseFloat(elemento.Item) * 10,
-                            "datre": "",
-                            "ebeln": "",//item.EBELN,
-                            "lblni": "",
-                            "ebelp": elemento.Item,
-                            "matnr": elemento.Material,
-                            "tipod": "B",
-                            "menge": elemento.Cantidad,
-                            "meins": elemento.Unidad,
-                            "NETPR": elemento.PrecioNeto,
-                            "waers": elemento.Moneda,
-                            "txz01": "",//item.TXZ01,
-                            "belnr": "",//item.BELNR,
-                            "mwskz": "I0",
-                            "banfn": elemento.Solped,
-                            "psorn": elemento.PaisOrigen
-                        });
+                        if (Numfa != "") {
 
-                    }
+                            if (!grupos[Numfa]) {
+                                grupos[Numfa] = { Proveedor: Proveedor, Inco1: Inco1, Inco2: Inco2, Numfa: Numfa, Numbl: Numbl, Datbl: Datbl, Prtsl: Prtsl, Prten: Prten, Tptra: Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras, Pedido: Pedido, ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
+                            }
+
+                            //grupos[numFc].Detalle.push(elemento);
+                            grupos[Numfa].Detalle.push({
+                                "werks": elemento.Centro,
+                                "lgort": elemento.Almacen,
+                                "mandt": "800",
+                                "bukrs": elemento.Sociedad,
+                                "lifnr": "",//item.LIFNR,
+                                "codefact": "",
+                                "posnr": parseFloat(elemento.Item) * 10,
+                                "datre": "",
+                                "ebeln": "",//item.EBELN,
+                                "lblni": "",
+                                "ebelp": elemento.Item,
+                                "matnr": elemento.Material,
+                                "tipod": "B",
+                                "menge": elemento.Cantidad,
+                                "meins": elemento.Unidad,
+                                "NETPR": elemento.PrecioNeto,
+                                "waers": elemento.Moneda,
+                                "txz01": "",//item.TXZ01,
+                                "belnr": "",//item.BELNR,
+                                "mwskz": "I0",
+                                "banfn": elemento.Solped,
+                                "psorn": elemento.PaisOrigen
+                            });
+
+                        }
 
                     });
 
                     break;
-                case "Vehiculos":  
-                Total = that.onCalcularTotalPosiciones(array,TypeTable);   
-                                 
+                case "Vehiculos":
+                    Total = that.onCalcularTotalPosiciones(array, TypeTable);
+
                     array.forEach(elemento => {
                         const Pedido = elemento.Num_Solped;
-                        const Moneda = elemento.Moneda; 
+                        const Moneda = elemento.Moneda;
                         const ClaseDocumento = elemento.Cl_Doc;
                         const OrganizacionCompras = elemento.Ekorg
-                        const GrupoCompras = elemento.Ekgrp;                     
+                        const GrupoCompras = elemento.Ekgrp;
                         const Inco1 = elemento.Inconterms;
                         const Inco2 = "";
                         const Numfa = elemento.Num_Fc;
@@ -1119,82 +1128,82 @@ sap.ui.define([
                         const Datbl = elemento.Fecha_Bl;
                         const Prtsl = elemento.Pto_Salida;
                         const Prten = elemento.Pto_Llegada;
-                        const Tptra = elemento.Via_Transp;                       
+                        const Tptra = elemento.Via_Transp;
                         const Proveedor = elemento.Proveedor;
                         //Total = Total + parseFloat((elemento.Fob_U != "") ? elemento.Fob_U : 0) + parseFloat((elemento.Flete != "") ? elemento.Flete : 0) + parseFloat((elemento.Seguro != "") ? elemento.Seguro : 0);
-                        if(Numfa!=""){
-                        
-                        if (!grupos[Numfa] ) {
-                            grupos[Numfa] = {Proveedor:Proveedor,Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSVEH",  Total: 0, Moneda: Moneda, Detalle: [] };
-                        }
-                        //grupos[Numfa].Total = Total;
-                        //grupos[numFc].Detalle.push(elemento);
-                        grupos[Numfa].Detalle.push({                            
-                        "BUKRS":"1000",
-                        "SOLFAC":"",
-                        "POSNR":"",
-                        "CL_DOC":elemento.Cl_Doc,
-                        "PROVEEDOR":elemento.Proveedor,
-                        "NUM_BL":elemento.Num_Bl,
-                        "FECHA_BL":formatter.formatearFechaString(elemento.Fecha_Bl),
-                        "NUM_FC":elemento.Num_Fc,
-                        "PTO_SALIDA":elemento.Pto_Salida,
-                        "MATERIAL":elemento.Material,
-                        "CANTIDAD":elemento.Cantidad,
-                        "KATASHIKI":elemento.Katashiki,
-                        "SFX_VENTA":elemento.Sfx_Venta,
-                        "SFX_PROD":elemento.Sfx_Prod,
-                        "M3_UNIT":elemento.M3_Unit,
-                        "PESO_BR":elemento.Peso_Br,
-                        "PESO_NT_U":elemento.Peso_Nt_U,
-                        "FOB_U":elemento.Fob_U,
-                        "COND_FOB":elemento.Cond_Fob,
-                        "FECHA_FC": formatter.formatearFechaString(elemento.Fecha_Fc),
-                        "FLETE":elemento.Flete,
-                        "FLETE_BL":elemento.Flete_Bl,
-                        "PTO_LLEGADA":elemento.Pto_Llegada,
-                        "INCOTERMS":elemento.Inconterms,
-                        "VIA_TRANSP":elemento.Via_Transp,
-                        "A_MODELO":elemento.A_modelo,
-                        "NUM_SOLPED":elemento.Num_Solped,
-                        "BNFPO":"",
-                        "CHASIS":elemento.Chasis,
-                        "NUM_MOTOR":elemento.Num_Motor,
-                        "COLOR_EXT":elemento.Color_Ext,
-                        "COLOR_INT":elemento.Color_Int,
-                        "NUM_LLAVE":elemento.Num_Llave,
-                        "ED_CARAC":elemento.Ed_Carac,
-                        "BUQUE":elemento.Buque,
-                        "NAVIERA":elemento.Naviera,
-                        "SEGURO":elemento.Seguro,
-                        "COLOR_EXT_ATC":"",
-                        "COLOR_INT_ATC":"",
-                        "EKORG":elemento.Ekorg,
-                        "EKGRP":elemento.Ekgrp,
-                        "EINDT":formatter.formatearFechaString(elemento.Eindt),
-                        });
+                        if (Numfa != "") {
 
-                    }
+                            if (!grupos[Numfa]) {
+                                grupos[Numfa] = { Proveedor: Proveedor, Inco1: Inco1, Inco2: Inco2, Numfa: Numfa, Numbl: Numbl, Datbl: Datbl, Prtsl: Prtsl, Prten: Prten, Tptra: Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras, Pedido: Pedido, ClaseDocumento: ClaseDocumento, TipoData: "XLSVEH", Total: 0, Moneda: Moneda, Detalle: [] };
+                            }
+                            //grupos[Numfa].Total = Total;
+                            //grupos[numFc].Detalle.push(elemento);
+                            grupos[Numfa].Detalle.push({
+                                "BUKRS": "1000",
+                                "SOLFAC": "",
+                                "POSNR": "",
+                                "CL_DOC": elemento.Cl_Doc,
+                                "PROVEEDOR": elemento.Proveedor,
+                                "NUM_BL": elemento.Num_Bl,
+                                "FECHA_BL": formatter.formatearFechaString(elemento.Fecha_Bl),
+                                "NUM_FC": elemento.Num_Fc,
+                                "PTO_SALIDA": elemento.Pto_Salida,
+                                "MATERIAL": elemento.Material,
+                                "CANTIDAD": elemento.Cantidad,
+                                "KATASHIKI": elemento.Katashiki,
+                                "SFX_VENTA": elemento.Sfx_Venta,
+                                "SFX_PROD": elemento.Sfx_Prod,
+                                "M3_UNIT": elemento.M3_Unit,
+                                "PESO_BR": elemento.Peso_Br,
+                                "PESO_NT_U": elemento.Peso_Nt_U,
+                                "FOB_U": elemento.Fob_U,
+                                "COND_FOB": elemento.Cond_Fob,
+                                "FECHA_FC": formatter.formatearFechaString(elemento.Fecha_Fc),
+                                "FLETE": elemento.Flete,
+                                "FLETE_BL": elemento.Flete_Bl,
+                                "PTO_LLEGADA": elemento.Pto_Llegada,
+                                "INCOTERMS": elemento.Inconterms,
+                                "VIA_TRANSP": elemento.Via_Transp,
+                                "A_MODELO": elemento.A_modelo,
+                                "NUM_SOLPED": elemento.Num_Solped,
+                                "BNFPO": "",
+                                "CHASIS": elemento.Chasis,
+                                "NUM_MOTOR": elemento.Num_Motor,
+                                "COLOR_EXT": elemento.Color_Ext,
+                                "COLOR_INT": elemento.Color_Int,
+                                "NUM_LLAVE": elemento.Num_Llave,
+                                "ED_CARAC": elemento.Ed_Carac,
+                                "BUQUE": elemento.Buque,
+                                "NAVIERA": elemento.Naviera,
+                                "SEGURO": elemento.Seguro,
+                                "COLOR_EXT_ATC": "",
+                                "COLOR_INT_ATC": "",
+                                "EKORG": elemento.Ekorg,
+                                "EKGRP": elemento.Ekgrp,
+                                "EINDT": formatter.formatearFechaString(elemento.Eindt),
+                            });
+
+                        }
                     });
                     break;
             }
-                       
-            const resultado = Object.values(grupos);     
-            $.each(resultado,function(i,item){                
-                var find = Total.find(elemento=> elemento.Numfa == item.Numfa);
-               if(find){
-                item.Total = find.Total
-               }
-            });    
-              
+
+            const resultado = Object.values(grupos);
+            $.each(resultado, function (i, item) {
+                var find = Total.find(elemento => elemento.Numfa == item.Numfa);
+                if (find) {
+                    item.Total = find.Total
+                }
+            });
+
             return resultado;
         },
-        _getDataFactura: function (Data,TypeTable) {
+        _getDataFactura: function (Data, TypeTable) {
 
             var conformidades = [];
-            switch(TypeTable){
+            switch (TypeTable) {
                 case "Repuestos":
-                    conformidades = Data.Detalle.map(item => {                
+                    conformidades = Data.Detalle.map(item => {
                         return {
                             "werks": item.werks,
                             "lgort": item.lgort,
@@ -1223,82 +1232,82 @@ sap.ui.define([
                     break;
 
                 case "Vehiculos":
-                    conformidades = Data.Detalle.map(elemento => {                
-                        return {                            
-                            "BUKRS":"1000",
-                            "SOLFAC":"",
-                            "POSNR":"",
-                            "CL_DOC":elemento.CL_DOC,
-                            "PROVEEDOR":elemento.PROVEEDOR,
-                            "NUM_BL":elemento.NUM_BL,
-                            "FECHA_BL":elemento.FECHA_BL,
-                            "NUM_FC":elemento.NUM_FC,
-                            "PTO_SALIDA":elemento.PTO_SALIDA,
+                    conformidades = Data.Detalle.map(elemento => {
+                        return {
+                            "BUKRS": "1000",
+                            "SOLFAC": "",
+                            "POSNR": "",
+                            "CL_DOC": elemento.CL_DOC,
+                            "PROVEEDOR": elemento.PROVEEDOR,
+                            "NUM_BL": elemento.NUM_BL,
+                            "FECHA_BL": elemento.FECHA_BL,
+                            "NUM_FC": elemento.NUM_FC,
+                            "PTO_SALIDA": elemento.PTO_SALIDA,
                             "MATERIAL": that.agregarZAlPrimerCaracter(elemento.MATERIAL),
-                            "CANTIDAD":elemento.CANTIDAD,
-                            "KATASHIKI":elemento.KATASHIKI,
-                            "SFX_VENTA":elemento.SFX_VENTA,
-                            "SFX_PROD":elemento.SFX_PROD,
-                            "M3_UNIT":elemento.M3_UNIT,
-                            "PESO_BR":elemento.Peso_PESO_BRBr,
-                            "PESO_NT_U":elemento.PESO_NT_U,
-                            "FOB_U":elemento.FOB_U,
-                            "COND_FOB":elemento.COND_FOB,
-                            "FECHA_FC":elemento.FECHA_FC,
-                            "FLETE":elemento.FLETE,
-                            "FLETE_BL":elemento.FLETE_BL,
-                            "PTO_LLEGADA":elemento.PTO_LLEGADA,
-                            "INCOTERMS":elemento.INCOTERMS,
-                            "VIA_TRANSP":elemento.VIA_TRANSP,
-                            "A_MODELO":elemento.A_MODELO,
-                            "NUM_SOLPED":elemento.NUM_SOLPED,
-                            "BNFPO":"",
-                            "CHASIS":elemento.CHASIS,
-                            "NUM_MOTOR":elemento.NUM_MOTOR,
-                            "COLOR_EXT":elemento.COLOR_EXT,
-                            "COLOR_INT":elemento.COLOR_INT,
-                            "NUM_LLAVE":elemento.NUM_LLAVE,
-                            "ED_CARAC":elemento.ED_CARAC,
-                            "BUQUE":elemento.BUQUE,
-                            "NAVIERA":elemento.NAVIERA,
-                            "SEGURO":elemento.SEGURO,
-                            "COLOR_EXT_ATC":"",
-                            "COLOR_INT_ATC":"",
-                            "EKORG":elemento.EKORG,
-                            "EKGRP":elemento.EKGRP,
-                            "EINDT":elemento.EINDT,
-                            "MONEDA":elemento.MONEDA,
-                            }
+                            "CANTIDAD": elemento.CANTIDAD,
+                            "KATASHIKI": elemento.KATASHIKI,
+                            "SFX_VENTA": elemento.SFX_VENTA,
+                            "SFX_PROD": elemento.SFX_PROD,
+                            "M3_UNIT": elemento.M3_UNIT,
+                            "PESO_BR": elemento.Peso_PESO_BRBr,
+                            "PESO_NT_U": elemento.PESO_NT_U,
+                            "FOB_U": elemento.FOB_U,
+                            "COND_FOB": elemento.COND_FOB,
+                            "FECHA_FC": elemento.FECHA_FC,
+                            "FLETE": elemento.FLETE,
+                            "FLETE_BL": elemento.FLETE_BL,
+                            "PTO_LLEGADA": elemento.PTO_LLEGADA,
+                            "INCOTERMS": elemento.INCOTERMS,
+                            "VIA_TRANSP": elemento.VIA_TRANSP,
+                            "A_MODELO": elemento.A_MODELO,
+                            "NUM_SOLPED": elemento.NUM_SOLPED,
+                            "BNFPO": "",
+                            "CHASIS": elemento.CHASIS,
+                            "NUM_MOTOR": elemento.NUM_MOTOR,
+                            "COLOR_EXT": elemento.COLOR_EXT,
+                            "COLOR_INT": elemento.COLOR_INT,
+                            "NUM_LLAVE": elemento.NUM_LLAVE,
+                            "ED_CARAC": elemento.ED_CARAC,
+                            "BUQUE": elemento.BUQUE,
+                            "NAVIERA": elemento.NAVIERA,
+                            "SEGURO": elemento.SEGURO,
+                            "COLOR_EXT_ATC": "",
+                            "COLOR_INT_ATC": "",
+                            "EKORG": elemento.EKORG,
+                            "EKGRP": elemento.EKGRP,
+                            "EINDT": elemento.EINDT,
+                            "MONEDA": elemento.MONEDA,
+                        }
                     });
-                    break;             
-            }    
+                    break;
+            }
 
-            let oReturn = that.ongetModelCabecera(Data,TypeTable);
-            
+            let oReturn = that.ongetModelCabecera(Data, TypeTable);
+
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
-                "IT_DET": (TypeTable=="Repuestos")?JSON.stringify(conformidades):"",
-                "IT_DETVE": (TypeTable=="Vehiculos")?JSON.stringify(conformidades):"",
+                "IT_DET": (TypeTable == "Repuestos") ? JSON.stringify(conformidades) : "",
+                "IT_DETVE": (TypeTable == "Vehiculos") ? JSON.stringify(conformidades) : "",
                 "IT_DOC": ""//JSON.stringify(adjuntoModel)
             };
             return obj;
         },
-        agregarZAlPrimerCaracter(texto) {            
-            if (texto.charAt(0) === '0') {              
+        agregarZAlPrimerCaracter(texto) {
+            if (texto.charAt(0) === '0') {
                 return 'Z' + texto;
-            }            
+            }
             return texto;
         },
         formatDateToyyyyMMdd: function (date) {
             const year = date.getFullYear();
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const day = date.getDate().toString().padStart(2, '0');
-        
+
             return `${year}${month}${day}`;
         },
-        ongetModelCabecera:function(Data,TypeTable){
+        ongetModelCabecera: function (Data, TypeTable) {
             return {
-                "FACTUR":Data.Numfa, /*(TypeTable=="Repuestos")?Data.Numfa:Data.Numfa,*/
+                "FACTUR": Data.Numfa, /*(TypeTable=="Repuestos")?Data.Numfa:Data.Numfa,*/
                 "INCO1": Data.Inco1,
                 "INCO2": Data.Inco2,
                 "NUMFA": Data.Numfa,
@@ -1306,19 +1315,19 @@ sap.ui.define([
                 "DATBL": formatter.formatearFechaString(Data.Datbl),
                 "PRTSL": Data.Prtsl,
                 "PRTEN": Data.Prten,
-                "TPTRA": Data.Tptra, 
+                "TPTRA": Data.Tptra,
                 "EKGRP": Data.GrupoCompras,
                 "EKORG": Data.OrganizacionCompras,
                 "EBELN": "",//Data.Pedido,
                 "TIPDAT": Data.TipoData,
                 "ESTADO": "01",
                 "WAERS": Data.Moneda,
-                "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,                
+                "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "FEMISI": that.formatDateToyyyyMMdd(new Date()),
                 "IMPORT": (Data.Total).toString(),
                 "SOLFAC": "",
                 "FCRESO": "",
-                "BSART" : Data.ClaseDocumento
+                "BSART": Data.ClaseDocumento
             }
 
         },
@@ -1389,7 +1398,7 @@ sap.ui.define([
                 case "Solicitudes":
                     oColumnListItem = new sap.m.ColumnListItem({
                         type: "Navigation",
-                        press: this.onDetalleSolicitud.bind(that,""),
+                        press: this.onDetalleSolicitud.bind(that, ""),
                         highlight: {
                             path: 'BESTU',
                             formatter: '.formatter.formatEstados'
@@ -1422,39 +1431,75 @@ sap.ui.define([
         },
         onShowMessage: function (oEvent) {
             var oObject = oEvent.getSource().getParent().getBindingContext().getObject();
-            var sMessage = oObject.TXTEST;
-            
+            var sMessage = that.parseJsonOrReturnStringForMessagePopup(oObject.TXTEST);
+            var MessageboxWidth = (sMessage.length>1)? "600px": "460px";
+            var typeMessageBox = (sMessage.length>1)? "information": "success";
+            var titleMessageBox = (sMessage.length>1)? "información": "Éxito";
+            var messageFormatter = that.formatMessages(sMessage);
             if (oObject.ColorEstado == 'Error') {
-                MessageBox.error("➢" + " " + sMessage, {
+                MessageBox.error(messageFormatter, {
                     stitle: "Error",
                     actions: [MessageBox.Action.OK],
                     //details: "<p> " + "➢" + " " + sMessage + "</p>",
                     contentWidth: "500px"
                 });
             }
+            else if(oObject.IconoEstado == "sap-icon://synchronize"){
+                MessageBox.information(messageFormatter, {
+                    stitle: "Información",
+                    actions: [MessageBox.Action.OK],
+                    //details: "<p> " + "➢" + " " + sMessage + "</p>",
+                    contentWidth: "500px"
+                }); 
+            }
+            else if(oObject.ESTADO == "06" || oObject.ESTADO == "09"){
+                MessageBox[typeMessageBox](messageFormatter, {
+                    stitle: titleMessageBox,
+                    actions: [MessageBox.Action.OK],
+                    //details: "<p> " + "➢" + " " + sMessage + "</p>",
+                    contentWidth: MessageboxWidth
+                }); 
+            }
+        },
+        parseJsonOrReturnStringForMessagePopup(str) {
+            try {
+                let respuesta = JSON.parse(str);
+                return respuesta.map(item => "[" + item.TYPE + "] - " + item.MESSAGE);
+            } catch (error) {
+                // Si no es un JSON válido, devolvemos el string original
+                return [str];
+            }
         },
         onSetColorImport: function (pValue) {
-            if (pValue == "05" || pValue == "08" ) {
+
+            if (pValue == "05" || pValue == "08"  ) {
                 return "red";
-            } else {
+            }
+            else if( pValue == "10"){
+                return "blue";
+            }
+            else if(pValue == "06" || pValue == "09"){
+                return "green"; 
+            }
+            else {
                 return "gray";
             }
         },
-        obtenerValorAleatorio: function(value) {
+        obtenerValorAleatorio: function (value) {
             let indicador = ""
-              switch (value) {
-                  case "NACION":
-                      indicador = "Success";
-                      break;
-                  case "XLSREP":
-                      indicador = "Indication08";
-                      break;
-                  case "XLSVEH":
-                      indicador = "Indication03";
-                      break;
-              }                
-              return indicador;
-          },
+            switch (value) {
+                case "NACION":
+                    indicador = "Success";
+                    break;
+                case "XLSREP":
+                    indicador = "Indication08";
+                    break;
+                case "XLSVEH":
+                    indicador = "Indication03";
+                    break;
+            }
+            return indicador;
+        },
         AddCellToColumnListItem: function (aColumns, oColumnListItem, TypeTable) {
             switch (TypeTable) {
                 case "Solicitudes":
@@ -1473,34 +1518,34 @@ sap.ui.define([
                             else if (oColumnData.path == "SOLFAC") {
                                 oCell = new sap.m.Label({ text: "{" + oColumnData.path + "}", design: oColumnData.design });
                             }
-                            else if(oColumnData.path ==  "TIPDATTEXT"){
-                                oCell = new sap.m.ObjectStatus({ text: "{" + oColumnData.path + "}" , state: "{" + oColumnData.path2 + "}", inverted:true,  });
+                            else if (oColumnData.path == "TIPDATTEXT") {
+                                oCell = new sap.m.ObjectStatus({ text: "{" + oColumnData.path + "}", state: "{" + oColumnData.path2 + "}", inverted: true, });
                             }
-                            else if(oColumnData.path == "iconErrores"){
-                               
+                            else if (oColumnData.path == "iconErrores") {
+
                                 var oIcon = new sap.ui.core.Icon({
                                     src: "sap-icon://message-popup",
                                     class: "size1 sapUiTinyMargin",
                                     color: "{ColorIconMessage}",
                                     tooltip: "{Tooltip}",
-                                    press:  that.onShowMessage.bind(that)                                   
+                                    press: that.onShowMessage.bind(that)
                                 });
-                                
+
                                 oCell = oIcon
                             }
                             else {
                                 oCell = new sap.m.Text({ text: "{" + oColumnData.path + "}" });
                             }
                         }
-                       
+
                         else {
 
                             var btnEditar = new sap.m.Button({
                                 icon: "sap-icon://edit",
-                                press: that.onDetalleSolicitud.bind(that,"X"),
+                                press: that.onDetalleSolicitud.bind(that, "X"),
                                 type: "Reject",
                                 tooltip: "Editar",
-                                enabled: "{= (${ESTADO} === '01' || ${ESTADO} === '03' || ${ESTADO} === '05' || ${ESTADO} === '07') ? true : false }"                               
+                                enabled: "{= (${ESTADO} === '01' || ${ESTADO} === '03' || ${ESTADO} === '05' || ${ESTADO} === '07') ? true : false }"
                             });
 
                             var oButtonDelete = new sap.m.Button({
@@ -1520,16 +1565,16 @@ sap.ui.define([
                                 tooltip: "{i18n>vistaRapidaTooltip}"
                             });
 
-                           switch(oColumnData.path){
+                            switch (oColumnData.path) {
 
-                            case "btnverDetalle":
-                                oCell =  oButtonDetailView;
-                                break;
+                                case "btnverDetalle":
+                                    oCell = oButtonDetailView;
+                                    break;
 
-                            case "btnEditar":
-                                oCell = btnEditar;
-                                break;
-                           }
+                                case "btnEditar":
+                                    oCell = btnEditar;
+                                    break;
+                            }
 
                             //oCell = (oColumnData.path == "btnverDetalle") ? oButtonDetailView : oButtonDelete;
                             //oCell = new sap.m.Text({ text: "" });
@@ -1578,16 +1623,16 @@ sap.ui.define([
                     // Crear las columnas
                     aColumns = [
                         { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
-                        { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT",path2: "ColorOrigen", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT", path2: "ColorOrigen", width: "4rem", design: "Bold", hAlign: "Begin" },
                         //{ id: "LIFNRTEXT", label: "Proveedor", path: "LIFNRTEXT", width: "4rem", design: "Bold", hAlign: "Begin" },
-                        { id: "FACTUR", label: "Factura", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
+                        { id: "FACTUR", label: "Factura Cliente", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "7rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FKDAT", label: "Fecha de Cont.", width: "6rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold", hAlign: "End" },
-                        { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
-                        { width: "3rem", path: "btnEditar" },
-                        { width: "3rem", path: "btnverDetalle" },
-                        { width: "3rem", path: "iconErrores" },
+                        { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },                        
+                        { width: "5rem",label: "Info. adici.", path: "btnverDetalle" },
+                        { width: "3rem",label: "Mensajes", path: "iconErrores" },
+                        { width: "3rem",label: "Editar", path: "btnEditar" },
                         //{ width: "5rem", path: "btnEliminarSolicitud" }
                     ];
 
@@ -2462,32 +2507,32 @@ sap.ui.define([
                     jsonObject.Katashiki = item["KATASHIKI"]
                     jsonObject.Sfx_Venta = item["SFX_VENTA"]
                     jsonObject.Sfx_Prod = item["SFX_PROD"],
-                    jsonObject.M3_Unit = item["M3_UNIT"],
-                    jsonObject.Peso_Br = item["PESO_BR"],
-                    jsonObject.Peso_Nt_U = item["PESO_NT_U"],
-                    jsonObject.Fob_U = item["FOB_U"],
-                    jsonObject.Cond_Fob = item["COND_FOB"],
-                    jsonObject.Fecha_Fc = item["FECHA_FC"],
-                    jsonObject.Flete = item["FLETE"],
-                    jsonObject.Flete_Bl = item["FLETE_BL"],
-                    jsonObject.Pto_Llegada = item["PTO_LLEGADA"],
-                    jsonObject.Inconterms = item["INCOTERMS"],
-                    jsonObject.Via_Transp = item["VIA_TRANSP"],
-                    jsonObject.A_modelo = item["A_MODELO"],
-                    jsonObject.Num_Solped = item["NUM_SOLPED"],
-                    jsonObject.Chasis = item["CHASIS"],
-                    jsonObject.Num_Motor = item["NUM_MOTOR"],
-                    jsonObject.Color_Ext = item["COLOR_EXT"],
-                    jsonObject.Color_Int = item["COLOR_INT"],
-                    jsonObject.Num_Llave = item["NUM_LLAVE"],
-                    jsonObject.Ed_Carac = item["ED_CARAC"],
-                    jsonObject.Buque = item["BUQUE"],
-                    jsonObject.Naviera = item["NAVIERA"],
-                    jsonObject.Seguro = item["SEGURO"],
-                    jsonObject.Ekorg = item["EKORG"],
-                    jsonObject.Ekgrp = item["EKGRP"],
-                    jsonObject.Eindt = item["EINDT"],
-                    jsonObject.Moneda = item["MONEDA"]
+                        jsonObject.M3_Unit = item["M3_UNIT"],
+                        jsonObject.Peso_Br = item["PESO_BR"],
+                        jsonObject.Peso_Nt_U = item["PESO_NT_U"],
+                        jsonObject.Fob_U = item["FOB_U"],
+                        jsonObject.Cond_Fob = item["COND_FOB"],
+                        jsonObject.Fecha_Fc = item["FECHA_FC"],
+                        jsonObject.Flete = item["FLETE"],
+                        jsonObject.Flete_Bl = item["FLETE_BL"],
+                        jsonObject.Pto_Llegada = item["PTO_LLEGADA"],
+                        jsonObject.Inconterms = item["INCOTERMS"],
+                        jsonObject.Via_Transp = item["VIA_TRANSP"],
+                        jsonObject.A_modelo = item["A_MODELO"],
+                        jsonObject.Num_Solped = item["NUM_SOLPED"],
+                        jsonObject.Chasis = item["CHASIS"],
+                        jsonObject.Num_Motor = item["NUM_MOTOR"],
+                        jsonObject.Color_Ext = item["COLOR_EXT"],
+                        jsonObject.Color_Int = item["COLOR_INT"],
+                        jsonObject.Num_Llave = item["NUM_LLAVE"],
+                        jsonObject.Ed_Carac = item["ED_CARAC"],
+                        jsonObject.Buque = item["BUQUE"],
+                        jsonObject.Naviera = item["NAVIERA"],
+                        jsonObject.Seguro = item["SEGURO"],
+                        jsonObject.Ekorg = item["EKORG"],
+                        jsonObject.Ekgrp = item["EKGRP"],
+                        jsonObject.Eindt = item["EINDT"],
+                        jsonObject.Moneda = item["MONEDA"]
                 }
                 resultData.push(jsonObject);
             });
@@ -2608,11 +2653,11 @@ sap.ui.define([
             let count = 0;
             Mensaje.map((mensaje) => {
                 count++;
-                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + "\n" /*.<br>"*/; 
+                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + "\n" /*.<br>"*/;
             });
             return NuevoMensaje;
         },
-        onEditar:function(){
+        onEditar: function () {
 
         }
 

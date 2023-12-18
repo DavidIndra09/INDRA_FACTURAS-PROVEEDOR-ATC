@@ -118,7 +118,8 @@
             <uxap:ObjectPageSection id="tableSection" title="{i18n>detalleViewTableSection}" titleUppercase="false">
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection >
-                        <Table id="idtablaFactura" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="10" growingScrollToLoad="true" noDataText="No hay Posiciones">
+                        <ScrollContainer height='15rem' vertical="true" >
+                        <Table id="idtablaFactura" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="10"  noDataText="No hay Posiciones">
                             <headerToolbar>
                                 <OverflowToolbar>
                                     <Title text="" />
@@ -180,6 +181,7 @@
                                 </ColumnListItem>
                             </items>
                         </Table>
+                         </ScrollContainer>
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
             </uxap:ObjectPageSection>

@@ -48,7 +48,7 @@
                                         }" enabled="{oCabecera>/Edit}"/>
                             </form:fields>
                             <form:label>
-                                <Label text="Factura" />
+                                <Label text="Factura cliente" />
                             </form:label>
                         </form:FormElement>
 
@@ -59,7 +59,7 @@
                                        }" state="{oCabecera>/ColorEstado}" icon="{oCabecera>/IconoEstado}" />
                             </form:fields>
                             <form:label>
-                                <Label text="Estado de Factura" />
+                                <Label text="Estado de factura" />
                             </form:label>
                         </form:FormElement>
 
@@ -70,6 +70,17 @@
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>fechaEmision}" />
+                            </form:label>
+                        </form:FormElement>
+                          <form:FormElement>
+                            <form:fields>
+                                <Input id="ICodigoFacturaSAP" required="false" value="{
+                                            parts:[{path:'oCabecera>/BELNR'}]
+                                            
+                                        }" enabled="false"/>
+                            </form:fields>
+                            <form:label>
+                                <Label text="Factura SAP" />
                             </form:label>
                         </form:FormElement>
                         <form:FormElement>

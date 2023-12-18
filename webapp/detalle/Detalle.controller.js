@@ -163,6 +163,7 @@ sap.ui.define([
         },
         mostrarDetalle: function (sCODEFACT, oCabecera, posiciones) {
             sap.ui.core.BusyIndicator.show(0);
+            const resourceBundle = that.getResourceBundle();
             let aFilters = [];
             var aLista = []
             aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
@@ -210,10 +211,15 @@ sap.ui.define([
                         });
                     });
 
+                    aLista.sort((a, b) => a.POSNR - b.POSNR);
                     let oModelLista = new JSONModel(aLista);
+                    oModelLista.setSizeLimit(99999999999)   
+                    let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
+                    let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
                     that.byId("idtablaFactura").setModel(oModelLista);
-
+                    that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
+                    that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
                     AdjuntosOriginal = [...adjuntos];
                 },
                 error: function (err) {

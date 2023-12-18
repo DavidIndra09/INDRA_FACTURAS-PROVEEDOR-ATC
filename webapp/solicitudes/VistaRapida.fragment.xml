@@ -59,6 +59,15 @@
                                 </form:label>
                             </form:FormElement>
 
+                             <form:FormElement>
+                                    <form:fields>
+                                        <Text text="{BELNR}"/>
+                                    </form:fields>
+                                    <form:label>
+                                        <Label text="Factura SAP" />
+                                    </form:label>
+                                </form:FormElement>
+
 
                                <form:FormElement>
                                 <form:fields>
