@@ -49,6 +49,27 @@
                 <form:formContainers>
                     <form:FormContainer >
                         <form:formElements>
+
+                         <form:FormElement>
+                                <form:fields>
+                                    <Text text="{EBELN}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Pedido" />
+                                </form:label>
+                            </form:FormElement>
+
+
+                               <form:FormElement>
+                                <form:fields>
+                                    <Text text="{WAERS}"/>
+                                </form:fields>
+                                <form:label>
+                                    <Label text="Moneda" />
+                                </form:label>
+                            </form:FormElement>
+
+
                             <form:FormElement>
                                 <form:fields>
                                  <Text text="{FCRESO}"/>
@@ -73,22 +94,8 @@
                                     <Label text="IVA" />
                                 </form:label>
                             </form:FormElement> -->
-                            <form:FormElement>
-                                <form:fields>
-                                    <Text text="{WAERS}"/>
-                                </form:fields>
-                                <form:label>
-                                    <Label text="Moneda" />
-                                </form:label>
-                            </form:FormElement>
-  <form:FormElement>
-                                <form:fields>
-                                    <Text text="{EBELN}"/>
-                                </form:fields>
-                                <form:label>
-                                    <Label text="Pedido" />
-                                </form:label>
-                            </form:FormElement>
+                         
+ 
                             
                           <!--  <form:FormElement>
                                 <form:fields>

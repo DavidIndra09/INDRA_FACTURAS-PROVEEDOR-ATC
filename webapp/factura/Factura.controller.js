@@ -66,22 +66,25 @@ sap.ui.define([
          * @public
          */
         onNavBack: function () {
-            sap.ui.core.BusyIndicator.show();
-            this.getRouter().navTo("solicitudes", {}, true);
-            /*
-            var sPreviousHash = History.getInstance().getPreviousHash();
-            if (sPreviousHash !== undefined) {
-                // eslint-disable-next-line sap-no-history-manipulation
-                history.go(-1);
-            } else {
+            try {
+                sap.ui.core.BusyIndicator.show();
                 this.getRouter().navTo("solicitudes", {}, true);
-            }
-            */
+            } catch (error) {
+                sap.ui.core.BusyIndicator.hide();  
+                const errorType = "error";
+                MessageBox[errorType]("Se produjo un error al tratar de navegar al reporte de solicitudes : " + error.message);
+            }        
+            
         },
 
         onNavOrdenes: function () {
-            sap.ui.core.BusyIndicator.show();
-            this.getRouter().navTo("orden", {}, false);
+            try {
+                sap.ui.core.BusyIndicator.show();
+                this.getRouter().navTo("orden", {}, false); 
+            } catch (error) {
+                
+            }
+            
         },
 
         onNavSolicitudes: function () {
@@ -143,7 +146,7 @@ sap.ui.define([
                 }
 
                
-
+             
                 const datosFactura = {
                     //version: invoice.ublversionid,
                     numeroSerie: invoice.id,
@@ -170,7 +173,7 @@ sap.ui.define([
                     //sumatoriaIgv: invoice.taxtotal.taxamount,
                     ordenReference: (invoice.orderreference)?invoice.orderreference.id:"",
                     nitproovedor: (invoice.accountingsupplierparty)?invoice.accountingsupplierparty.party.partytaxscheme.companyid:"" ,
-                    importe: (invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
+                    importe: (invoice.legalmonetarytotal)?invoice.legalmonetarytotal.taxexclusiveamount:invoice.note.legalmonetarytotal.taxexclusiveamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
                     total: (invoice.legalmonetarytotal)?invoice.legalmonetarytotal.payableamount:invoice.note.legalmonetarytotal.payableamount,
                     //sociedad: "3000"
                 };
@@ -184,6 +187,7 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
                 MODEL.setProperty("/Factura/importe", datosFactura.importe);
                 MODEL.setProperty("/Factura/total", datosFactura.total);
+                MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference); 
                 await this.getwaershelp(datosFactura.tipoMoneda);                
                 let waersCollection = that.getView().getModel("waershelp").getData();
                 var find = waersCollection.find(item=> item.VALUE == datosFactura.tipoMoneda);
@@ -416,7 +420,7 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide()
                 return;
             }
-            MessageBox.confirm(`¿Está seguro que desea crear esta factura?`, {
+            MessageBox.confirm(`¿Está seguro que desea crear la solicitud de factura?`, {
                 onClose: function (action) {
                     if (action === "OK") {
                         this._crearFactura();
@@ -607,6 +611,7 @@ sap.ui.define([
                 that.onNavBack();
                 return;
             }
+            //that._limpiarData();
             sap.ui.core.BusyIndicator.hide();
             let TotalNetwr = sap.ui.getCore().getModel("TotalNetwr").getData().TotalNetwr;
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNetwr));
@@ -622,12 +627,12 @@ sap.ui.define([
             if (param === "N") {
                 this._limpiarData();
             }
-            if (param !== "N") {
+            /*if (param !== "N") {
                 factura = await this._getSolicitud(param);
                 viewTitle = this.getResourceBundle().getText("facturaViewTitleEdition", [param]);
                 nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", true);
                 MODEL.setProperty("/Factura", factura);
-            }
+            }*/
 
             nuevafacturaModel.setProperty("/facturaViewTitle", viewTitle);
             this._bindView("/Factura");
@@ -694,6 +699,7 @@ sap.ui.define([
             that.getView().byId("InputSelectWaers").setValue("");
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
             MODEL.setProperty("/Adjuntos", []);
+            that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": [] }));
         },
         _readFiles: async function (file) {
             const resolveImport = (evt) => {
@@ -900,7 +906,7 @@ sap.ui.define([
             
             let oReturn = {
                 "STCD1": (facturxml!="")?facturxml.nitproovedor:"",
-                "NUMFA":(facturxml!="")?facturxml.ordenReference:"",
+                "NUMFA": factura.Numfa, //(facturxml!="")?facturxml.ordenReference:"",
                 "EBELN": factura.pedido,
                 "TIPDAT": "NACION",
                 "ESTADO": "01",

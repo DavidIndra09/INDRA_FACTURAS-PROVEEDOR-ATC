@@ -537,7 +537,7 @@ sap.ui.define([
                  MessageBox.error("Seleccione solo facturas con estado Registrado");
                  return;
              }*/
-            MODEL.setProperty("/tituloMensaje", "¿Desea Liberar para crear Factura?");
+            MODEL.setProperty("/tituloMensaje", "¿Desea liberar para procesar?");
             selectedFacturas.map(path => {
                 messageManager.addMessages(new Message({
                     message: MODEL.getProperty(path).SOLFAC,
@@ -877,7 +877,9 @@ sap.ui.define([
                 for (const item of solicitudes) {
                     try {
                         const copiedObject = (({ ColorEstado, DescripcionEstado, IconoEstado, ...rest }) => rest)(item.getObject());
-                        copiedObject.ESTADO = "02";
+                        
+
+                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION")?"03":"02";
                         copiedObject.FCRESO = formatter.formatearFechaString(copiedObject.FCRESO);
                         copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
                         copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);
@@ -941,19 +943,30 @@ sap.ui.define([
                 }, 3000);
             });
         },
+        onValidarProveedorExcel: function(Data) {
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;  
+            let valid = Data.every(item => item.Proveedor === lifnr);        
+            return valid;
+        },        
         onProcesarCargaFacturasMasiva: async function (Data, TypeTable) {
             try {
             sap.ui.core.BusyIndicator.show();
             let oView = this.getView();
             let mensaje = [];
-            let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);   
-                     
+            let valid = that.onValidarProveedorExcel(Data);
+            if(!valid){
+                MessageBox.error("El proveedor seleccionado no es el mismo que se intenta cargar en el archivo Excel.");
+                sap.ui.core.BusyIndicator.hide();
+                return;
+            }
+            
+            let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];                
                 let DataFactura = that._getDataFactura(Item,TypeTable);   
                                              
                 oView.byId("button-message").setVisible(true);
-                oView.byId("button-message").setText("Registrando factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
+                oView.byId("button-message").setText("Registrando solicitud para la factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
                 //await that.esperarTresSegundos();                             
                 const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", DataFactura);
                 mensaje.push(request.E_MSG);
@@ -1052,10 +1065,11 @@ sap.ui.define([
                         const Prtsl = elemento.PuertoSalida;
                         const Prten = elemento.Puertollegada;
                         const Tptra = elemento.ViaTransporte;
+                        const Proveedor = elemento.Proveedor;
                        if(Numfa!=""){
                        
                         if (!grupos[Numfa]) {
-                            grupos[Numfa] = {Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
+                            grupos[Numfa] = {Proveedor:Proveedor,Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
                         }
                         
                         //grupos[numFc].Detalle.push(elemento);
@@ -1106,12 +1120,12 @@ sap.ui.define([
                         const Prtsl = elemento.Pto_Salida;
                         const Prten = elemento.Pto_Llegada;
                         const Tptra = elemento.Via_Transp;                       
-                        
+                        const Proveedor = elemento.Proveedor;
                         //Total = Total + parseFloat((elemento.Fob_U != "") ? elemento.Fob_U : 0) + parseFloat((elemento.Flete != "") ? elemento.Flete : 0) + parseFloat((elemento.Seguro != "") ? elemento.Seguro : 0);
                         if(Numfa!=""){
                         
                         if (!grupos[Numfa] ) {
-                            grupos[Numfa] = {Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSVEH",  Total: 0, Moneda: Moneda, Detalle: [] };
+                            grupos[Numfa] = {Proveedor:Proveedor,Inco1: Inco1,Inco2: Inco2,Numfa:Numfa,Numbl:Numbl,Datbl:Datbl,Prtsl:Prtsl,Prten:Prten,Tptra:Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras,Pedido: Pedido,ClaseDocumento: ClaseDocumento, TipoData: "XLSVEH",  Total: 0, Moneda: Moneda, Detalle: [] };
                         }
                         //grupos[Numfa].Total = Total;
                         //grupos[numFc].Detalle.push(elemento);
@@ -1253,7 +1267,7 @@ sap.ui.define([
                             "EKORG":elemento.EKORG,
                             "EKGRP":elemento.EKGRP,
                             "EINDT":elemento.EINDT,
-                            //"MONEDA":elemento.MONEDA,
+                            "MONEDA":elemento.MONEDA,
                             }
                     });
                     break;             
@@ -1284,7 +1298,7 @@ sap.ui.define([
         },
         ongetModelCabecera:function(Data,TypeTable){
             return {
-                "FACTUR": (TypeTable=="Repuestos")?"Factura_repuestos":"Factura_Vehículos",
+                "FACTUR": (TypeTable=="Repuestos")?"Factura_repuestos":Data.Numfa,
                 "INCO1": Data.Inco1,
                 "INCO2": Data.Inco2,
                 "NUMFA": Data.Numfa,

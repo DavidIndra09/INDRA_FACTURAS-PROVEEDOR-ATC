@@ -59,8 +59,15 @@ sap.ui.define([
          * @public
          */
         onNavBack: function () {
+            try{            
             sap.ui.core.BusyIndicator.show();
-            this.getRouter().navTo("solicitudes", {}, true);           
+            this.getRouter().navTo("solicitudes", {}, true);        
+            }
+            catch(error){
+                sap.ui.core.BusyIndicator.hide();  
+                const errorType = "error";
+                MessageBox[errorType]("Se produjo un error al tratar de navegar al reporte de solicitudes: " + error.message);
+            }   
         },
 
         /* =========================================================== */
@@ -136,10 +143,27 @@ sap.ui.define([
             viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [codigoSolicitud]));
             viewModel.setProperty("/busy", false);
         },
+        buildModelDetail: function(oData){
+            let data = []
+            $.each(oData, function (i, item) {
+                data.push({
+                     "EBELN":"",
+                     "EBELP":item.POSNR,
+                     "MATNR":item.MATERIAL,
+                     "TXZ01":"",
+                     "MEINS":item.M3_UNIT,
+                     "MENGE": item.CANTIDAD ,
+                     "NETWR":parseFloat(item.FOB_U || 0) + parseFloat(item.FLETE || 0) + parseFloat(item.SEGURO || 0),
+                     "WAERS":item.MONEDA
+                });
+            });
 
+            return data;    
+        },
         mostrarDetalle: function (sCODEFACT, oCabecera, posiciones) {
             sap.ui.core.BusyIndicator.show(0);
             let aFilters = [];
+            var aLista = []
             aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
             aFilters.push(new Filter("I_BUKRS", FilterOperator.EQ, "1000"));
             ODATA_SAP.read("/getDetailSolFactSet", {
@@ -147,8 +171,14 @@ sap.ui.define([
                 success: function (data) {
                     sap.ui.core.BusyIndicator.hide();
                     let Detalle = (oCabecera.TIPDAT== "XLSREP")?data.results[0].ET_DET:data.results[0].ET_DETVE;
-                    let Documentos = data.results[0].ET_DOC;
-                    let aLista = JSON.parse(Detalle);
+                    
+                    if(oCabecera.TIPDAT== "XLSVEH"){
+                        aLista = that.buildModelDetail(JSON.parse(Detalle));
+                    }
+                    else{
+                         aLista = JSON.parse(Detalle);
+                    }
+                    let Documentos = data.results[0].ET_DOC;                    
                     
                     if (posiciones.length > 0) {
                         let posicionesParse = JSON.parse(posiciones);
@@ -519,8 +549,7 @@ sap.ui.define([
                         this.getRouter().navTo("solicitudes", {}, false);
                     }.bind(this)
                 });
-            } catch (error) {
-                console.error("Error al actualizar factura:", error);
+            } catch (error) {             
                 sap.ui.core.BusyIndicator.hide();
                 const errorType = "error";
                 MessageBox[errorType]("Se produjo un error al actualizar la factura. Error: " + error.message);
@@ -543,8 +572,15 @@ sap.ui.define([
             return formatoYMD;
         },
         onNavOrdenes: function () {
+            try {
             sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("orden", {}, false);
+            }
+            catch(error){
+                sap.ui.core.BusyIndicator.hide();  
+                const errorType = "error";
+                MessageBox[errorType]("Se produjo un error al tratar de navegar a la selección de pedidos: " + error.message);
+            }
         },
         onFileSizeExceed: function (oEvent) {
             sap.m.MessageToast.show("El adjunto no debe pesar más de 10 MB.");
