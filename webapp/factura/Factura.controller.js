@@ -45,7 +45,7 @@ sap.ui.define([
                 isBtnPosicionesEnabled: false
                 // facturaViewTitle: this.getResourceBundle().getText("facturaViewTitleCreate")
             });
-            sap.ui.getCore().setModel(new JSONModel({ "TotalNetwr": 0 }), "TotalNetwr");
+            sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": 0 }), "TotalNETPR");
             that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": [] }));
             this.getRouter().getRoute("factura").attachPatternMatched(this._onFacturaMatched, this);
             this.setModel(nuevafacturaModel, "facturaView");
@@ -376,8 +376,8 @@ sap.ui.define([
             that.onCalcularDiferencia(importeBase);
         },
         onCalcularDiferencia: function (importeBase) {
-            let TotalNetwr = sap.ui.getCore().getModel("TotalNetwr").getData().TotalNetwr;
-            let diferencia = (importeBase - TotalNetwr).toFixed(2);
+            let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;
+            let diferencia = (importeBase - TotalNETPR).toFixed(2);
             MODEL.setProperty("/Factura/diferencia", diferencia);
         },
         onSeleccionarTipoImpuesto: function (event) {
@@ -438,7 +438,7 @@ sap.ui.define([
             function obtenerTotalConformidad(aData) {
                 let dTotal = 0;
                 for (let i = 0; i < aData.length; i++) {
-                    dTotal = parseFloat(aData[i].NETWR) + dTotal;
+                    dTotal = parseFloat(aData[i].NETPR) + dTotal;
                 }
                 return dTotal;
             }
@@ -461,7 +461,7 @@ sap.ui.define([
                 MODEL.setProperty("/DetalleFactura", oItems);
 
                 for (var j = 0; j < oItems.length; j++) {
-                    impTotalDel += oItems[j].NETWR;
+                    impTotalDel += oItems[j].NETPR;
                 }
                 // sap.that.updateAmount(impTotalDel);
 
@@ -613,8 +613,8 @@ sap.ui.define([
             }
             //that._limpiarData();
             sap.ui.core.BusyIndicator.hide();
-            let TotalNetwr = sap.ui.getCore().getModel("TotalNetwr").getData().TotalNetwr;
-            that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNetwr));
+            let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;
+            that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNETPR));
             let importeBase = MODEL.getProperty("/Factura/importe");
             that.onCalcularDiferencia((importeBase == undefined) ? 0.00 : importeBase);
             const historyDirection = History.getInstance().getDirection();
@@ -641,9 +641,9 @@ sap.ui.define([
             let suma = 0;
             let posiciones = MODEL.getProperty("/Factura/conformidades/results");
             $.each(posiciones, function (i, item) {
-                suma = suma + parseFloat(item.NETWR);
+                suma = suma + parseFloat(item.NETPR);
             });
-            sap.ui.getCore().setModel(new JSONModel({ "TotalNetwr": suma }), "TotalNetwr");
+            sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": suma }), "TotalNETPR");
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(suma));
         },
 
@@ -841,6 +841,7 @@ sap.ui.define([
                     "BUKRS": "1000"
                 }
             });
+
             const conformidades = factura.conformidades.results.map(item => {
                 return {
                     "mandt": "800",
@@ -856,17 +857,14 @@ sap.ui.define([
                     "tipod": "B",
                     "menge": item.MENGE,
                     "meins": item.MEINS,
-                    "netwr": item.NETWR,
+                    //"NETPR": item.NETPR,
+                    "netpr": item.NETPR,
                     "waers": item.WAERS,
                     "txz01": item.TXZ01,
                     "belnr": item.BELNR,
                     "mwskz": item.MWSKZ
                 }
-            });
-
-            
-
-
+            });     
 
             let dIgv = 0,
                 dRetencion = 0;
@@ -891,7 +889,7 @@ sap.ui.define([
                 "detra": "0",
                 "reten": "0",
                 "wrbtr": "0",
-                "netwr": parseFloat(factura.importe),//factura.total.toString(),
+                "NETPR": parseFloat(factura.importe),//factura.total.toString(),
                 "bankn": "",
                 "bankl": "",
                 "banks": "",

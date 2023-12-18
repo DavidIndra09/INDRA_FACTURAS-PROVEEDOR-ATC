@@ -79,12 +79,14 @@ sap.ui.define([
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
                 if (sPreviousHash.includes("Detalle")) {
-                    let data = JSON.stringify(detalleFactura)
+                    let data = detalleFactura;
+                    debugger
+                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones":data }), "PosicionesDetalle")
                     sap.ui.core.BusyIndicator.show();
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],
                         proveedor: sPreviousHash.split("/")[2],
-                        posiciones: data
+                        posiciones: "1"
                     },
                         true);
                 }
@@ -165,7 +167,7 @@ sap.ui.define([
                     Butxt: rowInvoice.Butxt,
                     Nrinv: "",
                     Dtinv: "",
-                    Netwr: 0,
+                    NETPR: 0,
                     Waers: rowInvoice.Waers
                 };
                 var impTotal = 0.00;
@@ -173,13 +175,13 @@ sap.ui.define([
                 let sumatoria = 0;
                 detalleFactura = selectedPaths.map(item => {
                     let element = MODEL.getProperty(item);
-                    sumatoria = sumatoria + parseFloat(that.convertirFormato(element.NETWR));
+                    sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
                     MODEL.setProperty("/Factura/pedido", element.EBELN);
                     return MODEL.getProperty(item);
                 });
                 MODEL.setProperty("/Factura/conformidades/results", detalleFactura);
 
-                sap.ui.getCore().setModel(new JSONModel({ "TotalNetwr": sumatoria }), "TotalNetwr")
+                sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
                 MODEL.setProperty("/Ordenes", []);
                 this.onNavBack(detalleFactura);
@@ -222,7 +224,7 @@ sap.ui.define([
                 MODEL.setProperty("/DetalleFactura", oItems);
 
                 for (var j = 0; j < oItems.length; j++) {
-                    impTotalDel += oItems[j].NETWR;
+                    impTotalDel += oItems[j].NETPR;
                 }
                 // sap.that.updateAmount(impTotalDel);
 
@@ -256,7 +258,7 @@ sap.ui.define([
             if(request.results.length>0){
                 posiciones = JSON.parse(request.results[0].ET_DATA);
                 $.each(posiciones, function (i, item) {
-                    item.NETWR = (item.NETWR).toString();
+                    item.NETPR = (item.NETPR).toString();
                     item.MENGE = (item.MENGE).toString();
                 });
             }
@@ -341,7 +343,7 @@ sap.ui.define([
             const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
             var posiciones = JSON.parse(request.results[0].ET_DATA);
             $.each(posiciones, function (i, item) {
-                item.NETWR = (item.NETWR).toString();
+                item.NETPR = (item.NETPR).toString();
                 item.MENGE = (item.MENGE).toString();
             });
             MODEL.setProperty("/Ordenes", posiciones);

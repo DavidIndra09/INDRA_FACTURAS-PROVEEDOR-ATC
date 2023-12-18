@@ -945,7 +945,7 @@ sap.ui.define([
         },
         onValidarProveedorExcel: function(Data) {
             let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;  
-            let valid = Data.every(item => item.Proveedor === lifnr);        
+            let valid = Data.every(item => item.Proveedor == lifnr);        
             return valid;
         },        
         onProcesarCargaFacturasMasiva: async function (Data, TypeTable) {
@@ -963,7 +963,7 @@ sap.ui.define([
             let FacturasConsolidadas = that.onConsolidarFacturas(Data, TypeTable);
             for (let i = 0; i < FacturasConsolidadas.length; i++) {
                 const Item = FacturasConsolidadas[i];                
-                let DataFactura = that._getDataFactura(Item,TypeTable);   
+                let DataFactura = that._getDataFactura(Item,TypeTable);  
                                              
                 oView.byId("button-message").setVisible(true);
                 oView.byId("button-message").setText("Registrando solicitud para la factura " + Item.Numfa + " (" + (i + 1) + " de " + FacturasConsolidadas.length + ")");
@@ -1089,7 +1089,7 @@ sap.ui.define([
                             "tipod": "B",
                             "menge": elemento.Cantidad,
                             "meins": elemento.Unidad,
-                            "netwr": elemento.PrecioNeto,
+                            "NETPR": elemento.PrecioNeto,
                             "waers": elemento.Moneda,
                             "txz01": "",//item.TXZ01,
                             "belnr": "",//item.BELNR,
@@ -1108,7 +1108,7 @@ sap.ui.define([
                                  
                     array.forEach(elemento => {
                         const Pedido = elemento.Num_Solped;
-                        const Moneda = "COP"; 
+                        const Moneda = elemento.Moneda; 
                         const ClaseDocumento = elemento.Cl_Doc;
                         const OrganizacionCompras = elemento.Ekorg
                         const GrupoCompras = elemento.Ekgrp;                     
@@ -1211,7 +1211,7 @@ sap.ui.define([
                             "tipod": "B",
                             "menge": item.menge,
                             "meins": item.meins,
-                            "netwr": item.netwr,
+                            "NETPR": item.NETPR,
                             "waers": item.waers,
                             "txz01": "",//item.TXZ01,
                             "belnr": "",//item.BELNR,
@@ -1298,7 +1298,7 @@ sap.ui.define([
         },
         ongetModelCabecera:function(Data,TypeTable){
             return {
-                "FACTUR": (TypeTable=="Repuestos")?"Factura_repuestos":Data.Numfa,
+                "FACTUR":Data.Numfa, /*(TypeTable=="Repuestos")?Data.Numfa:Data.Numfa,*/
                 "INCO1": Data.Inco1,
                 "INCO2": Data.Inco2,
                 "NUMFA": Data.Numfa,

@@ -42,6 +42,7 @@ sap.ui.define([
 
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
+            sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "PosicionesDetalle"); 
             ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
             this.getRouter().getRoute("detalle").attachPatternMatched(this._onDetalletMatched, this);
             this.setModel(viewModel, "detalleView");
@@ -153,7 +154,7 @@ sap.ui.define([
                      "TXZ01":"",
                      "MEINS":item.M3_UNIT,
                      "MENGE": item.CANTIDAD ,
-                     "NETWR":parseFloat(item.FOB_U || 0) + parseFloat(item.FLETE || 0) + parseFloat(item.SEGURO || 0),
+                     "NETPR":parseFloat(item.FOB_U || 0) + parseFloat(item.FLETE || 0) + parseFloat(item.SEGURO || 0),
                      "WAERS":item.MONEDA
                 });
             });
@@ -170,7 +171,7 @@ sap.ui.define([
                 filters: aFilters,
                 success: function (data) {
                     sap.ui.core.BusyIndicator.hide();
-                    let Detalle = (oCabecera.TIPDAT== "XLSREP")?data.results[0].ET_DET:data.results[0].ET_DETVE;
+                    let Detalle = (oCabecera.TIPDAT== "XLSVEH")?data.results[0].ET_DETVE:data.results[0].ET_DET;
                     
                     if(oCabecera.TIPDAT== "XLSVEH"){
                         aLista = that.buildModelDetail(JSON.parse(Detalle));
@@ -180,10 +181,14 @@ sap.ui.define([
                     }
                     let Documentos = data.results[0].ET_DOC;                    
                     
-                    if (posiciones.length > 0) {
-                        let posicionesParse = JSON.parse(posiciones);
-                        aLista.push(...posicionesParse);
-                    }                    
+                    //if (posiciones.length > 0) {
+                        let posicionesParse = sap.ui.getCore().getModel("PosicionesDetalle").getData().Posiciones;//JSON.parse(posiciones);
+                        if(posicionesParse.length>0){
+                            aLista.push(...posicionesParse);
+                        }
+                        
+                    //}   
+                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "PosicionesDetalle"); //limpiamos las posiciones                 
                     $.each(aLista, function (i, item) {
                         item.WAERS = oCabecera.WAERS.split("-")[0];
                     });
@@ -391,11 +396,11 @@ sap.ui.define([
                     "tipod": "B",
                     "menge": item.MENGE,
                     "meins": item.MEINS,
-                    "netwr": item.NETWR,
+                    "NETPR": item.NETPR,
                     "waers": item.WAERS,
                     "txz01": item.TXZ01,
                     "belnr": item.BELNR,
-                    "solfac": item.SOLFAC,
+                    //"solfac": item.SOLFAC,
                     "mwskz": item.MWSKZ
                 }
             });
@@ -445,7 +450,8 @@ sap.ui.define([
                 "IMPORT": that.convertirFormato((Data.IMPORT).toString()),
                 "SOLFAC": Data.SOLFAC,
                 "FCRESO": that.formatFecha(Data.FCRESO),
-                "BSART" : Data.BSART
+                "BSART" : Data.BSART,
+                "FACTUR": Data.FACTUR
             }
 
         },
@@ -537,7 +543,8 @@ sap.ui.define([
                     sap.ui.core.BusyIndicator.hide()
                     return;
                 }
-                const data = this._getDataFactura();
+                var data = this._getDataFactura();
+                debugger
                 const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
                 const type = "success";
                 sap.ui.core.BusyIndicator.hide();

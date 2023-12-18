@@ -75,7 +75,7 @@
                             formatter: '.formatter.numberUnit'
                         }" />
                     <ObjectNumber number="{
-                            parts:[{path:'NETWR',formatter: '.formatter.formatCurrency'}]                                                        
+                            parts:[{path:'NETPR',formatter: '.formatter.formatCurrency'}]                                                        
                         }" unit="{WAERS}" state="Information" />
                         
                     <Button type="Reject" icon="sap-icon://delete" press="onEliminarRegistro"/>
