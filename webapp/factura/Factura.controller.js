@@ -976,7 +976,7 @@ sap.ui.define([
         },
 
         _parse: function (node, j) {
-            var nodeName = node.nodeName.replace(/^.+:/, '').toLowerCase();
+            var nodeName = node.nodeName.replace(/^.+:/, '').toLowerCase();            
             var cur = null;
             var that = this;
             var text = $(node).contents().filter(function (x) {
