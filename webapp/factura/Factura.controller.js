@@ -216,6 +216,7 @@ sap.ui.define([
             MODEL.setProperty("/Factura/estadoIcon", "");
             MODEL.setProperty("/Factura/estadoCp", "");
             MODEL.setProperty("/Factura/moneda", "");
+            MODEL.setProperty("/Factura/Numfa", "");
             nuevafacturaModel.setProperty("/isEnabledCabecera", true);
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
 

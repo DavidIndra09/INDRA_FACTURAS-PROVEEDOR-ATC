@@ -550,7 +550,7 @@ sap.ui.define([
                     return;
                 }
                 var data = this._getDataFactura();
-                debugger
+                
                 const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
                 const type = "success";
                 sap.ui.core.BusyIndicator.hide();
