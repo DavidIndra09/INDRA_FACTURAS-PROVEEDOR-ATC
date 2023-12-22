@@ -123,7 +123,7 @@ sap.ui.define([
             nuevafacturaModel.setProperty("/tituloListaAdjuntos", title);
         },
 
-        onImportarArchivoXml: async function (event) {
+          onImportarArchivoXml: async function (event) {
             const files = event.getParameter("files");
             const fileUploader = event.getSource();
             if (files.length > 0) {
@@ -132,7 +132,7 @@ sap.ui.define([
 
                 if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice) {//dataXml.invoice
                     MessageBox.error(`El archivo xml no cumple con el formato requerido`);
-                    fileUploader.setValue("");
+                    fileUploader.setValue("");                    
                     return;
                 }
                 const invoice = (dataXml.attacheddocument) ? ((dataXml.attacheddocument.attachment.externalreference.description.invoice) ? dataXml.attacheddocument.attachment.externalreference.description.invoice : dataXml.attacheddocument.attachment.externalreference.description) : dataXml.invoice//dataXml.invoice;
@@ -144,9 +144,7 @@ sap.ui.define([
                     fileUploader.setValue("");
                     return;
                 }
-
-
-
+                  
                 const datosFactura = {
                     //version: invoice.ublversionid,
                     numeroSerie: invoice.id,
@@ -171,13 +169,13 @@ sap.ui.define([
                     //totalValorVenta: "",
                     //totalDescuentos: "",
                     //sumatoriaIgv: invoice.taxtotal.taxamount,
-                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id : "",
+                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id : invoice.note.orderreference.id,
                     nitproovedor: (invoice.accountingsupplierparty) ? invoice.accountingsupplierparty.party.partytaxscheme.companyid : "",
-                    importe: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.taxexclusiveamount : invoice.note.legalmonetarytotal.taxexclusiveamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
+                    importe: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.lineextensionamount : invoice.note.legalmonetarytotal.lineextensionamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
                     total: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.payableamount : invoice.note.legalmonetarytotal.payableamount,
                     //sociedad: "3000"
                 };
-
+                
                 MODEL.setProperty("/facturaXml", datosFactura);
 
                 const fechaEmisionView = formatter.formatDateImportacion(datosFactura.fechaEmision);

@@ -37,10 +37,11 @@ sap.ui.define([
             if (!date) return "";
             if (typeof date !== "string") return;
             let year = date.split("-")[0];
-            let month = date.split("-")[1];
+            let month = date.split("-")[1] - 1;  // Restar 1 al mes
             let day = date.split("-")[2];
             return new Date(year, month, day);
         },
+        
 
         formatDateParameter: function (date) {
             if (!date) return "";
