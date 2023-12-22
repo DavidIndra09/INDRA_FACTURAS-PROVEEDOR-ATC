@@ -17,7 +17,7 @@
       ],
       "windows": {
         "runtimeExecutable": "npx.cmd"
-      },
+      },<
       "console": "internalConsole",
       "internalConsoleOptions": "openOnSessionStart",
       "outputCapture": "std",

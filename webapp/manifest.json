@@ -212,5 +212,10 @@
     "sap.cloud": {
         "public": true,
         "service": "usil-com-createinvoice-atc"
+    },
+    "sap.cloud.portal": {
+        "CreateInvoiceAtc-Display":{
+            "vizType": "tilefacturaproveedor"
+        }
     }
 }

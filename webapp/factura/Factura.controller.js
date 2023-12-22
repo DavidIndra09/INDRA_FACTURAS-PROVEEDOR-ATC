@@ -70,21 +70,21 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.show();
                 this.getRouter().navTo("solicitudes", {}, true);
             } catch (error) {
-                sap.ui.core.BusyIndicator.hide();  
+                sap.ui.core.BusyIndicator.hide();
                 const errorType = "error";
                 MessageBox[errorType]("Se produjo un error al tratar de navegar al reporte de solicitudes : " + error.message);
-            }        
-            
+            }
+
         },
 
         onNavOrdenes: function () {
             try {
                 sap.ui.core.BusyIndicator.show();
-                this.getRouter().navTo("orden", {}, false); 
+                this.getRouter().navTo("orden", {}, false);
             } catch (error) {
-                
+
             }
-            
+
         },
 
         onNavSolicitudes: function () {
@@ -129,14 +129,14 @@ sap.ui.define([
             if (files.length > 0) {
                 const file = files[0];
                 const dataXml = await this._readFiles(file);
-                
+
                 if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice) {//dataXml.invoice
                     MessageBox.error(`El archivo xml no cumple con el formato requerido`);
                     fileUploader.setValue("");
                     return;
                 }
-                const invoice = (dataXml.attacheddocument)?((dataXml.attacheddocument.attachment.externalreference.description.invoice)?dataXml.attacheddocument.attachment.externalreference.description.invoice:dataXml.attacheddocument.attachment.externalreference.description) :dataXml.invoice//dataXml.invoice;
-                
+                const invoice = (dataXml.attacheddocument) ? ((dataXml.attacheddocument.attachment.externalreference.description.invoice) ? dataXml.attacheddocument.attachment.externalreference.description.invoice : dataXml.attacheddocument.attachment.externalreference.description) : dataXml.invoice//dataXml.invoice;
+
                 let version = invoice.ublversionid;
                 version = parseFloat(version);
                 if (version <= 2.0) {
@@ -145,15 +145,15 @@ sap.ui.define([
                     return;
                 }
 
-               
-             
+
+
                 const datosFactura = {
                     //version: invoice.ublversionid,
                     numeroSerie: invoice.id,
                     fechaEmision: invoice.issuedate,
                     //fechaVencimiento: invoice.paymentterms.paymentduedate,
                     //tipoDocumento: invoice.invoicetypecode,
-                    tipoMoneda: (invoice.documentcurrencycode)?invoice.documentcurrencycode:invoice.note.documentcurrencycode,
+                    tipoMoneda: (invoice.documentcurrencycode) ? invoice.documentcurrencycode : invoice.note.documentcurrencycode,
                     //rucEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
                     //nombreComercialEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
                     //numeroDocumentoReceptor: invoice.accountingcustomerparty.party.partyidentification.id,
@@ -171,10 +171,10 @@ sap.ui.define([
                     //totalValorVenta: "",
                     //totalDescuentos: "",
                     //sumatoriaIgv: invoice.taxtotal.taxamount,
-                    ordenReference: (invoice.orderreference)?invoice.orderreference.id:"",
-                    nitproovedor: (invoice.accountingsupplierparty)?invoice.accountingsupplierparty.party.partytaxscheme.companyid:"" ,
-                    importe: (invoice.legalmonetarytotal)?invoice.legalmonetarytotal.taxexclusiveamount:invoice.note.legalmonetarytotal.taxexclusiveamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
-                    total: (invoice.legalmonetarytotal)?invoice.legalmonetarytotal.payableamount:invoice.note.legalmonetarytotal.payableamount,
+                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id : "",
+                    nitproovedor: (invoice.accountingsupplierparty) ? invoice.accountingsupplierparty.party.partytaxscheme.companyid : "",
+                    importe: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.taxexclusiveamount : invoice.note.legalmonetarytotal.taxexclusiveamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
+                    total: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.payableamount : invoice.note.legalmonetarytotal.payableamount,
                     //sociedad: "3000"
                 };
 
@@ -187,15 +187,15 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
                 MODEL.setProperty("/Factura/importe", datosFactura.importe);
                 MODEL.setProperty("/Factura/total", datosFactura.total);
-                MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference); 
-                await this.getwaershelp(datosFactura.tipoMoneda);                
+                MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference);
+                await this.getwaershelp(datosFactura.tipoMoneda);
                 let waersCollection = that.getView().getModel("waershelp").getData();
-                var find = waersCollection.find(item=> item.VALUE == datosFactura.tipoMoneda);
-                var moneda = (find)? (find.VALUE + " - " +find.TEXTO):datosFactura.tipoMoneda;
+                var find = waersCollection.find(item => item.VALUE == datosFactura.tipoMoneda);
+                var moneda = (find) ? (find.VALUE + " - " + find.TEXTO) : datosFactura.tipoMoneda;
                 MODEL.setProperty("/Factura/moneda", moneda);
                 //MODEL.setProperty("/Factura/sociedad", datosFactura.sociedad);
 
-                nuevafacturaModel.setProperty("/isEnabledCabecera", true); 
+                nuevafacturaModel.setProperty("/isEnabledCabecera", true);
                 MODEL.setProperty("/Factura/estado", "No validado");
                 MODEL.setProperty("/Factura/estadoState", "Information");
                 MODEL.setProperty("/Factura/estadoIcon", "sap-icon://information");
@@ -703,12 +703,10 @@ sap.ui.define([
         },
         _readFiles: async function (file) {
             const resolveImport = (evt) => {
-                const objData = this._xmlToJson(evt.target.result);
-                // const workbook = XLSX.read(evt.target.result,{
-                //     type: "binary"
-                // });
-                // const data = workbook.Sheets[workbook.SheetNames[0]];
-                // const objData = XLSX.utils.sheet_to_json(data);
+                //const objData = this._xmlToJson(evt.target.result);
+                const content = evt.target.result;
+                const withoutBom = this._removeBom(content);
+                const objData = this._xmlToJson(withoutBom);
                 return objData;
             };
 
@@ -722,6 +720,9 @@ sap.ui.define([
             });
 
             return await dataFile.then(resolveImport, rejectImport);
+        },
+        _removeBom: function (content) {
+            return content.replace(/^\ï»¿/, ''); //Remove Bom
         },
 
         _mostrarMensaje: function (Mensaje) {
@@ -753,7 +754,7 @@ sap.ui.define([
             try {
                 sap.ui.core.BusyIndicator.show();
                 const data = this._getDataFactura();
-                
+
                 const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
                 const type = "success";
                 sap.ui.core.BusyIndicator.hide();
@@ -771,7 +772,7 @@ sap.ui.define([
                 MessageBox[type]("Ocurrió un error al crear la factura. Por favor, inténtelo nuevamente.");
             }
         },
-        
+
 
         _actualizarFactura: async function () {
             const data = this._getDataFactura();
@@ -816,14 +817,14 @@ sap.ui.define([
             else {
                 that.getView().byId("InputSelectWaers").setValueState("None")
             }
-        /*    if (factura.pedido == undefined || factura.pedido == "") {
-                that.getView().byId("pedido").setValueState("Error")
-                valid = false;
-            }
-            else {
-                that.getView().byId("pedido").setValueState("None")
-            }
-            */
+            /*    if (factura.pedido == undefined || factura.pedido == "") {
+                    that.getView().byId("pedido").setValueState("Error")
+                    valid = false;
+                }
+                else {
+                    that.getView().byId("pedido").setValueState("None")
+                }
+                */
             return valid;
         },
         _getDataFactura: function () {
@@ -864,7 +865,7 @@ sap.ui.define([
                     "belnr": item.BELNR,
                     "mwskz": item.MWSKZ
                 }
-            });     
+            });
 
             let dIgv = 0,
                 dRetencion = 0;
@@ -900,10 +901,10 @@ sap.ui.define([
             }
             const codigoSolicitud = factura.codigoSolicitud;
             if (codigoSolicitud) data.codigoSolicitud = codigoSolicitud;
-            let facturxml = (MODEL.getProperty("/facturaXml")==undefined || MODEL.getProperty("/facturaXml")=="" || MODEL.getProperty("/facturaXml") == null)?"":MODEL.getProperty("/facturaXml");
-            
+            let facturxml = (MODEL.getProperty("/facturaXml") == undefined || MODEL.getProperty("/facturaXml") == "" || MODEL.getProperty("/facturaXml") == null) ? "" : MODEL.getProperty("/facturaXml");
+
             let oReturn = {
-                "STCD1": (facturxml!="")?facturxml.nitproovedor:"",
+                "STCD1": (facturxml != "") ? facturxml.nitproovedor : "",
                 "NUMFA": factura.Numfa, //(facturxml!="")?facturxml.ordenReference:"",
                 "EBELN": factura.pedido,
                 "TIPDAT": "NACION",
@@ -941,7 +942,7 @@ sap.ui.define([
             return formatoYMD;
         },
 
-       
+
 
         formatFecha: function (fecha) {
             // Extraer la fecha del formato "2023-11-16T05:00:00"            
@@ -975,16 +976,35 @@ sap.ui.define([
             return json;
         },
 
+
         _parse: function (node, j) {
-            var nodeName = node.nodeName.replace(/^.+:/, '').toLowerCase();            
+            var nodeName = node.nodeName.replace(/^.+:/, '').toLowerCase();
             var cur = null;
             var that = this;
             var text = $(node).contents().filter(function (x) {
                 return this.nodeType === 3;
             });
+
             if (text[0] && text[0].nodeValue.trim()) {
-                cur = text[0].nodeValue;
+                //el nodo description contiene CDATA con tag Invoice que tiene la info de factura
+                //se ajustó la lógica para extraer el valor correctamente
+                if (nodeName.includes("description")) {
+                    cur = {};
+                    $.each(node.attributes, function () {
+                        if (this.name.indexOf('xmlns:') !== 0) {
+                            cur[this.name.replace(/^.+:/, '')] = this.value;
+                        }
+                    });
+                    $.each(node.children, function () {
+                        that._parse(this, cur);
+                    });
+                }
+                else {
+                    cur = text[0].nodeValue;
+                }
+
             } else {
+
                 cur = {};
                 $.each(node.attributes, function () {
                     if (this.name.indexOf('xmlns:') !== 0) {
