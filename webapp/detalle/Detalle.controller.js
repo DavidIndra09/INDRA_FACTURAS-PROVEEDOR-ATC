@@ -36,13 +36,15 @@ sap.ui.define([
             // between the busy indication for loading the view's meta data
             viewModel = new JSONModel({
                 busy: true,
-                delay: 0
+                delay: 0,
+                visibleconpedido:false,
+                visiblepos:true
             });
 
 
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
-            sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "PosicionesDetalle"); 
+            sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle"); 
             ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
             this.getRouter().getRoute("detalle").attachPatternMatched(this._onDetalletMatched, this);
             this.setModel(viewModel, "detalleView");
@@ -166,37 +168,55 @@ sap.ui.define([
             const resourceBundle = that.getResourceBundle();
             let aFilters = [];
             var aLista = []
+            let Detalle = [];
             aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
             aFilters.push(new Filter("I_BUKRS", FilterOperator.EQ, "1000"));
             ODATA_SAP.read("/getDetailSolFactSet", {
                 filters: aFilters,
                 success: function (data) {
-                    sap.ui.core.BusyIndicator.hide();
-                    let Detalle = (oCabecera.TIPDAT== "XLSVEH")?data.results[0].ET_DETVE:data.results[0].ET_DET;
                     
-                    if(oCabecera.TIPDAT== "XLSVEH"){
-                        aLista = that.buildModelDetail(JSON.parse(Detalle));
+                    sap.ui.core.BusyIndicator.hide();                    
+                    if(data.results[0].ET_COND!=undefined){
+                        viewModel.setProperty("/visibleconpedido", true);
+                        viewModel.setProperty("/visiblepos", false);
+                        Detalle = data.results[0].ET_COND;
+                        aLista = JSON.parse(Detalle);
                     }
                     else{
-                         aLista = JSON.parse(Detalle);
+                        viewModel.setProperty("/visibleconpedido", false);
+                        viewModel.setProperty("/visiblepos", true);
+                        Detalle = (oCabecera.TIPDAT== "XLSVEH")?data.results[0].ET_DETVE:data.results[0].ET_DET;
+                    
+                        if(oCabecera.TIPDAT== "XLSVEH"){
+                            aLista = that.buildModelDetail(JSON.parse(Detalle));
+                        }
+                        else{
+                             aLista = JSON.parse(Detalle);
+                        }
                     }
+
+                     
                     let Documentos = data.results[0].ET_DOC;                    
                     
                     //if (posiciones.length > 0) {
-                        let posicionesParse = sap.ui.getCore().getModel("PosicionesDetalle").getData().Posiciones;//JSON.parse(posiciones);
+                        let posicionesParse = sap.ui.getCore().getModel("Detalle").getData().Posiciones;//JSON.parse(posiciones);
                         if(posicionesParse.length>0){
                             aLista.push(...posicionesParse);
                         }
                         
                     //}   
-                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "PosicionesDetalle"); //limpiamos las posiciones                 
+                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle"); //limpiamos las posiciones                 
                     $.each(aLista, function (i, item) {
                         item.WAERS = oCabecera.WAERS.split("-")[0];
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
+                    that.getView().byId("btnAddCondPedido").setEnabled(oCabecera.Edit);
                     that.getView().byId("btnAddPosiciones").setEnabled(oCabecera.Edit);
                     that.getView().byId("AdjuntosUploader").setEnabled(oCabecera.Edit);
+                    that.getView().byId("btnEliminarPosiciones").setEnabled(oCabecera.Edit);
+                    that.getView().byId("btnEliminarCondPedido").setEnabled(oCabecera.Edit);                    
+                    
                     $.each(aListaDocumentos, function (i, item) {
 
                         adjuntos.push({
@@ -216,7 +236,7 @@ sap.ui.define([
                     oModelLista.setSizeLimit(99999999999)   
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
-                    that.byId("idtablaFactura").setModel(oModelLista);
+                    (data.results[0].ET_COND!=undefined)?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
                     that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
@@ -653,6 +673,42 @@ sap.ui.define([
             //oCabecera.IMPORT = formatter.formatCurrency(oCabecera.IMPORT);
             that.getOwnerComponent().getModel("oCabecera").refresh(true);
         },
+        eliminarFilasSeleccionadas: function(table,messageConfirm) {
+            var oTable = that.getView().byId(table); 
+            var aSelectedItems = oTable.getSelectedItems();
+        
+            if (aSelectedItems.length > 0) {
+                // Muestra un mensaje de confirmación
+                sap.m.MessageBox.confirm(messageConfirm, {
+                    title: "Confirmar",
+                    onClose: function (oAction) {
+                        if (oAction === sap.m.MessageBox.Action.OK) {
+                            // Elimina las filas seleccionadas
+                            aSelectedItems.forEach(function (oSelectedItem) {
+                                oTable.removeItem(oSelectedItem);
+                            });       
+                          
+                            // Limpia la selección después de borrar
+                            oTable.removeSelections();
+                            var data = [];
+                           var Items =  oTable.getItems();
+                           Items.forEach(function (oItem) {
+                            var oBindingContext = oItem.getBindingContext();
+                            var oRowData = oBindingContext.getObject();
+                            data.push(oRowData);
+                            
+                        });
+                           
+                           that.byId("idtablaFactura").setModel(new JSONModel(data))
+                        }
+                    }
+                });
+            } else {
+                // Muestra un mensaje si no hay filas seleccionadas
+                sap.m.MessageToast.show("No hay filas seleccionadas para eliminar.");
+            }
+        }
+        
     });
 
 });

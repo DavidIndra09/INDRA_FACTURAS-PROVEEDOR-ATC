@@ -76,7 +76,7 @@
                     icon="sap-icon://add"
                     text="Agregar"
                     type="Accept"
-                    press="onAgregarOrdenes"
+                    press="onEvaluarAgregar"
                 />
             </OverflowToolbar>
         </f:footer>

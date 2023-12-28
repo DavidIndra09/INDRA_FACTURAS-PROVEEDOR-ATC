@@ -8,83 +8,7 @@
     xmlns:core="sap.ui.core"
     xmlns:uxap="sap.uxap"
     xmlns:u="sap.ui.unified">
-    <!--
-    <f:DynamicPage id="page" busy="{detalleView>/busy}" busyIndicatorDelay="{detalleView>/delay}">
-        <f:header>
-            <f:DynamicPageHeader backgroundDesign="Transparent">
-                <f:content>
-                    <core:Fragment fragmentName="usil.com.createinvoice.atc.detalle.Cabecera" />
-                </f:content>
-            </f:DynamicPageHeader>
-        </f:header>
-        <f:content>
-           
-            <Table id="reviewTable" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="10" growingScrollToLoad="true" noDataText="No hay Posiciones">
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="" />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                    <Column>
-                        <Label text="{i18n>conformidad}" design="Bold" />
-                    </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>posConformidad}" design="Bold" />
-                    </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>ordenCompra}" design="Bold" />
-                    </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>posOrden}" design="Bold" />
-                    </Column>
 
-                    <Column demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>material}" design="Bold" />
-                    </Column>
-                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
-                        <Label text="{i18n>cantidad}" design="Bold" />
-                    </Column>
-                    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
-                        <Label text="{i18n>importe}" design="Bold" />
-                    </Column>
-                </columns>
-
-                <items>
-                    <ColumnListItem press=".onPress">
-                        <cells>
-                            <ObjectIdentifier title="{BELNR}" />
-                            <Text text="{POSNR}" />
-                            <Text text="{EBELN}" />
-                            <Text text="{EBELP}" />
-                            <ObjectIdentifier title="{MATNR}" text="{TXZ01}" />
-                            <ObjectNumber number="{
-                                    path: 'MENGE',
-                                    formatter: '.formatter.numberUnit'
-                                }" unit="{MEINS}" />
-                            <ObjectNumber number="{
-                                    parts:[{path:'NETPR'},{path:'WAERS'}],
-                                    type: 'sap.ui.model.type.Currency',
-                                    formatOptions: {showMeasure: false}
-                                }" unit="{WAERS}" state="Information" />
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </f:content>
-        <f:header />
-        <f:title>
-            <f:DynamicPageTitle areaShrinkRatio="1:1.6:1.6" backgroundDesign="Transparent">
-                <f:heading>
-                    <Title text="{detalleView>/detalleViewTitle}" level="H2" />
-                </f:heading>
-                <f:navigationActions>
-                    <Button icon="sap-icon://decline" type="Reject" press=".onNavBack" />
-                </f:navigationActions>
-            </f:DynamicPageTitle>
-        </f:title>
-    </f:DynamicPage>
-    -->
     <!--Nueva vista detalle-->
     <uxap:ObjectPageLayout id="idHomePage" upperCaseAnchorBar="false" showFooter="true">
         <!-- <uxap:headerTitle>
@@ -118,70 +42,129 @@
             <uxap:ObjectPageSection id="tableSection" title="{i18n>detalleViewTableSection}" titleUppercase="false">
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection >
-                        <ScrollContainer height='15rem' vertical="true" >
-                        <Table id="idtablaFactura" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="10"  noDataText="No hay Posiciones">
-                            <headerToolbar>
-                                <OverflowToolbar>
-                                    <Title text="" />
-                                    <ToolbarSpacer />
-                                    <Button id="btnAddPosiciones" type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
-                                </OverflowToolbar>
-                            </headerToolbar>
-                            <columns>
-                                <Column>
-                                    <Label text="{i18n>conformidad}" design="Bold" />
-                                </Column>
-                              <!--  <Column demandPopin="true" minScreenWidth="Tablet">
+                        <ScrollContainer height='15rem' vertical="true">
+                            <Table visible="{detalleView>/visiblepos}" id="idtablaFactura" mode="MultiSelect" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="10" noDataText="No hay Posiciones">
+                                <headerToolbar>
+                                    <OverflowToolbar>
+                                        <Title text="" />
+                                        <ToolbarSpacer />
+                                        <Button id="btnEliminarPosiciones" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idtablaFactura','¿Está seguro que desea eliminar las posiciones seleccionadas?')" text="Eliminar posiciones"/>
+                                        <Button id="btnAddPosiciones" type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
+                                    </OverflowToolbar>
+                                </headerToolbar>
+                                <columns>
+                                    <Column>
+                                        <Label text="{i18n>conformidad}" design="Bold" />
+                                    </Column>
+                                    <!--  <Column demandPopin="true" minScreenWidth="Tablet">
                                     <Label text="{i18n>posConformidad}" design="Bold" />
                                 </Column> -->
-                                <Column demandPopin="true" minScreenWidth="Tablet">
-                                    <Label text="{i18n>ordenCompra}" design="Bold" />
-                                </Column>
-                                <Column demandPopin="true" minScreenWidth="Tablet">
-                                    <Label text="{i18n>posOrden}" design="Bold" />
-                                </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                        <Label text="{i18n>ordenCompra}" design="Bold" />
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                        <Label text="{i18n>posOrden}" design="Bold" />
+                                    </Column>
 
-                                <Column demandPopin="true" minScreenWidth="Tablet">
-                                    <Label text="{i18n>material}" design="Bold"/>
-                                </Column>
-                                <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
-                                    <Label text="{i18n>descmaterial}" design="Bold"/>
-                                </Column>
-                                <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
-                                    <Label text="{i18n>unidadMedida}" design="Bold"/>
-                                </Column>
-                                <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
-                                    <Label text="{i18n>cantidad}" design="Bold" />
-                                </Column>
-                                <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
-                                    <Label text="{i18n>importe}" design="Bold" />
-                                </Column>
-                            </columns>
+                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                        <Label text="{i18n>material}" design="Bold"/>
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
+                                        <Label text="{i18n>descmaterial}" design="Bold"/>
+                                    </Column>
+                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
+                                        <Label text="{i18n>unidadMedida}" design="Bold"/>
+                                    </Column>
+                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                                        <Label text="{i18n>cantidad}" design="Bold" />
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+                                        <Label text="{i18n>importe}" design="Bold" />
+                                    </Column>
+                                </columns>
 
-                            <items>
-                                <ColumnListItem press=".onPress">
-                                    <cells>
-                                        <ObjectIdentifier title="{BELNR}" />
-                                      <!--  <Text text="{POSNR}" /> -->
-                                        <Text text="{EBELN}" />
-                                        <Text text="{EBELP}" />
-                                        <Text text="{MATNR}" />
-                                        <Text text="{TXZ01}" />
-                                        <Text text="{MEINS}" />
-                                        <ObjectNumber number="{
+                                <items>
+                                    <ColumnListItem press=".onPress">
+                                        <cells>
+                                            <ObjectIdentifier title="{BELNR}" />
+                                            <!--  <Text text="{POSNR}" /> -->
+                                            <Text text="{EBELN}" />
+                                            <Text text="{EBELP}" />
+                                            <Text text="{MATNR}" />
+                                            <Text text="{TXZ01}" />
+                                            <Text text="{MEINS}" />
+                                            <ObjectNumber number="{
                                     path: 'MENGE',
                                     formatter: '.formatter.numberUnit'
                                 }" />
-                                        <ObjectNumber number="{
+                                            <ObjectNumber number="{
                                     parts:[{path:'NETPR'},{path:'WAERS'}],
                                     type: 'sap.ui.model.type.Currency',
                                     formatOptions: {showMeasure: false}
                                 }" unit="{WAERS}" state="Information" />
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-                         </ScrollContainer>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                            <!--Tabla de condición de pedidos-->
+                            <Table visible="{detalleView>/visibleconpedido}" id="idTableCondicionesPedido" width="auto" items="{path: '/'}" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="10" mode="MultiSelect">
+
+                                <headerToolbar>
+                                    <OverflowToolbar>
+                                        <ToolbarSpacer />
+                                        <Button id="btnEliminarCondPedido" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idTableCondicionesPedido','¿Está seguro que desea eliminar las condiciones de pedido seleccionadas?')" text="Eliminar condiciones de pedido"/>
+                                        <Button id="btnAddCondPedido" type="Emphasized" text="Agregar Condiciones pedido" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
+                                        <SearchField visible="false" id="searchFieldCondPedido" tooltip="{i18n>ordenSearchTooltip}" liveChange="onBusquedaRapida">
+                                            <layoutData>
+                                                <OverflowToolbarLayoutData maxWidth="200px" priority="NeverOverflow"/>
+                                            </layoutData>
+                                        </SearchField>
+                                        <Switch visible="false" id="SwitchTableCP" customTextOn="COND" customTextOff="POS" change="onShowHideFilters">
+                                            <layoutData>
+                                                <FlexItemData growFactor="1" />
+                                            </layoutData>
+                                        </Switch>
+                                    </OverflowToolbar>
+                                </headerToolbar>
+
+                                <columns>
+                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                        <Label text="{i18n>ordenCompra}" design="Bold"/>
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                        <Label text="Condición documento" design="Bold"/>
+                                    </Column>
+
+                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                        <Label text="Posición" design="Bold"/>
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                        <Label text="Clase condición" design="Bold"/>
+                                    </Column>
+                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                        <Label text="Importe" design="Bold"/>
+                                    </Column>
+                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                        <Label text="Moneda" design="Bold"/>
+                                    </Column>
+                                </columns>
+
+                                <items>
+                                    <ColumnListItem press=".onPress">
+                                        <cells>
+
+                                            <Text text="{EBELN}" />
+                                            <Text text="{KBETR}" />
+                                            <Text text="{KNUMV}" />
+                                            <Text text="{KPOSN}" />
+                                            <Text text="{KSCHL}" />
+                                            <Text text="{WAERS}" />
+
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </ScrollContainer>
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
             </uxap:ObjectPageSection>
@@ -196,7 +179,7 @@
                                 <OverflowToolbar >
                                     <Title text="{facturaView>/tituloListaAdjuntos}" />
                                     <ToolbarSpacer />
-                                    <u:FileUploader id="AdjuntosUploader" maximumFileSize="10" fileSizeExceed="onFileSizeExceed"  name="myFileUpload" placeholder="Seleccione archivos" uploadUrl="upload/" buttonText="Seleccionar Adjunto" style="Emphasized" tooltip="Adjunte sus archivos" change="onCargaAdjuntos" buttonOnly="true" icon="sap-icon://attachment" iconOnly="{device>/system/phone}"/>
+                                    <u:FileUploader id="AdjuntosUploader" maximumFileSize="10" fileSizeExceed="onFileSizeExceed" name="myFileUpload" placeholder="Seleccione archivos" uploadUrl="upload/" buttonText="Seleccionar Adjunto" style="Emphasized" tooltip="Adjunte sus archivos" change="onCargaAdjuntos" buttonOnly="true" icon="sap-icon://attachment" iconOnly="{device>/system/phone}"/>
                                 </OverflowToolbar>
                             </headerToolbar>
                             <columns>

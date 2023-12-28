@@ -42,7 +42,7 @@ sap.ui.define([
                 busy: true,
                 delay: 0,
                 isEnabledCabecera: true,
-                isBtnPosicionesEnabled: false
+                isBtnPosicionesEnabled: false                
                 // facturaViewTitle: this.getResourceBundle().getText("facturaViewTitleCreate")
             });
             sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": 0 }), "TotalNETPR");
@@ -50,6 +50,7 @@ sap.ui.define([
             this.getRouter().getRoute("factura").attachPatternMatched(this._onFacturaMatched, this);
             this.setModel(nuevafacturaModel, "facturaView");
             MODEL = this.getOwnerComponent().getModel();
+          
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
             ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
@@ -634,6 +635,7 @@ sap.ui.define([
             }*/
 
             nuevafacturaModel.setProperty("/facturaViewTitle", viewTitle);
+            
             this._bindView("/Factura");
         },
         onCalcularSumaPosiciones: function () {
@@ -690,8 +692,14 @@ sap.ui.define([
                 conformidades: {
                     results: []
                 },
-                tipoImpuesto: "1"
-            });
+                condpedido:{
+                    results: [] 
+                },
+                tipoImpuesto: "1",
+                visibleconpedido:false,
+                visiblepos:true
+            });            
+            
             that.getView().byId("InputFactura").setValue("");
             that.getView().byId("FechaEmision").setValue("");
             that.getView().byId("InputImporte").setValue("");
@@ -866,6 +874,17 @@ sap.ui.define([
                 }
             });
 
+            const conpedido = factura.condpedido.results.map(item => {
+                return {                   
+                    "ebeln": item.EBELN,
+                    "kbetr": item.KBETR,
+                    "knumv": item.KNUMV,
+                    "kposn": item.KPOSN,
+                    "kschl": item.KSCHL,
+                    "waers": item.WAERS                  
+                }
+            });
+
             let dIgv = 0,
                 dRetencion = 0;
 
@@ -919,7 +938,8 @@ sap.ui.define([
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
                 "IT_DET": JSON.stringify(conformidades),
-                "IT_DOC": JSON.stringify(adjuntoModel)
+                "IT_DOC": JSON.stringify(adjuntoModel),
+                "IT_COND": JSON.stringify(conpedido)
             };
             return obj;
         },

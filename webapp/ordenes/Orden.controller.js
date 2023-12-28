@@ -80,9 +80,8 @@ sap.ui.define([
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
                 if (sPreviousHash.includes("Detalle")) {
-                    let data = detalleFactura;
-                    debugger
-                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones":data }), "PosicionesDetalle")
+                    let data = detalleFactura;                    
+                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones":data }), "Detalle")
                     sap.ui.core.BusyIndicator.show();
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],
@@ -143,6 +142,15 @@ sap.ui.define([
             });
             return NuevoMensaje;
         },
+        onEvaluarAgregar: async function(){
+            let tableOC = that.byId("idTableOrdenes").getVisible();
+            if(tableOC){
+             that.onAgregarOrdenes();
+            }
+            else{
+             that.onAgregarCondicionPedido();
+            }     
+        },
         onAgregarOrdenes: async function () {
             let object = that.onValidarIndicadorImpuesto();
             if (!object.valid) {                
@@ -181,10 +189,65 @@ sap.ui.define([
                     return MODEL.getProperty(item);
                 });
                 MODEL.setProperty("/Factura/conformidades/results", detalleFactura);
+                MODEL.setProperty("/Factura/condpedido/results", []);
+                MODEL.setProperty("/Factura/visibleconpedido", false);
+                MODEL.setProperty("/Factura/visiblepos", true);
 
                 sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
                 MODEL.setProperty("/Ordenes", []);
+                this.onNavBack(detalleFactura);
+            } else {
+                MessageBox.error("Debe seleccionar por lo menos un registro.");
+            }
+        },
+        onAgregarCondicionPedido: async function () {
+          /*  let object = that.onValidarIndicadorImpuesto();
+            if (!object.valid) {                
+                let formattermessage = that.formatMessages(object.mensaje);
+                MessageBox.warning(
+                    formattermessage,
+                    {
+                        title: "Falta indicador de impuesto.",
+                        actions: [MessageBox.Action.CLOSE],
+                        //details: htmlmessage
+                    }
+                );
+                return;
+            }
+            */
+            const table = this.getView().byId("idTableCondicionesPedido");
+            const selectedPaths = table.getSelectedContextPaths();
+            let detalleFactura;
+            let sStatus;
+            if (selectedPaths.length > 0) {
+                var rowInvoice = MODEL.getProperty(selectedPaths[0]);
+                var oFormData = {
+                    Bukrs: rowInvoice.Bukrs,
+                    Butxt: rowInvoice.Butxt,
+                    Nrinv: "",
+                    Dtinv: "",
+                    NETPR: 0,
+                    Waers: rowInvoice.Waers
+                };
+                var impTotal = 0.00;
+                var rowDetails = [];
+                let sumatoria = 0;
+                detalleFactura = selectedPaths.map(item => {
+                    let element = MODEL.getProperty(item);
+                    //sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
+                    MODEL.setProperty("/Factura/pedido", element.EBELN);
+                    return MODEL.getProperty(item);
+                });
+                
+                MODEL.setProperty("/Factura/conformidades/results", []);
+                MODEL.setProperty("/Factura/condpedido/results", detalleFactura);
+                MODEL.setProperty("/Factura/visibleconpedido", true);
+                MODEL.setProperty("/Factura/visiblepos", false);
+                
+                sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
+                var oDetailInvoiceModel = new JSONModel(rowDetails);
+                MODEL.setProperty("/CondPedido", []);
                 this.onNavBack(detalleFactura);
             } else {
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
@@ -307,6 +370,7 @@ sap.ui.define([
             });*/
 
             let parameters = { filters: filters };
+            debugger
             const request = await this.readEntity(ODATA_SAP, "/getCondPedidoSet", parameters);
             var posiciones = [];
             if(request.results.length>0){
@@ -326,7 +390,7 @@ sap.ui.define([
                     }
                 );
             }  
-            MODEL.setProperty("/Ordenes", posiciones);
+            MODEL.setProperty("/CondPedido", posiciones);
             sap.ui.core.BusyIndicator.hide();
         },
         onLimpiarFiltros: function () {
@@ -439,7 +503,7 @@ sap.ui.define([
         onShowHideFilters: function(oEvent){
             var classType = "sapUiSmallMarginTop";
             var state = oEvent.mParameters.state;
-            debugger
+            
             if(oEvent.getSource().getId().includes("SwitchTableOC")){
                 that.byId("btnFilterBuscar").addStyleClass(classType);  
                 that.byId("btnFilterLimpiar").addStyleClass(classType);  
