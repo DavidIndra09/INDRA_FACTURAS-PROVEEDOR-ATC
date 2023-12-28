@@ -53,10 +53,21 @@
             </f:DynamicPageHeader>
         </f:header>
         <f:content>
+         <VBox id="contenedorTablas" class="sapUiSmallMargin">
+<!-- Fragmento para la primera tabla -->
             <core:Fragment
                 fragmentName="usil.com.createinvoice.atc.ordenes.Tabla"
                 type="XML"
             />
+
+            <!-- Fragmento para la segunda tabla (si es necesario) -->
+            <core:Fragment
+                fragmentName="usil.com.createinvoice.atc.ordenes.TablaCondicionesPedido"
+                type="XML"
+            />
+          </VBox>
+          
+           
         </f:content>
         <f:footer>
             <OverflowToolbar>

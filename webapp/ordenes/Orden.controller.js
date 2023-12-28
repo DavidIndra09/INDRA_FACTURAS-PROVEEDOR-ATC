@@ -56,7 +56,8 @@ sap.ui.define([
             ordenModel = new JSONModel({
                 busy: true,
                 delay: 0,
-                ordenCompra: MODEL.getProperty("/Factura/pedido")
+                ordenCompra: MODEL.getProperty("/Factura/pedido"),
+                visibleFilters: true
             });
 
             this.setModel(ordenModel, "ordenView");
@@ -233,6 +234,17 @@ sap.ui.define([
                 MessageBox.error("Debe seleccionar al menos un registro.");
             }
         },
+        onEvaluarBusqueda: async function(){
+            
+            let tableOC = that.byId("idTableOrdenes").getVisible();
+            if(tableOC){
+             that.onBuscarOrdenes();
+            }
+            else{
+             that.ongetCondPedido();
+            }
+            //that.byId("SwitchTableOC").getState();
+        },
         onBuscarOrdenes: async function () {
             sap.ui.core.BusyIndicator.show();
             const busqueda = ordenModel.getProperty("/Busqueda");
@@ -261,6 +273,48 @@ sap.ui.define([
                     item.NETPR = (item.NETPR).toString();
                     item.MENGE = (item.MENGE).toString();
                 });
+            }
+            else{
+                MessageBox.information(
+                    "No existen pedidos confirmados para el proveedor seleccionado.",
+                    {
+                        title: "No se encontraron resultados",
+                        actions: [MessageBox.Action.CLOSE],
+                        //details: htmlmessage
+                    }
+                );
+            }  
+            MODEL.setProperty("/Ordenes", posiciones);
+            sap.ui.core.BusyIndicator.hide();
+        },
+        ongetCondPedido: async function () {
+            sap.ui.core.BusyIndicator.show();
+            const busqueda = ordenModel.getProperty("/Busqueda");
+            const filters = [];
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;            
+            filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
+            filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
+            //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+            //filters.push(new Filter("I_ELIKZ", "EQ", "X"));
+            this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
+                filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
+            });
+            /*this.getView().byId("mtIptConformidades").getTokens().map(function (token) {
+                filters.push(new Filter("IR_BELNR", "EQ", token.getKey()));
+            });
+            this.getView().byId("mtIptDescMaterial").getTokens().map(function (token) {
+                filters.push(new Filter("IR_MATNR", "EQ", token.getKey()));
+            });*/
+
+            let parameters = { filters: filters };
+            const request = await this.readEntity(ODATA_SAP, "/getCondPedidoSet", parameters);
+            var posiciones = [];
+            if(request.results.length>0){
+                posiciones = JSON.parse(request.results[0].ET_DATA);
+                /*$.each(posiciones, function (i, item) {
+                    item.NETPR = (item.NETPR).toString();
+                    item.MENGE = (item.MENGE).toString();
+                });*/
             }
             else{
                 MessageBox.information(
@@ -381,6 +435,34 @@ sap.ui.define([
             if (aTableSearchState.length !== 0) {
                 ordenModel.setProperty("/tableNoDataText", this.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
             }
+        },
+        onShowHideFilters: function(oEvent){
+            var classType = "sapUiSmallMarginTop";
+            var state = oEvent.mParameters.state;
+            debugger
+            if(oEvent.getSource().getId().includes("SwitchTableOC")){
+                that.byId("btnFilterBuscar").addStyleClass(classType);  
+                that.byId("btnFilterLimpiar").addStyleClass(classType);  
+                that.byId("idTableOrdenes").setVisible(false)   
+                that.byId("idTableCondicionesPedido").setVisible(true)  
+                that.byId("elementConformidades").setVisible(false);
+                that.byId("elementDescMaterial").setVisible(false);
+                that.byId("SwitchTableCP").setState(true) 
+                that.byId("SwitchTableOC").setState(false)            
+            }
+            else{
+                that.byId("btnFilterBuscar").removeStyleClass(classType);  
+                that.byId("btnFilterLimpiar").removeStyleClass(classType);                    
+                that.byId("idTableOrdenes").setVisible(true)  
+                that.byId("idTableCondicionesPedido").setVisible(false) 
+                that.byId("elementConformidades").setVisible(true);
+                that.byId("elementDescMaterial").setVisible(true);
+                that.byId("SwitchTableCP").setState(false)
+                that.byId("SwitchTableOC").setState(false)
+
+            }           
+             
+            
         }
     });
 

@@ -1,12 +1,12 @@
 <core:FragmentDefinition
 	xmlns="sap.m"
 	xmlns:core="sap.ui.core">
-    <Table
-        visible="true"
-        id="idTableOrdenes"
+   <Table
+        visible="false"
+        id="idTableCondicionesPedido"
         width="auto"
         items="{
-            path: '/Ordenes',
+            path: '/CondPedido',
             sorter: {
                 path: 'conformidad',
                 descending: false
@@ -15,19 +15,18 @@
         noDataText="{ordenView>/tableNoDataText}"
         busyIndicatorDelay="{ordenView>/tableBusyDelay}"
         growing="true"
-        growingScrollToLoad="true"
-        updateFinished=".onUpdateFinished"
+        growingScrollToLoad="true"        
         mode="MultiSelect">
-
+        
         <headerToolbar>
             <OverflowToolbar>
                 <Title
-                    id="tableHeader"
+                    id="tableHeaderCondPedido"
                     text="{ordenView>/ordenTableTitle}"
                     level="H3"/>
                 <ToolbarSpacer />
                 <SearchField
-                    id="searchField"
+                    id="searchFieldCondPedido"
                     tooltip="{i18n>ordenSearchTooltip}"                    
                     liveChange="onBusquedaRapida">
                     <layoutData>
@@ -36,7 +35,7 @@
                             priority="NeverOverflow"/>
                     </layoutData>
                 </SearchField>
-                <Switch id="SwitchTableOC" state="false" customTextOn="COND" customTextOff="POS" change="onShowHideFilters">
+                <Switch id="SwitchTableCP"  customTextOn="COND" customTextOff="POS" change="onShowHideFilters">
 				<layoutData>
 					<FlexItemData growFactor="1" />
 				</layoutData>
@@ -44,68 +43,42 @@
             </OverflowToolbar>
         </headerToolbar>
 
-        <columns>
-            <Column >
-                <Label text="{i18n>conformidad}" design="Bold"/>
-            </Column>
-           <!-- <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
-                <Label text="{i18n>posConformidad}" design="Bold"/> 
-            </Column>-->
+        <columns>           
             <Column demandPopin="true" minScreenWidth="Tablet"  width="9rem">
                 <Label text="{i18n>ordenCompra}" design="Bold"/>
             </Column>
             <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
-                <Label text="{i18n>posOrden}" design="Bold"/>
+                <Label text="Condición documento" design="Bold"/>
             </Column>
 
             <Column demandPopin="true" minScreenWidth="Tablet">
-                <Label text="{i18n>material}" design="Bold"/>
+                <Label text="Posición" design="Bold"/>
             </Column>
              <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
-                <Label text="{i18n>descmaterial}" design="Bold"/>
+                <Label text="Clase condición" design="Bold"/>
             </Column>
              <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
-                <Label text="{i18n>unidadMedida}" design="Bold"/>
+                <Label text="Importe" design="Bold"/>
             </Column>
             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="6rem">
-                <Label text="{i18n>cantidad}" design="Bold"/>
-            </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
-                <Label text="{i18n>importe}" design="Bold"/>
-            </Column>           
-            <Column hAlign="Center" width="5rem">
-                <Label text="" />
-            </Column>
+                <Label text="Moneda" design="Bold"/>
+            </Column>            
         </columns>
 
         <items>
             <ColumnListItem
                 press=".onPress">
-                <cells>
-                    <ObjectIdentifier
-                          title="{BELNR}"/>
-                  <!-- <Text text="{BUZEI}" /> -->
+                <cells>                
+                 
                     <Text text="{EBELN}" />
                     <Text text="{EBELP}" />
                     <Text text="{MATNR}" />
                     <Text text="{TXZ01}" /> 
-                    <Text text="{MEINS}" />                   
-                    <ObjectStatus
-                        text="{
-                            path: 'MENGE'
-                           
-                        }"
-                         />
-                         <ObjectNumber number="{
-                            parts:[{path:'NETPR',formatter: '.formatter.formatCurrency'}]                                                        
-                        }" unit="{WAERS}" state="Information" />
+                    <Text text="{MEINS}" />
+                    <Text text="{MEINS}" />  
                        
                 </cells>
             </ColumnListItem>
         </items>
     </Table>
-
-
-  
-
 </core:FragmentDefinition>

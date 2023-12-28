@@ -767,7 +767,7 @@ sap.ui.define([
             for (let i = 0; i < aLista.length; i++) {
                 let value = aLista[i];
                 let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
-                value.DescripcionEstado = find.TEXTO;
+                value.DescripcionEstado = (find)?find.TEXTO:"";
                 let resultEstatus = that.getColorStatus(value.ESTADO);
                 //await that.getProveedorText(value.LIFNR);
                 //let Proveedor = that.getView().getModel("proveedorText").getData();

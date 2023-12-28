@@ -8,7 +8,7 @@
         <form:formContainers>
             <form:FormContainer>
                 <form:formElements>
-                    <form:FormElement>
+                    <form:FormElement id="elementConformidades" >
                         <form:fields>
                           <!--  <Input value="{ordenView>conformidad}" placeholder="{i18n>placeholderConformidad}" /> -->
                             <MultiInput
@@ -38,7 +38,7 @@
                             <Label text="{i18n>ordenCompra}" design="Bold"/>
                         </form:label>
                     </form:FormElement>
-                    <form:FormElement>
+                    <form:FormElement id="elementDescMaterial">
                         <form:fields>
                          <MultiInput
                                             id="mtIptDescMaterial"
@@ -64,10 +64,10 @@
                             <Label text="{i18n>fechaOrden}" design="Bold"/>
                         </form:label>
                     </form:FormElement> -->
-                    <form:FormElement>
+                    <form:FormElement  >
                         <form:fields>
-                            <Button text="Buscar" type="Emphasized" icon="sap-icon://search" press="onBuscarOrdenes" />
-                            <Button text="Limpiar" type="Ghost" icon="sap-icon://clear-filter" press="onLimpiarFiltros" />
+                            <Button id="btnFilterBuscar"  text="Buscar" type="Emphasized" icon="sap-icon://search" press="onEvaluarBusqueda" />
+                            <Button id="btnFilterLimpiar"  text="Limpiar" type="Ghost" icon="sap-icon://clear-filter" press="onLimpiarFiltros" />
                         </form:fields>
                         <form:label>
                             <Label text="" />
