@@ -125,10 +125,12 @@ sap.ui.define([
 
             $.each(data, function (i, item) {
                 let element = MODEL.getProperty(item);
-                if (element.MWSKZ == "") {
-                    object.valid = false;
-                    object.mensaje.push("El pedido " + element.EBELN + " no cuenta con indicador de impuesto. Por favor actualizar desde la tx me22n");
-                }
+                if(element!=undefined){
+                    if (element.MWSKZ == "") {
+                        object.valid = false;
+                        object.mensaje.push("El pedido " + element.EBELN + " no cuenta con indicador de impuesto. Por favor actualizar desde la tx me22n");
+                    }
+                }               
 
             });
             return object;
@@ -347,7 +349,9 @@ sap.ui.define([
                     }
                 );
             }  
+            posiciones.sort((a, b) => a.BELNR - b.BELNR);
             MODEL.setProperty("/Ordenes", posiciones);
+            that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
             sap.ui.core.BusyIndicator.hide();
         },
         ongetCondPedido: async function () {
@@ -370,7 +374,7 @@ sap.ui.define([
             });*/
 
             let parameters = { filters: filters };
-            debugger
+            
             const request = await this.readEntity(ODATA_SAP, "/getCondPedidoSet", parameters);
             var posiciones = [];
             if(request.results.length>0){
@@ -382,7 +386,7 @@ sap.ui.define([
             }
             else{
                 MessageBox.information(
-                    "No existen pedidos confirmados para el proveedor seleccionado.",
+                    "No existen pedidos con condiciones para el proveedor seleccionado.",
                     {
                         title: "No se encontraron resultados",
                         actions: [MessageBox.Action.CLOSE],
@@ -390,7 +394,9 @@ sap.ui.define([
                     }
                 );
             }  
+            posiciones.sort((a, b) => a.BELNR - b.BELNR);
             MODEL.setProperty("/CondPedido", posiciones);
+            that.getView().byId("tableHeaderCondPedido").setText("Condiciones (" + posiciones.length +")");
             sap.ui.core.BusyIndicator.hide();
         },
         onLimpiarFiltros: function () {
@@ -512,7 +518,8 @@ sap.ui.define([
                 that.byId("elementConformidades").setVisible(false);
                 that.byId("elementDescMaterial").setVisible(false);
                 that.byId("SwitchTableCP").setState(true) 
-                that.byId("SwitchTableOC").setState(false)            
+                that.byId("SwitchTableOC").setState(false)  
+                that.ongetCondPedido();          
             }
             else{
                 that.byId("btnFilterBuscar").removeStyleClass(classType);  

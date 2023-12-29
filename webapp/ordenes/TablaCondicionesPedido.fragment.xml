@@ -15,14 +15,14 @@
         noDataText="{ordenView>/tableNoDataText}"
         busyIndicatorDelay="{ordenView>/tableBusyDelay}"
         growing="true"
-        growingScrollToLoad="true"        
+        growingThreshold="10"       
         mode="MultiSelect">
         
         <headerToolbar>
             <OverflowToolbar>
                 <Title
                     id="tableHeaderCondPedido"
-                    text="{ordenView>/ordenTableTitle}"
+                    text="Condiciones (0)"
                     level="H3"/>
                 <ToolbarSpacer />
                 <SearchField

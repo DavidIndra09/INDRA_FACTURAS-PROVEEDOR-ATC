@@ -15,7 +15,7 @@
         noDataText="{ordenView>/tableNoDataText}"
         busyIndicatorDelay="{ordenView>/tableBusyDelay}"
         growing="true"
-        growingScrollToLoad="true"
+        growingThreshold="10"
         updateFinished=".onUpdateFinished"
         mode="MultiSelect">
 
@@ -23,7 +23,7 @@
             <OverflowToolbar>
                 <Title
                     id="tableHeader"
-                    text="{ordenView>/ordenTableTitle}"
+                    text="Posiciones (0)"
                     level="H3"/>
                 <ToolbarSpacer />
                 <SearchField

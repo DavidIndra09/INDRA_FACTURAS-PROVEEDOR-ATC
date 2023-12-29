@@ -176,7 +176,7 @@ sap.ui.define([
                 success: function (data) {
                     
                     sap.ui.core.BusyIndicator.hide();                    
-                    if(data.results[0].ET_COND!=undefined){
+                    if(data.results[0].ET_COND!=""){
                         viewModel.setProperty("/visibleconpedido", true);
                         viewModel.setProperty("/visiblepos", false);
                         Detalle = data.results[0].ET_COND;
@@ -236,7 +236,7 @@ sap.ui.define([
                     oModelLista.setSizeLimit(99999999999)   
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
-                    (data.results[0].ET_COND!=undefined)?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
+                    (data.results[0].ET_COND!="")?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
                     that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
@@ -451,6 +451,7 @@ sap.ui.define([
                 "IT_DET": JSON.stringify(conformidades),
                 "IT_DOC": JSON.stringify(adjuntoModel)
             };
+            
 
             return obj;
         },
@@ -469,7 +470,7 @@ sap.ui.define([
                 "EKORG": Data.EKORG,
                 "EBELN": Data.EBELN,
                 "TIPDAT": Data.TIPDAT,
-                "ESTADO": Data.ESTADO,
+                "ESTADO": (Data.EBELN!="" && (Data.TIPDAT == "XLSVEH" || Data.TIPDAT == "XLSREP"))?"09":Data.ESTADO,
                 "WAERS": Data.WAERS.split("-")[0].trim() ,
                 "LIFNR": Data.LIFNR,                
                 "FEMISI": that.formatFecha(Data.FEMISI),

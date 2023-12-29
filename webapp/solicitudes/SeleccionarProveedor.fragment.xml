@@ -8,7 +8,7 @@
             <!-- SearchField -->
           <SearchField  id="InputSelectProveedor" width="100%"  showSearchButton="false" placeholder="Ingrese el código o nombre de un proveedor" enableSuggestions="true" search=".handleSearch" suggest=".onSuggest" suggestionItems="{path:'proveedoreshelp>/'}">
 
-                <SuggestionItem text="{proveedoreshelp>TEXTO}"  />
+                <SuggestionItem text="{proveedoreshelp>VALUE} - {proveedoreshelp>TEXTO}"  />
 
             </SearchField> 
 

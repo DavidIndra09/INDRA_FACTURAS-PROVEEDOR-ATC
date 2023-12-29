@@ -414,12 +414,16 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide()
                 return;
             }
-            let validDiferencia = that.validarDiferencia();
+            sap.ui.core.BusyIndicator.show()
+            let validDiferencia = await that.validarDiferencia();
             if (!validDiferencia) {
-                MessageBox.warning("La diferencia entre el importe y el total de posiciones debe ser 0.");
+                let diferencia = MODEL.getProperty("/Factura/diferencia");
+                let tolerancia = await that.ongetTolerancia();
+                MessageBox.warning("La diferencia entre el importe y el total de las posiciones excedió la tolerancia configurada." + "\n"+"\n"+"Diferencia: "+ parseFloat(diferencia).toFixed(2) + "."+"\n"+"\n" + "Tolerancia actual: " + parseFloat(tolerancia).toFixed(2) + ".");
                 sap.ui.core.BusyIndicator.hide()
                 return;
             }
+            sap.ui.core.BusyIndicator.hide()
             MessageBox.confirm(`¿Está seguro que desea crear la solicitud de factura?`, {
                 onClose: function (action) {
                     if (action === "OK") {
@@ -611,6 +615,7 @@ sap.ui.define([
                 that.onNavBack();
                 return;
             }
+            
             //that._limpiarData();
             sap.ui.core.BusyIndicator.hide();
             let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;
@@ -708,6 +713,16 @@ sap.ui.define([
             MODEL.setProperty("/Adjuntos", []);
             that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": [] }));
         },
+        ongetTolerancia: async function(){
+            const parameters = {
+                filters: [],
+                urlParameters: {
+                   
+                }
+            }
+            var response = await this.readEntity(ODATA_SAP, `/getToleranciaSet`, parameters);
+            return response.results[0].E_TOLER;            
+        },
         _readFiles: async function (file) {
             const resolveImport = (evt) => {
                 //const objData = this._xmlToJson(evt.target.result);
@@ -752,9 +767,10 @@ sap.ui.define([
             });
             oDialog.open();
         },
-        validarDiferencia: function () {
+        validarDiferencia: async  function () {
             let diferencia = MODEL.getProperty("/Factura/diferencia");
-            let valid = (diferencia == 0) ? true : false;
+            var tolerancia = await that.ongetTolerancia();
+            let valid = (parseFloat(diferencia) <= parseFloat(tolerancia)) ? true : false;
             return valid;
         },
         _crearFactura: async function () {
@@ -776,7 +792,7 @@ sap.ui.define([
                 console.error("Error al crear factura:", error);
                 sap.ui.core.BusyIndicator.hide();
                 const type = "error";
-                MessageBox[type]("Ocurrió un error al crear la factura. Por favor, inténtelo nuevamente.");
+                MessageBox[type]("Ocurrió un error al crear la solicitud de la factura. Por favor, inténtelo nuevamente.");
             }
         },
 

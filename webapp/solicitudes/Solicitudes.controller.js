@@ -289,10 +289,12 @@ sap.ui.define([
         onLimpiarFiltros: function () {
             MODEL.setProperty("/Busqueda", {});
             var oMultiComboBox = this.getView().byId("ComboEstados");
+            var oMultiComboBoxOrigen = this.getView().byId("Origen");
             const dateRangeEmision = this.getView().byId("idDateRangeEmision");
             const dateRangeRegistro = this.getView().byId("idDateRangeRegistro");
             const DateRangeContabilizacion = this.getView().byId("idDateRangeContabilizacion");
             // limpiamos fechas
+            oMultiComboBoxOrigen.setSelectedKeys([]);
             oMultiComboBox.setSelectedKeys([]);
             dateRangeEmision.setDateValue(null);
             dateRangeEmision.setSecondDateValue(null);
@@ -504,7 +506,7 @@ sap.ui.define([
                     findSelected = proveedoreshelpSelected;
                 }
             }
-            var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.trim() || element.TEXTO == proveedorSelected.trim())
+            var find = proveedoreshelp.find(element => element.VALUE == proveedorSelected.split("-")[0].trim() || element.TEXTO == proveedorSelected.split("-")[1].trim())
             if (find != undefined) {
                 that.getView().setModel(new JSONModel(find), "proveedoreshelpSelected");
                 sap.ui.getCore().setModel(new JSONModel({ "Lifnr": find.VALUE }), "Lifnr")
@@ -888,12 +890,14 @@ sap.ui.define([
                         const copiedObject = (({ ColorEstado, DescripcionEstado, IconoEstado, ...rest }) => rest)(item.getObject());
 
 
-                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "03" : "02";
+                        //copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "03" : "02";
+                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "09" : "02";
                         copiedObject.FCRESO = formatter.formatearFechaString(copiedObject.FCRESO);
                         copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
                         copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);
                         copiedObject.IMPORT = that.convertirFormato(copiedObject.IMPORT);
                         const solicitud = { "IS_FACT_CAB": JSON.stringify(copiedObject) };
+                        
                         const result = await this.createEntity(ODATA_SAP, "/solPagoFactSet", solicitud);
                         results.push(result);
                     } catch (error) {
@@ -1816,7 +1820,8 @@ sap.ui.define([
                     var oButtonSeleccionarTipoCarga = new sap.m.Button({
                         text: "Cargar Facturas",
                         icon: "sap-icon://enter-more",
-                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
+                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable),
+                        visible:true
                     });
 
                     oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
@@ -1893,7 +1898,8 @@ sap.ui.define([
                     var oButtonSeleccionarTipoCarga = new sap.m.Button({
                         text: "Cargar Facturas",
                         icon: "sap-icon://enter-more",
-                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
+                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable),
+                        visible:true
                     });
 
                     oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
@@ -1967,7 +1973,8 @@ sap.ui.define([
                     var oButtonSeleccionarTipoCarga = new sap.m.Button({
                         text: "Cargar Facturas",
                         icon: "sap-icon://enter-more",
-                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable)
+                        press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable),
+                        visible:true
                     });
 
                     oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
