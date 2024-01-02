@@ -1079,10 +1079,11 @@ sap.ui.define([
                         const Prten = elemento.Puertollegada;
                         const Tptra = elemento.ViaTransporte;
                         const Proveedor = elemento.Proveedor;
+                        const Numcaja = elemento.Znumcaja;
                         if (Numfa != "") {
 
                             if (!grupos[Numfa]) {
-                                grupos[Numfa] = { Proveedor: Proveedor, Inco1: Inco1, Inco2: Inco2, Numfa: Numfa, Numbl: Numbl, Datbl: Datbl, Prtsl: Prtsl, Prten: Prten, Tptra: Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras, Pedido: Pedido, ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
+                                grupos[Numfa] = {Numcaja:Numcaja, Proveedor: Proveedor, Inco1: Inco1, Inco2: Inco2, Numfa: Numfa, Numbl: Numbl, Datbl: Datbl, Prtsl: Prtsl, Prten: Prten, Tptra: Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras, Pedido: Pedido, ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
                             }
 
                             //grupos[numFc].Detalle.push(elemento);
@@ -1311,6 +1312,7 @@ sap.ui.define([
         },
         ongetModelCabecera: function (Data, TypeTable) {
             return {
+                "ZNUMCAJA": (Data.Numcaja!="" && Data.Numcaja!=undefined)?Data.Numcaja:"",
                 "FACTUR": Data.Numfa, /*(TypeTable=="Repuestos")?Data.Numfa:Data.Numfa,*/
                 "INCO1": Data.Inco1,
                 "INCO2": Data.Inco2,
@@ -2501,6 +2503,7 @@ sap.ui.define([
                     jsonObject.Icoterms = item["ICOTERMS"]
                     jsonObject.LugarIncoterms = item["LUGAR INCOTERMS"]
                     jsonObject.ViaTransporte = item["VIA TRANSPORTE"]
+                    jsonObject.Znumcaja = item["ZNUMCAJA"]
                 }
                 else {
                     jsonObject.Cl_Doc = item["CL_DOC"]
@@ -2579,7 +2582,8 @@ sap.ui.define([
                 "PUERTO DE LLEGADA",
                 "ICOTERMS",
                 "LUGAR INCOTERMS",
-                "VIA TRANSPORTE"
+                "VIA TRANSPORTE",
+                "ZNUMCAJA"
             ];
 
             const elementosRequeridosVehiculos = [
