@@ -6,7 +6,8 @@ sap.ui.define([
     "../model/formatter",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "sap/ui/core/format/DateFormat"
+    "sap/ui/core/format/DateFormat",
+    'sap/m/Token',
 ], function (
     BaseController,
     JSONModel,
@@ -15,7 +16,8 @@ sap.ui.define([
     formatter,
     Filter,
     FilterOperator,
-    DateFormat
+    DateFormat,
+    Token
 ) {
     "use strict";
     let MODEL,
@@ -50,7 +52,14 @@ sap.ui.define([
             this.getRouter().getRoute("factura").attachPatternMatched(this._onFacturaMatched, this);
             this.setModel(nuevafacturaModel, "facturaView");
             MODEL = this.getOwnerComponent().getModel();
-          
+            let oMultiInputNumfaBl = that.byId("InputNumfactBl");
+            let fnValidator = function (args) {
+                let text = args.text;
+
+                return new Token({ key: text, text: text });
+            };
+            oMultiInputNumfaBl.addValidator(fnValidator);
+
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
             ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
@@ -170,7 +179,7 @@ sap.ui.define([
                     //totalValorVenta: "",
                     //totalDescuentos: "",
                     //sumatoriaIgv: invoice.taxtotal.taxamount,
-                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id : invoice.note.orderreference.id,
+                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id :(typeof invoice.note === 'object' )?invoice.note.orderreference.id:"",
                     nitproovedor: (invoice.accountingsupplierparty) ? invoice.accountingsupplierparty.party.partytaxscheme.companyid : "",
                     importe: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.lineextensionamount : invoice.note.legalmonetarytotal.lineextensionamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
                     total: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.payableamount : invoice.note.legalmonetarytotal.payableamount,
@@ -185,8 +194,7 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/fechaEmision", fechaEmisionView);
                 MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
                 MODEL.setProperty("/Factura/importe", datosFactura.importe);
-                MODEL.setProperty("/Factura/total", datosFactura.total);
-                MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference);
+                MODEL.setProperty("/Factura/total", datosFactura.total);                             
                 await this.getwaershelp(datosFactura.tipoMoneda);
                 let waersCollection = that.getView().getModel("waershelp").getData();
                 var find = waersCollection.find(item => item.VALUE == datosFactura.tipoMoneda);
@@ -199,10 +207,26 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/estadoState", "Information");
                 MODEL.setProperty("/Factura/estadoIcon", "sap-icon://information");
                 MODEL.setProperty("/Factura/estadoCp", "");
+
+                var validCaracter = datosFactura.ordenReference.substring(0, 2) === "45";
+                if(validCaracter){
+                    MODEL.setProperty("/Factura/pedido", datosFactura.ordenReference); 
+                    that.onBuscarOC(datosFactura.ordenReference,datosFactura.importe);  
+                }
+                else{
+                var SplitOrdenReference = datosFactura.ordenReference.split(";");                
+                let oMultiInputNumfaBl = that.byId("InputNumfactBl");
+                $.each(SplitOrdenReference,function(i,item){
+                    oMultiInputNumfaBl.addToken(new Token({ key: item, text: item }))  
+                });                             
+                MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference); 
+                
+                } 
                 // this._destroyMessageStrip();
             }
         },
         onClearArchivoXml: function (event) {
+            let oMultiInputNumfaBl = that.byId("InputNumfactBl");
             MODEL.setProperty("/facturaXml", {});
             MODEL.setProperty("/Factura/codigoFactura", "");
             MODEL.setProperty("/Factura/fechaEmision", "");
@@ -216,11 +240,14 @@ sap.ui.define([
             MODEL.setProperty("/Factura/estadoCp", "");
             MODEL.setProperty("/Factura/moneda", "");
             MODEL.setProperty("/Factura/Numfa", "");
+            MODEL.setProperty("/Factura/pedido","")
+            oMultiInputNumfaBl.setTokens([])
             nuevafacturaModel.setProperty("/isEnabledCabecera", true);
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
-
             const fileUploader = this.getView().byId("fileUploader");
             fileUploader.setValue("");
+            that.getView().byId("sumatoriaImporte").setText("");
+            that._limpiarData();
         },
         onValidarArchivoXml: function (event) {
             nuevafacturaModel.setProperty("/isEnabledCabecera", false);
@@ -376,8 +403,8 @@ sap.ui.define([
             that.onCalcularDiferencia(importeBase);
         },
         onCalcularDiferencia: function (importeBase) {
-            let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;
-            let diferencia = (importeBase - TotalNETPR).toFixed(2);
+            let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;            
+            let diferencia = (importeBase - that.convertirFormato(TotalNETPR)).toFixed(2);
             MODEL.setProperty("/Factura/diferencia", diferencia);
         },
         onSeleccionarTipoImpuesto: function (event) {
@@ -947,7 +974,7 @@ sap.ui.define([
                 "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
                 "FACTUR": factura.codigoFactura,
                 "FEMISI": that.formatFecha(factura.fechaEmisionParameter),
-                "IMPORT": factura.importe,
+                "IMPORT": that.convertirFormato(factura.importe),
                 "SOLFAC": "",
                 "FCRESO": ""
             }
@@ -1135,6 +1162,68 @@ sap.ui.define([
                     }
                 });
             });
+        },
+        onBuscarOC: async function (pedido,ImporteBase) {
+            sap.ui.core.BusyIndicator.show();
+         
+            const filters = [];
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;            
+            filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
+            filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
+            //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+            filters.push(new Filter("I_ELIKZ", "EQ", "X"));
+           
+            filters.push(new Filter("IR_EBELN", "EQ", pedido));    
+
+            let parameters = { filters: filters };
+            const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
+            var posiciones = [];
+            if(request.results.length>0){
+                posiciones = JSON.parse(request.results[0].ET_DATA);
+                $.each(posiciones, function (i, item) {
+                    item.NETPR = (item.NETPR).toString();
+                    item.MENGE = (item.MENGE).toString();
+                });
+            }
+            else{
+                MessageBox.information(
+                    "No existen pedidos confirmados para el proveedor seleccionado.",
+                    {
+                        title: "No se encontraron resultados",
+                        actions: [MessageBox.Action.CLOSE],
+                        //details: htmlmessage
+                    }
+                );
+            }  
+            posiciones.sort((a, b) => a.BELNR - b.BELNR);
+            let sumatoria = 0;
+            posiciones.map(element => {                
+                sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );                
+            });
+            MODEL.setProperty("/Factura/conformidades/results", posiciones);
+            sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
+            //that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
+            that.onCalcularSumaPosiciones();
+            that.onCalcularDiferencia(ImporteBase);
+            sap.ui.core.BusyIndicator.hide();
+        },
+        convertirFormato(valor) {
+            // Reemplazar las comas con una cadena vacía
+            const valorSinComas = valor.toString().replace(/,/g, '');
+
+            // Convertir la cadena a un número
+            const numero = parseFloat(valorSinComas);
+
+            // Verificar si el valor es un número válido
+            if (!isNaN(numero)) {
+                // Formatear el número de nuevo a una cadena con dos decimales
+                const valorFormateado = numero.toFixed(2);
+                return valorFormateado;
+            } else {
+                // Manejar el caso en el que el valor no sea un número válido
+                console.error('El valor no es un número válido:', valor);
+                return valor;
+            }
         },
         //   xmlToJson('<?xml version="1.0" encoding="UTF-8"?><atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"> <atom:content type="application/xml"> <m:properties> <d:Pernr>800001</d:Pernr> <d:Approve>X</d:Approve> </m:properties> </atom:content> <atom:link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/ToLeaveItem" type="application/atom+xml;type=feed" title="ZHR_APP_SRV.Header_Item"> <m:inline> <atom:feed> <atom:entry> <atom:content type="application/xml"> <m:properties> <d:Pernr></d:Pernr> <d:Index>0</d:Index> <d:RequestId>74867AF30B3A1ED4BDA9EDC88782C0EC</d:RequestId> </m:properties> </atom:content> </atom:entry> </atom:feed> </m:inline> </atom:link> </atom:entry>');
 

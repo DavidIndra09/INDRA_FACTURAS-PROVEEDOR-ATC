@@ -87,7 +87,7 @@
                         </form:FormElement>
                         <form:FormElement>
                             <form:fields>
-                                <Input id="InputNumfactBl" required="false" value="{Numfa}" placeholder="Ingrese factura Bl" enabled="{facturaView>/isEnabledCabecera}" />
+                                <MultiInput id="InputNumfactBl" required="false" value="" showValueHelp="false" placeholder="Ingrese factura Bl" enabled="{facturaView>/isEnabledCabecera}" />
 
                             </form:fields>
                             <form:label>
