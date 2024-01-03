@@ -60,7 +60,7 @@
              <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
                 <Label text="Importe" design="Bold"/>
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto" visible="false">
                 <Label text="Moneda" design="Bold"/>
             </Column>            
         </columns>
@@ -71,12 +71,13 @@
                 <cells>                
                  
                     <Text text="{EBELN}" />
-                    <Text text="{KBETR}" />
-                    <Text text="{KNUMV}" />
+                    <Text text="{KNUMV}" />  
                     <Text text="{KPOSN}" /> 
-                    <Text text="{KSCHL}" />
-                    <Text text="{WAERS}" />  
-                       
+                    <Text text="{KSCHL}" /> 
+                     <ObjectNumber number="{
+                            parts:[{path:'KBETR',formatter: '.formatter.formatCurrency'}]                                                        
+                        }" unit="{WAERS}" state="Information" />  
+                    <Text text="{WAERS}" />                         
                 </cells>
             </ColumnListItem>
         </items>

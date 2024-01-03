@@ -184,13 +184,25 @@ sap.ui.define([
                 var impTotal = 0.00;
                 var rowDetails = [];
                 let sumatoria = 0;
-                detalleFactura = selectedPaths.map(item => {
-                    let element = MODEL.getProperty(item);                    
-                    sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
-                    element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) )).toFixed(2);
-                    MODEL.setProperty("/Factura/pedido", element.EBELN);
-                    return MODEL.getProperty(item);
-                });
+                if(table.isAllSelectableSelected()){
+                    var Allordenes = table.getModel().getData().Ordenes;
+                    detalleFactura = Allordenes.map(item => {                                          
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) );
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
+                        MODEL.setProperty("/Factura/pedido", item.EBELN);
+                        return item;
+                    });
+                }
+                else{
+                    detalleFactura = selectedPaths.map(item => {
+                        let element = MODEL.getProperty(item);                    
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
+                        element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) )).toFixed(2);
+                        MODEL.setProperty("/Factura/pedido", element.EBELN);
+                        return MODEL.getProperty(item);
+                    });
+                }
+               
                 MODEL.setProperty("/Factura/conformidades/results", detalleFactura);
                 MODEL.setProperty("/Factura/condpedido/results", []);
                 MODEL.setProperty("/Factura/visibleconpedido", false);
@@ -236,12 +248,29 @@ sap.ui.define([
                 var impTotal = 0.00;
                 var rowDetails = [];
                 let sumatoria = 0;
-                detalleFactura = selectedPaths.map(item => {
-                    let element = MODEL.getProperty(item);
-                    //sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
-                    MODEL.setProperty("/Factura/pedido", element.EBELN);
-                    return MODEL.getProperty(item);
-                });
+                if(table.isAllSelectableSelected()){
+                    var AllCondicionPedido = table.getModel().getData().CondPedido;
+                    detalleFactura = AllCondicionPedido.map(item => {                       
+                        //sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KBETR)));
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
+                        MODEL.setProperty("/Factura/pedido", item.EBELN);
+                        return item;
+                    });
+                     sumatoria = that.sumarPorEBELN(selectedPaths);
+                    
+                }
+                else{
+                    detalleFactura = selectedPaths.map(item => {
+                        let element = MODEL.getProperty(item);
+                        //sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.KBETR)));
+                        element.TOTAL = ((parseFloat(that.convertirFormato(element.KBETR)))).toFixed(2);
+                        MODEL.setProperty("/Factura/pedido", element.EBELN);
+                        return MODEL.getProperty(item);
+                    });
+                     sumatoria = that.sumarPorEBELN(selectedPaths);
+                    
+                }
+                
                 
                 MODEL.setProperty("/Factura/conformidades/results", []);
                 MODEL.setProperty("/Factura/condpedido/results", detalleFactura);
@@ -256,6 +285,62 @@ sap.ui.define([
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }
         },
+        sumarPorEBELN: function (selectedPaths) {
+            let primerValorPorEBELN = {};
+            let sumarTodos = true;
+        
+            selectedPaths.forEach(item => {
+                let element = MODEL.getProperty(item);
+                let ebeln = element.EBELN;
+                let kbetr = parseFloat(that.convertirFormato(element.KBETR));
+                let bsart = element.BSART;
+        
+                // Verificar si no hemos sumado KBETR para este EBELN
+                if (primerValorPorEBELN[ebeln] === undefined) {
+                    primerValorPorEBELN[ebeln] = kbetr;
+                }
+        
+                // Verificar la condición de BSART
+                if (bsart === "ZVEM") {
+                    sumarTodos = true; // Establecer a true si encontramos al menos un BSART igual a ZVEM
+                }
+            });
+        
+            let resultado;
+        
+            if (sumarTodos) {
+                // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
+                resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
+            } else {
+                // Obtener solo el primer valor de KBETR para cada valor único de EBELN
+                resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
+                    return total + valor;
+                }, 0);
+            }
+        
+            return resultado.toFixed(2);
+        },
+        
+        /* sumarPorEBELN:function(selectedPaths) {
+            let primerValorPorEBELN = {};
+
+            selectedPaths.forEach(item => {
+                let element = MODEL.getProperty(item);
+                let ebeln = element.EBELN;
+                let kbetr = parseFloat(that.convertirFormato(element.KBETR));
+        
+                // Verificar si no hemos sumado KBETR para este EBELN
+                if (primerValorPorEBELN[ebeln] === undefined) {
+                    primerValorPorEBELN[ebeln] = kbetr;
+                }
+            });
+        
+            let sumaTotal = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
+
+            return sumaTotal.toFixed(2);
+        
+        },
+        */
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
             const valorSinComas = valor.toString().replace(/,/g, '');
@@ -396,7 +481,8 @@ sap.ui.define([
                 );
             }  
             posiciones.sort((a, b) => a.BELNR - b.BELNR);
-            MODEL.setProperty("/CondPedido", posiciones);
+            MODEL.setProperty("/CondPedido", posiciones);            
+            that.getView().byId("idTableCondicionesPedido").setSelectedContextPaths([]);
             that.getView().byId("tableHeaderCondPedido").setText("Condiciones (" + posiciones.length +")");
             sap.ui.core.BusyIndicator.hide();
         },
@@ -443,7 +529,12 @@ sap.ui.define([
                 that.onNavSolicitudes();
                 return;
             }       
-                 
+            MODEL.setProperty("/Ordenes", []);
+            MODEL.setProperty("/CondPedido", []);
+            var tableOrdenes = this.getView().byId("idTableOrdenes");
+            var tableCP = this.getView().byId("idTableCondicionesPedido");
+            tableOrdenes.removeSelections([]);
+            tableCP.removeSelections([]);
             MODEL.setProperty("/Ordenes", []);
             this.byId("idTableOrdenes").removeSelections();
             ordenModel.setProperty("/busy", false);

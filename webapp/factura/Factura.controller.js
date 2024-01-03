@@ -647,6 +647,7 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.hide();
             let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNETPR));
+            that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(TotalNETPR));
             let importeBase = MODEL.getProperty("/Factura/importe");
             that.onCalcularDiferencia((importeBase == undefined) ? 0.00 : importeBase);
             const historyDirection = History.getInstance().getDirection();
