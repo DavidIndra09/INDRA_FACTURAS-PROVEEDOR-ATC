@@ -169,6 +169,7 @@ sap.ui.define([
             let aFilters = [];
             var aLista = []
             let Detalle = [];
+            var sumatoria = 0; 
             aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
             aFilters.push(new Filter("I_BUKRS", FilterOperator.EQ, "1000"));
             ODATA_SAP.read("/getDetailSolFactSet", {
@@ -207,7 +208,9 @@ sap.ui.define([
                     //}   
                     sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle"); //limpiamos las posiciones                 
                     $.each(aLista, function (i, item) {
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) ); 
                         item.WAERS = oCabecera.WAERS.split("-")[0];
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
@@ -231,9 +234,10 @@ sap.ui.define([
                         });
                     });
 
-                    aLista.sort((a, b) => a.POSNR - b.POSNR);
+                    aLista.sort((a, b) => a.POSNR - b.POSNR);                    
                     let oModelLista = new JSONModel(aLista);
                     oModelLista.setSizeLimit(99999999999)   
+                    that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
                     (data.results[0].ET_COND!="")?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
@@ -484,7 +488,7 @@ sap.ui.define([
         },
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
-            const valorSinComas = valor.replace(/,/g, '');
+            const valorSinComas = valor.toString().replace(/,/g, '');
 
             // Convertir la cadena a un número
             const numero = parseFloat(valorSinComas);

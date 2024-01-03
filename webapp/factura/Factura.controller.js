@@ -673,8 +673,8 @@ sap.ui.define([
         onCalcularSumaPosiciones: function () {
             let suma = 0;
             let posiciones = MODEL.getProperty("/Factura/conformidades/results");
-            $.each(posiciones, function (i, item) {
-                suma = suma + parseFloat(item.NETPR);
+            $.each(posiciones, function (i, element) {
+                suma = suma + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) ); 
             });
             sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": suma }), "TotalNETPR");
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(suma));
@@ -1183,6 +1183,7 @@ sap.ui.define([
                 $.each(posiciones, function (i, item) {
                     item.NETPR = (item.NETPR).toString();
                     item.MENGE = (item.MENGE).toString();
+                    item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
                 });
             }
             else{
@@ -1197,11 +1198,11 @@ sap.ui.define([
             }  
             posiciones.sort((a, b) => a.BELNR - b.BELNR);
             let sumatoria = 0;
-            posiciones.map(element => {                
+           /* posiciones.map(element => {                
                 sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );                
-            });
+            });*/
             MODEL.setProperty("/Factura/conformidades/results", posiciones);
-            sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
+            //sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
             //that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
             that.onCalcularSumaPosiciones();
             that.onCalcularDiferencia(ImporteBase);

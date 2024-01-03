@@ -90,11 +90,8 @@
                     <Text text="{MATNR}" />
                     <Text text="{TXZ01}" /> 
                     <Text text="{MEINS}" />                   
-                    <ObjectStatus
-                        text="{
-                            path: 'MENGE'
-                           
-                        }"
+                    <Input
+                        value="{path: 'MENGE'}"
                          />
                          <ObjectNumber number="{
                             parts:[{path:'NETPR',formatter: '.formatter.formatCurrency'}]                                                        

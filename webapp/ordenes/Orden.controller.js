@@ -185,8 +185,9 @@ sap.ui.define([
                 var rowDetails = [];
                 let sumatoria = 0;
                 detalleFactura = selectedPaths.map(item => {
-                    let element = MODEL.getProperty(item);
+                    let element = MODEL.getProperty(item);                    
                     sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
+                    element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) )).toFixed(2);
                     MODEL.setProperty("/Factura/pedido", element.EBELN);
                     return MODEL.getProperty(item);
                 });
@@ -257,7 +258,7 @@ sap.ui.define([
         },
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
-            const valorSinComas = valor.replace(/,/g, '');
+            const valorSinComas = valor.toString().replace(/,/g, '');
 
             // Convertir la cadena a un número
             const numero = parseFloat(valorSinComas);

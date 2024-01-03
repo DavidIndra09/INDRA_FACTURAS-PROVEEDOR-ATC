@@ -81,6 +81,12 @@
                                     <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                                         <Label text="{i18n>importe}" design="Bold" />
                                     </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+                                            <Label text="{i18n>total}" design="Bold" />
+                                            <footer>                                                
+                                                <ObjectStatus text="0.00" id="sumatoriaImporte" state="Information" />
+                                            </footer>
+                                        </Column>
                                 </columns>
 
                                 <items>
@@ -99,6 +105,11 @@
                                 }" />
                                             <ObjectNumber number="{
                                     parts:[{path:'NETPR'},{path:'WAERS'}],
+                                    type: 'sap.ui.model.type.Currency',
+                                    formatOptions: {showMeasure: false}
+                                }" unit="{WAERS}" state="Information" />
+                                 <ObjectNumber number="{
+                                    parts:[{path:'TOTAL'},{path:'WAERS'}],
                                     type: 'sap.ui.model.type.Currency',
                                     formatOptions: {showMeasure: false}
                                 }" unit="{WAERS}" state="Information" />
