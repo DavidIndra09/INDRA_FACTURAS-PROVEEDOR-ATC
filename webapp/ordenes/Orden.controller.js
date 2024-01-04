@@ -184,12 +184,16 @@ sap.ui.define([
                 var impTotal = 0.00;
                 var rowDetails = [];
                 let sumatoria = 0;
+                var pedido = [];
                 if(table.isAllSelectableSelected()){
                     var Allordenes = table.getModel().getData().Ordenes;
                     detalleFactura = Allordenes.map(item => {                                          
                         sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) );
                         item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
-                        MODEL.setProperty("/Factura/pedido", item.EBELN);
+                        var find = pedido.find(fore=> fore == element.EBELN)
+                        if(!find){
+                            pedido.push(element.EBELN);
+                        }
                         return item;
                     });
                 }
@@ -198,11 +202,17 @@ sap.ui.define([
                         let element = MODEL.getProperty(item);                    
                         sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
                         element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) )).toFixed(2);
-                        MODEL.setProperty("/Factura/pedido", element.EBELN);
+                        
+                        var find = pedido.find(fore=> fore == element.EBELN)
+                        if(!find){
+                            pedido.push(element.EBELN);
+                        }
                         return MODEL.getProperty(item);
                     });
+                    
                 }
-               
+                
+                MODEL.setProperty("/Factura/pedido", pedido.join(";"));
                 MODEL.setProperty("/Factura/conformidades/results", detalleFactura);
                 MODEL.setProperty("/Factura/condpedido/results", []);
                 MODEL.setProperty("/Factura/visibleconpedido", false);
@@ -566,7 +576,8 @@ sap.ui.define([
             //this._seleccionarTabla(posiciones);
             */
             
-            that.onBuscarOrdenes();
+            //that.onBuscarOrdenes();
+            that.onEvaluarBusqueda();
         },
 
         _seleccionarTabla: function (posiciones) {

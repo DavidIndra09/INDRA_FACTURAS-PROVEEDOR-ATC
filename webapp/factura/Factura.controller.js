@@ -53,11 +53,13 @@ sap.ui.define([
             this.setModel(nuevafacturaModel, "facturaView");
             MODEL = this.getOwnerComponent().getModel();
             let oMultiInputNumfaBl = that.byId("InputNumfactBl");
+            let oMultiInputPedido = that.byId("pedido");
             let fnValidator = function (args) {
                 let text = args.text;
 
                 return new Token({ key: text, text: text });
             };
+            oMultiInputPedido.addValidator(fnValidator);
             oMultiInputNumfaBl.addValidator(fnValidator);
 
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
@@ -246,7 +248,8 @@ sap.ui.define([
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
             const fileUploader = this.getView().byId("fileUploader");
             fileUploader.setValue("");
-            that.getView().byId("sumatoriaImporte").setText("");
+            that.getView().byId("sumatoriaImporte").setText("0.00");
+            that.getView().byId("sumatoriaImporteCP").setText("0.00");
             that._limpiarData();
         },
         onValidarArchivoXml: function (event) {
@@ -649,6 +652,12 @@ sap.ui.define([
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(TotalNETPR));
             that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(TotalNETPR));
             let importeBase = MODEL.getProperty("/Factura/importe");
+            let Pedidos = MODEL.getProperty("/Factura/pedido");
+            var PedidosCollection = (Pedidos)?Pedidos.split(";"):[];
+            let oMultiInputPedido = that.byId("pedido");
+            $.each(PedidosCollection,function(i,item){
+                oMultiInputPedido.addToken(new Token({ key: item, text: item }))  
+            }); 
             that.onCalcularDiferencia((importeBase == undefined) ? 0.00 : importeBase);
             const historyDirection = History.getInstance().getDirection();
             if (historyDirection === "Backwards") {
@@ -737,6 +746,9 @@ sap.ui.define([
             that.getView().byId("FechaEmision").setValue("");
             that.getView().byId("InputImporte").setValue("");
             that.getView().byId("InputSelectWaers").setValue("");
+            that.getView().byId("InputNumfactBl").setTokens([])
+            that.getView().byId("sumatoriaImporte").setText("0.00");
+            that.getView().byId("sumatoriaImporteCP").setText("0.00");
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
             MODEL.setProperty("/Adjuntos", []);
             that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": [] }));

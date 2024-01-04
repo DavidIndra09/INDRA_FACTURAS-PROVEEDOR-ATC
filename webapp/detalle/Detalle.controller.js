@@ -177,7 +177,7 @@ sap.ui.define([
                 success: function (data) {
                     
                     sap.ui.core.BusyIndicator.hide();                    
-                    if(data.results[0].ET_COND!=""){
+                    if(data.results[0].ET_COND!="[]"){
                         viewModel.setProperty("/visibleconpedido", true);
                         viewModel.setProperty("/visiblepos", false);
                         Detalle = data.results[0].ET_COND;
@@ -207,10 +207,21 @@ sap.ui.define([
                         
                     //}   
                     sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle"); //limpiamos las posiciones                 
+                    var VisibleTable =   viewModel.getProperty("/visibleconpedido") ;
+                    sumatoria = (VisibleTable)?that.sumarPorEBELN(aLista):0 ;
                     $.each(aLista, function (i, item) {
-                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) ); 
+                       
+                        if(VisibleTable){
+                            
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
+                        }
+                        else{
+                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) ); 
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
+                        }
+                        
                         item.WAERS = oCabecera.WAERS.split("-")[0];
-                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
+                        
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
@@ -237,13 +248,15 @@ sap.ui.define([
                     aLista.sort((a, b) => a.POSNR - b.POSNR);                    
                     let oModelLista = new JSONModel(aLista);
                     oModelLista.setSizeLimit(99999999999)   
-                    that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
+                    //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
-                    (data.results[0].ET_COND!="")?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
+                    (data.results[0].ET_COND!="[]")?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
                     that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
+                    that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria));
+                    that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(sumatoria));
                     AdjuntosOriginal = [...adjuntos];
                 },
                 error: function (err) {
@@ -253,6 +266,41 @@ sap.ui.define([
                     sap.ui.core.BusyIndicator.hide();
                 }
             });
+        },
+        sumarPorEBELN: function (oData) {
+            let primerValorPorEBELN = {};
+            let sumarTodos = true;
+        
+            oData.forEach(item => {
+                let element = item;
+                let ebeln = element.EBELN;
+                let kbetr = parseFloat(that.convertirFormato(element.KBETR));
+                let bsart = element.BSART;
+        
+                // Verificar si no hemos sumado KBETR para este EBELN
+                if (primerValorPorEBELN[ebeln] === undefined) {
+                    primerValorPorEBELN[ebeln] = kbetr;
+                }
+        
+                // Verificar la condición de BSART
+                if (bsart === "ZVEM") {
+                    sumarTodos = true; // Establecer a true si encontramos al menos un BSART igual a ZVEM
+                }
+            });
+        
+            let resultado;
+        
+            if (sumarTodos) {
+                // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
+                resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
+            } else {
+                // Obtener solo el primer valor de KBETR para cada valor único de EBELN
+                resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
+                    return total + valor;
+                }, 0);
+            }
+        
+            return resultado.toFixed(2);
         },
         convertirCadenaAFecha(cadenaFecha) {
             // Dividir la cadena en partes: año, mes, día

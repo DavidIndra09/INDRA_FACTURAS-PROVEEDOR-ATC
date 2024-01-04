@@ -38,7 +38,7 @@
                     </form:FormElement> -->
                     <form:FormElement >
                         <form:fields >
-                        <Input id="pedido"  required="false" value="{pedido}" placeholder="Ingrese Nro. pedido" enabled="{facturaView>/isEnabledCabecera}" />
+                        <MultiInput id="pedido" showValueHelp="false"  required="false"  placeholder="Ingrese Nro. pedido" enabled="{facturaView>/isEnabledCabecera}" />
                           <!-- <ObjectStatus class="sapUiSmallMarginBottom" title="Pedido" text="{pedido}" active="false"  /> -->
                         </form:fields>
                          <form:label>

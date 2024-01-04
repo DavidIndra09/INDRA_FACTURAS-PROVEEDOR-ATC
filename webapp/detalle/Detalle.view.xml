@@ -82,11 +82,11 @@
                                         <Label text="{i18n>importe}" design="Bold" />
                                     </Column>
                                     <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
-                                            <Label text="{i18n>total}" design="Bold" />
-                                            <footer>                                                
-                                                <ObjectStatus text="0.00" id="sumatoriaImporte" state="Information" />
-                                            </footer>
-                                        </Column>
+                                        <Label text="{i18n>total}" design="Bold" />
+                                        <footer>
+                                            <ObjectStatus text="0.00" id="sumatoriaImporte" state="Information" />
+                                        </footer>
+                                    </Column>
                                 </columns>
 
                                 <items>
@@ -108,7 +108,7 @@
                                     type: 'sap.ui.model.type.Currency',
                                     formatOptions: {showMeasure: false}
                                 }" unit="{WAERS}" state="Information" />
-                                 <ObjectNumber number="{
+                                            <ObjectNumber number="{
                                     parts:[{path:'TOTAL'},{path:'WAERS'}],
                                     type: 'sap.ui.model.type.Currency',
                                     formatOptions: {showMeasure: false}
@@ -155,7 +155,13 @@
                                     <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
                                         <Label text="Importe" design="Bold"/>
                                     </Column>
-                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+                                        <Label text="{i18n>total}" design="Bold" />
+                                        <footer>
+                                            <ObjectStatus text="0.00" id="sumatoriaImporteCP" state="Information" />
+                                        </footer>
+                                    </Column>
+                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto" visible="false">
                                         <Label text="Moneda" design="Bold"/>
                                     </Column>
                                 </columns>
@@ -165,10 +171,16 @@
                                         <cells>
 
                                             <Text text="{EBELN}" />
-                                            <Text text="{KBETR}" />
                                             <Text text="{KNUMV}" />
                                             <Text text="{KPOSN}" />
                                             <Text text="{KSCHL}" />
+                                            <ObjectNumber number="{
+                            parts:[{path:'KBETR',formatter: '.formatter.formatCurrency'}]                                                        
+                        }" unit="{WAERS}" state="Information" />
+                                            <ObjectNumber number="{
+                            parts:[{path:'TOTAL',formatter: '.formatter.formatCurrency'}]                                                        
+                        }" unit="{WAERS}" state="Information" />
+
                                             <Text text="{WAERS}" />
 
                                         </cells>
