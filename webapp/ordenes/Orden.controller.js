@@ -75,13 +75,13 @@ sap.ui.define([
          * If not, it will replace the current entry of the browser history with the worklist route.
          * @public
          */
-        onNavBack: function (detalleFactura) {
+        onNavBack: function (detalleFactura,value) {
             var sPreviousHash = History.getInstance().getPreviousHash();
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
                 if (sPreviousHash.includes("Detalle")) {
                     let data = detalleFactura;                    
-                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones":data }), "Detalle")
+                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones":data,"CondPedidoTable":value,"PosicionesTable":!value }), "Detalle")
                     sap.ui.core.BusyIndicator.show();
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],
@@ -221,7 +221,7 @@ sap.ui.define([
                 sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
                 MODEL.setProperty("/Ordenes", []);
-                this.onNavBack(detalleFactura);
+                this.onNavBack(detalleFactura,false);
             } else {
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }
@@ -298,7 +298,7 @@ sap.ui.define([
                 sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
                 MODEL.setProperty("/CondPedido", []);
-                this.onNavBack(detalleFactura);
+                this.onNavBack(detalleFactura,true);
             } else {
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }

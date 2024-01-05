@@ -201,8 +201,11 @@ sap.ui.define([
                     
                     //if (posiciones.length > 0) {
                         let posicionesParse = sap.ui.getCore().getModel("Detalle").getData().Posiciones;//JSON.parse(posiciones);
+
                         if(posicionesParse.length>0){
                             aLista.push(...posicionesParse);
+                            viewModel.setProperty("/visibleconpedido", sap.ui.getCore().getModel("Detalle").getData().CondPedidoTable);
+                            viewModel.setProperty("/visiblepos", sap.ui.getCore().getModel("Detalle").getData().PosicionesTable);
                         }
                         
                     //}   
@@ -251,7 +254,7 @@ sap.ui.define([
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
-                    (data.results[0].ET_COND!="[]")?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
+                    (viewModel.getProperty("/visibleconpedido"))?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
                     that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
