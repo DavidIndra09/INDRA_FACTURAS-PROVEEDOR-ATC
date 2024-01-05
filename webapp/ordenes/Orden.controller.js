@@ -190,9 +190,9 @@ sap.ui.define([
                     detalleFactura = Allordenes.map(item => {                                          
                         sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) );
                         item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
-                        var find = pedido.find(fore=> fore == element.EBELN)
+                        var find = pedido.find(fore=> fore == item.EBELN)
                         if(!find){
-                            pedido.push(element.EBELN);
+                            pedido.push(item.EBELN);
                         }
                         return item;
                     });
@@ -264,9 +264,9 @@ sap.ui.define([
                     detalleFactura = AllCondicionPedido.map(item => {                       
                         //sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KBETR)));
                         item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
-                        var find = pedido.find(fore=> fore == element.EBELN)
+                        var find = pedido.find(fore=> fore == item.EBELN)
                         if(!find){
-                            pedido.push(element.EBELN);
+                            pedido.push(item.EBELN);
                         }
                         return item;
                     });

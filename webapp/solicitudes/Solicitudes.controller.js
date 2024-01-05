@@ -1079,7 +1079,7 @@ sap.ui.define([
                         const Prten = elemento.Puertollegada;
                         const Tptra = elemento.ViaTransporte;
                         const Proveedor = elemento.Proveedor;
-                        const Numcaja = elemento.Znumcaja;
+                        const Numcaja = elemento.Caja;
                         if (Numfa != "") {
 
                             if (!grupos[Numfa]) {
@@ -2503,7 +2503,7 @@ sap.ui.define([
                     jsonObject.Icoterms = item["ICOTERMS"]
                     jsonObject.LugarIncoterms = item["LUGAR INCOTERMS"]
                     jsonObject.ViaTransporte = item["VIA TRANSPORTE"]
-                    jsonObject.Znumcaja = item["ZNUMCAJA"]
+                    jsonObject.Caja = item["CAJA"]
                 }
                 else {
                     jsonObject.Cl_Doc = item["CL_DOC"]
@@ -2583,7 +2583,7 @@ sap.ui.define([
                 "ICOTERMS",
                 "LUGAR INCOTERMS",
                 "VIA TRANSPORTE",
-                "ZNUMCAJA"
+                "CAJA"
             ];
 
             const elementosRequeridosVehiculos = [

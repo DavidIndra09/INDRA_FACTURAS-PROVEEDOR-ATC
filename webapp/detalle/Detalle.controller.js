@@ -417,9 +417,13 @@ sap.ui.define([
         },
         _getDataFactura: function () {
             let posiciones = that.byId("idtablaFactura").getModel().getData();
+            let condicionPedidos = that.byId("idTableCondicionesPedido").getModel().getData();
             let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             let cabecera = that.getOwnerComponent().getModel("oCabecera").getData();
             let PosnrMax = that.onObtenerPosicionAdjunto();
+            let conformidades = [];
+            let conpedido = [];
+            var tablaconpedido = viewModel.getProperty("/visibleconpedido")
             //let posnr = 0;
             const adjuntoModel = adjuntos.map((item, index) => {
                 //posnr = posnr + 10
@@ -462,31 +466,43 @@ sap.ui.define([
                 }
             });
 
-            const conformidades = posiciones.map(item => {
-                return {
-                    "mandt": "",
-                    "bukrs": item.BUKRS,
-                    "lifnr": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
-                    "codefact": "",
-                    "posnr": item.BUZEI,
-                    "datre": "20001102",
-                    "ebeln": item.EBELN,
-                    "lblni": "",
-                    "ebelp": item.EBELP,
-                    "matnr": item.MATNR,
-                    "tipod": "B",
-                    "menge": item.MENGE,
-                    "meins": item.MEINS,
-                    "NETPR": item.NETPR,
-                    "waers": item.WAERS,
-                    "txz01": item.TXZ01,
-                    "belnr": item.BELNR,
-                    //"solfac": item.SOLFAC,
-                    "mwskz": item.MWSKZ
-                }
-            });
-
-
+            if(tablaconpedido){
+                conpedido = condicionPedidos.map(item => {
+                    return {                   
+                        "ebeln": item.EBELN,
+                        "kbetr": item.KBETR,
+                        "knumv": item.KNUMV,
+                        "kposn": item.KPOSN,
+                        "kschl": item.KSCHL,
+                        "waers": item.WAERS                  
+                    }
+                });
+            }
+            else{
+                conformidades = posiciones.map(item => {
+                    return {
+                        "mandt": "",
+                        "bukrs": item.BUKRS,
+                        "lifnr": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
+                        "codefact": "",
+                        "posnr": item.BUZEI,
+                        "datre": "20001102",
+                        "ebeln": item.EBELN,
+                        "lblni": "",
+                        "ebelp": item.EBELP,
+                        "matnr": item.MATNR,
+                        "tipod": "B",
+                        "menge": item.MENGE,
+                        "meins": item.MEINS,
+                        "NETPR": item.NETPR,
+                        "waers": item.WAERS,
+                        "txz01": item.TXZ01,
+                        "belnr": item.BELNR,
+                        //"solfac": item.SOLFAC,
+                        "mwskz": item.MWSKZ
+                    }
+                });
+            }
 
             let oReturn = that.ongetModelCabecera(cabecera);
             
@@ -504,7 +520,8 @@ sap.ui.define([
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
                 "IT_DET": JSON.stringify(conformidades),
-                "IT_DOC": JSON.stringify(adjuntoModel)
+                "IT_DOC": JSON.stringify(adjuntoModel),
+                "IT_COND": JSON.stringify(conpedido)
             };
             
 
