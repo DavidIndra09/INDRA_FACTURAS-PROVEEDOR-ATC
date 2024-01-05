@@ -654,6 +654,7 @@ sap.ui.define([
             let importeBase = MODEL.getProperty("/Factura/importe");
             let Pedidos = MODEL.getProperty("/Factura/pedido");
             var PedidosCollection = (Pedidos)?Pedidos.split(";"):[];
+            
             let oMultiInputPedido = that.byId("pedido");
             $.each(PedidosCollection,function(i,item){
                 oMultiInputPedido.addToken(new Token({ key: item, text: item }))  

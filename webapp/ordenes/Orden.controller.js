@@ -258,12 +258,16 @@ sap.ui.define([
                 var impTotal = 0.00;
                 var rowDetails = [];
                 let sumatoria = 0;
+                var pedido = [];
                 if(table.isAllSelectableSelected()){
                     var AllCondicionPedido = table.getModel().getData().CondPedido;
                     detalleFactura = AllCondicionPedido.map(item => {                       
                         //sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KBETR)));
                         item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
-                        MODEL.setProperty("/Factura/pedido", item.EBELN);
+                        var find = pedido.find(fore=> fore == element.EBELN)
+                        if(!find){
+                            pedido.push(element.EBELN);
+                        }
                         return item;
                     });
                      sumatoria = that.sumarPorEBELN(selectedPaths);
@@ -274,7 +278,10 @@ sap.ui.define([
                         let element = MODEL.getProperty(item);
                         //sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.KBETR)));
                         element.TOTAL = ((parseFloat(that.convertirFormato(element.KBETR)))).toFixed(2);
-                        MODEL.setProperty("/Factura/pedido", element.EBELN);
+                        var find = pedido.find(fore=> fore == element.EBELN)
+                        if(!find){
+                            pedido.push(element.EBELN);
+                        }
                         return MODEL.getProperty(item);
                     });
                      sumatoria = that.sumarPorEBELN(selectedPaths);
@@ -282,6 +289,7 @@ sap.ui.define([
                 }
                 
                 
+                MODEL.setProperty("/Factura/pedido", pedido.join(";"));
                 MODEL.setProperty("/Factura/conformidades/results", []);
                 MODEL.setProperty("/Factura/condpedido/results", detalleFactura);
                 MODEL.setProperty("/Factura/visibleconpedido", true);
