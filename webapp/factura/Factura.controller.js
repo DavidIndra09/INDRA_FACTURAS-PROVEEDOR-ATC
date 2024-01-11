@@ -44,7 +44,7 @@ sap.ui.define([
                 busy: true,
                 delay: 0,
                 isEnabledCabecera: true,
-                isBtnPosicionesEnabled: false                
+                isBtnPosicionesEnabled: false
                 // facturaViewTitle: this.getResourceBundle().getText("facturaViewTitleCreate")
             });
             sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": 0 }), "TotalNETPR");
@@ -135,7 +135,7 @@ sap.ui.define([
             nuevafacturaModel.setProperty("/tituloListaAdjuntos", title);
         },
 
-          onImportarArchivoXml: async function (event) {
+        onImportarArchivoXml: async function (event) {
             const files = event.getParameter("files");
             const fileUploader = event.getSource();
             if (files.length > 0) {
@@ -144,7 +144,7 @@ sap.ui.define([
 
                 if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice) {//dataXml.invoice
                     MessageBox.error(`El archivo xml no cumple con el formato requerido`);
-                    fileUploader.setValue("");                    
+                    fileUploader.setValue("");
                     return;
                 }
                 const invoice = (dataXml.attacheddocument) ? ((dataXml.attacheddocument.attachment.externalreference.description.invoice) ? dataXml.attacheddocument.attachment.externalreference.description.invoice : dataXml.attacheddocument.attachment.externalreference.description) : dataXml.invoice//dataXml.invoice;
@@ -156,7 +156,7 @@ sap.ui.define([
                     fileUploader.setValue("");
                     return;
                 }
-                  
+
                 const datosFactura = {
                     //version: invoice.ublversionid,
                     numeroSerie: invoice.id,
@@ -181,13 +181,14 @@ sap.ui.define([
                     //totalValorVenta: "",
                     //totalDescuentos: "",
                     //sumatoriaIgv: invoice.taxtotal.taxamount,
-                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id :(typeof invoice.note === 'object' )?invoice.note.orderreference.id:"",
+                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id : ((typeof invoice.note === 'object' && invoice.note !== null && invoice.note.orderreference && invoice.note.orderreference.id) ? invoice.note.orderreference.id : ""),
+                    //(invoice.orderreference) ? invoice.orderreference.id :(typeof invoice.note === 'object' )?invoice.note.orderreference.id:"",
                     nitproovedor: (invoice.accountingsupplierparty) ? invoice.accountingsupplierparty.party.partytaxscheme.companyid : "",
                     importe: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.lineextensionamount : invoice.note.legalmonetarytotal.lineextensionamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
                     total: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.payableamount : invoice.note.legalmonetarytotal.payableamount,
                     //sociedad: "3000"
                 };
-                
+
                 MODEL.setProperty("/facturaXml", datosFactura);
 
                 const fechaEmisionView = formatter.formatDateImportacion(datosFactura.fechaEmision);
@@ -196,7 +197,7 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/fechaEmision", fechaEmisionView);
                 MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
                 MODEL.setProperty("/Factura/importe", datosFactura.importe);
-                MODEL.setProperty("/Factura/total", datosFactura.total);                             
+                MODEL.setProperty("/Factura/total", datosFactura.total);
                 await this.getwaershelp(datosFactura.tipoMoneda);
                 let waersCollection = that.getView().getModel("waershelp").getData();
                 var find = waersCollection.find(item => item.VALUE == datosFactura.tipoMoneda);
@@ -211,24 +212,26 @@ sap.ui.define([
                 MODEL.setProperty("/Factura/estadoCp", "");
 
                 var validCaracter = datosFactura.ordenReference.substring(0, 2) === "45";
-                if(validCaracter){
-                    MODEL.setProperty("/Factura/pedido", datosFactura.ordenReference); 
-                    that.onBuscarOC(datosFactura.ordenReference,datosFactura.importe);  
+                if (validCaracter) {
+                    MODEL.setProperty("/Factura/pedido", datosFactura.ordenReference);
+                    let oMultiInputPedido = that.byId("pedido");                   
+                    oMultiInputPedido.addToken(new Token({ key: datosFactura.ordenReference, text: datosFactura.ordenReference }))                    
+                    that.onBuscarOC(datosFactura.ordenReference, datosFactura.importe);
                 }
-                else{
-                var SplitOrdenReference = datosFactura.ordenReference.split(";");                
-                let oMultiInputNumfaBl = that.byId("InputNumfactBl");
-                $.each(SplitOrdenReference,function(i,item){
-                    oMultiInputNumfaBl.addToken(new Token({ key: item, text: item }))  
-                });                             
-                MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference); 
-                
-                } 
+                else {
+                    var SplitOrdenReference = (datosFactura.ordenReference.includes(";")) ? datosFactura.ordenReference.split(";") : [];
+                    let oMultiInputNumfaBl = that.byId("InputNumfactBl");
+                    $.each(SplitOrdenReference, function (i, item) {
+                        oMultiInputNumfaBl.addToken(new Token({ key: item, text: item }))
+                    });
+                    MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference);
+
+                }
                 // this._destroyMessageStrip();
             }
         },
         onClearArchivoXml: function (event) {
-            let oMultiInputNumfaBl = that.byId("InputNumfactBl");
+            
             MODEL.setProperty("/facturaXml", {});
             MODEL.setProperty("/Factura/codigoFactura", "");
             MODEL.setProperty("/Factura/fechaEmision", "");
@@ -242,8 +245,8 @@ sap.ui.define([
             MODEL.setProperty("/Factura/estadoCp", "");
             MODEL.setProperty("/Factura/moneda", "");
             MODEL.setProperty("/Factura/Numfa", "");
-            MODEL.setProperty("/Factura/pedido","")
-            oMultiInputNumfaBl.setTokens([])
+            MODEL.setProperty("/Factura/pedido", "")
+            
             nuevafacturaModel.setProperty("/isEnabledCabecera", true);
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
             const fileUploader = this.getView().byId("fileUploader");
@@ -406,7 +409,7 @@ sap.ui.define([
             that.onCalcularDiferencia(importeBase);
         },
         onCalcularDiferencia: function (importeBase) {
-            let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;            
+            let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;
             let diferencia = (importeBase - that.convertirFormato(TotalNETPR)).toFixed(2);
             MODEL.setProperty("/Factura/diferencia", diferencia);
         },
@@ -449,7 +452,7 @@ sap.ui.define([
             if (!validDiferencia) {
                 let diferencia = MODEL.getProperty("/Factura/diferencia");
                 let tolerancia = await that.ongetTolerancia();
-                MessageBox.warning("La diferencia entre el importe y el total de las posiciones excedió la tolerancia configurada." + "\n"+"\n"+"Diferencia: "+ parseFloat(diferencia).toFixed(2) + "."+"\n"+"\n" + "Tolerancia actual: " + parseFloat(tolerancia).toFixed(2) + ".");
+                MessageBox.warning("La diferencia entre el importe y el total de las posiciones excedió la tolerancia configurada." + "\n" + "\n" + "Diferencia: " + parseFloat(diferencia).toFixed(2) + "." + "\n" + "\n" + "Tolerancia actual: " + parseFloat(tolerancia).toFixed(2) + ".");
                 sap.ui.core.BusyIndicator.hide()
                 return;
             }
@@ -645,7 +648,7 @@ sap.ui.define([
                 that.onNavBack();
                 return;
             }
-            
+
             //that._limpiarData();
             sap.ui.core.BusyIndicator.hide();
             let TotalNETPR = sap.ui.getCore().getModel("TotalNETPR").getData().TotalNETPR;
@@ -653,12 +656,12 @@ sap.ui.define([
             that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(TotalNETPR));
             let importeBase = MODEL.getProperty("/Factura/importe");
             let Pedidos = MODEL.getProperty("/Factura/pedido");
-            var PedidosCollection = (Pedidos)?Pedidos.split(";"):[];
-            
+            var PedidosCollection = (Pedidos) ? Pedidos.split(";") : [];
+
             let oMultiInputPedido = that.byId("pedido");
-            $.each(PedidosCollection,function(i,item){
-                oMultiInputPedido.addToken(new Token({ key: item, text: item }))  
-            }); 
+            $.each(PedidosCollection, function (i, item) {
+                oMultiInputPedido.addToken(new Token({ key: item, text: item }))
+            });
             that.onCalcularDiferencia((importeBase == undefined) ? 0.00 : importeBase);
             const historyDirection = History.getInstance().getDirection();
             if (historyDirection === "Backwards") {
@@ -678,14 +681,14 @@ sap.ui.define([
             }*/
 
             nuevafacturaModel.setProperty("/facturaViewTitle", viewTitle);
-            
+
             this._bindView("/Factura");
         },
         onCalcularSumaPosiciones: function () {
             let suma = 0;
             let posiciones = MODEL.getProperty("/Factura/conformidades/results");
             $.each(posiciones, function (i, element) {
-                suma = suma + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) ); 
+                suma = suma + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)));
             });
             sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": suma }), "TotalNETPR");
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(suma));
@@ -735,14 +738,15 @@ sap.ui.define([
                 conformidades: {
                     results: []
                 },
-                condpedido:{
-                    results: [] 
+                condpedido: {
+                    results: []
                 },
                 tipoImpuesto: "1",
-                visibleconpedido:false,
-                visiblepos:true
-            });            
-            
+                visibleconpedido: false,
+                visiblepos: true
+            });
+            let oMultiInputNumfaBl = that.byId("InputNumfactBl");
+            let oMultiInputPedido = that.byId("pedido");
             that.getView().byId("InputFactura").setValue("");
             that.getView().byId("FechaEmision").setValue("");
             that.getView().byId("InputImporte").setValue("");
@@ -750,19 +754,21 @@ sap.ui.define([
             that.getView().byId("InputNumfactBl").setTokens([])
             that.getView().byId("sumatoriaImporte").setText("0.00");
             that.getView().byId("sumatoriaImporteCP").setText("0.00");
+            oMultiInputNumfaBl.setTokens([])
+            oMultiInputPedido.setTokens([]);
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
             MODEL.setProperty("/Adjuntos", []);
             that.getView().byId("AdjuntosFactura").setModel(new JSONModel({ "Adjuntos": [] }));
         },
-        ongetTolerancia: async function(){
+        ongetTolerancia: async function () {
             const parameters = {
                 filters: [],
                 urlParameters: {
-                   
+
                 }
             }
             var response = await this.readEntity(ODATA_SAP, `/getToleranciaSet`, parameters);
-            return response.results[0].E_TOLER;            
+            return response.results[0].E_TOLER;
         },
         _readFiles: async function (file) {
             const resolveImport = (evt) => {
@@ -808,7 +814,7 @@ sap.ui.define([
             });
             oDialog.open();
         },
-        validarDiferencia: async  function () {
+        validarDiferencia: async function () {
             let diferencia = MODEL.getProperty("/Factura/diferencia");
             var tolerancia = await that.ongetTolerancia();
             let valid = (parseFloat(diferencia) <= parseFloat(tolerancia)) ? true : false;
@@ -932,13 +938,13 @@ sap.ui.define([
             });
 
             const conpedido = factura.condpedido.results.map(item => {
-                return {                   
+                return {
                     "ebeln": item.EBELN,
                     "kbetr": item.KBETR,
                     "knumv": item.KNUMV,
                     "kposn": item.KPOSN,
                     "kschl": item.KSCHL,
-                    "waers": item.WAERS                  
+                    "waers": item.WAERS
                 }
             });
 
@@ -1177,30 +1183,30 @@ sap.ui.define([
                 });
             });
         },
-        onBuscarOC: async function (pedido,ImporteBase) {
+        onBuscarOC: async function (pedido, ImporteBase) {
             sap.ui.core.BusyIndicator.show();
-         
+
             const filters = [];
-            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;            
+            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
             filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
             filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
             //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
             filters.push(new Filter("I_ELIKZ", "EQ", "X"));
-           
-            filters.push(new Filter("IR_EBELN", "EQ", pedido));    
+
+            filters.push(new Filter("IR_EBELN", "EQ", pedido));
 
             let parameters = { filters: filters };
             const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
             var posiciones = [];
-            if(request.results.length>0){
+            if (request.results.length > 0) {
                 posiciones = JSON.parse(request.results[0].ET_DATA);
                 $.each(posiciones, function (i, item) {
                     item.NETPR = (item.NETPR).toString();
                     item.MENGE = (item.MENGE).toString();
-                    item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
+                    item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)))).toFixed(2);
                 });
             }
-            else{
+            else {
                 MessageBox.information(
                     "No existen pedidos confirmados para el proveedor seleccionado.",
                     {
@@ -1209,12 +1215,12 @@ sap.ui.define([
                         //details: htmlmessage
                     }
                 );
-            }  
+            }
             posiciones.sort((a, b) => a.BELNR - b.BELNR);
             let sumatoria = 0;
-           /* posiciones.map(element => {                
-                sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );                
-            });*/
+            /* posiciones.map(element => {                
+                 sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );                
+             });*/
             MODEL.setProperty("/Factura/conformidades/results", posiciones);
             //sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
             //that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
