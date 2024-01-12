@@ -645,7 +645,25 @@ sap.ui.define([
             }           
              
             
-        }
+        },
+        onValidarMontoIngresado: function(oEvent) {
+            var oInput = oEvent.getSource();
+            var oContext = oInput.getBindingContext();
+      
+            var fMENGE_PEND = parseFloat(oEvent.getParameter("value"));
+            var fMENGE_INGR = parseFloat(oContext.getProperty("MENGE_INGR"));
+            var fMENGE_FACT = parseFloat(oContext.getProperty("MENGE_FACT"));
+      
+            // Validar que MENGE_PEND sea menor o igual a la diferencia entre MENGE_INGR y MENGE_FACT
+            if (fMENGE_PEND > (fMENGE_INGR - fMENGE_FACT)) {
+              // Si no es válido, mostrar un cuadro de mensaje de error y establecer el valor del input a 0
+              MessageBox.error("El valor ingresado no es válido", {
+                onClose: function() {
+                  oInput.setValue(0);
+                }
+              });
+            }
+          }
     });
 
 });

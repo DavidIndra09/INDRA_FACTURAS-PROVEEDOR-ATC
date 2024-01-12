@@ -290,11 +290,15 @@ sap.ui.define([
             MODEL.setProperty("/Busqueda", {});
             var oMultiComboBox = this.getView().byId("ComboEstados");
             var oMultiComboBoxOrigen = this.getView().byId("Origen");
+            var SolicitudInput = this.getView().byId("InputCodigoSolicitud");
+            var CodigoFacturaInput = this.getView().byId("InputCodigoFactura");
             const dateRangeEmision = this.getView().byId("idDateRangeEmision");
             const dateRangeRegistro = this.getView().byId("idDateRangeRegistro");
             const DateRangeContabilizacion = this.getView().byId("idDateRangeContabilizacion");
             // limpiamos fechas
             oMultiComboBoxOrigen.setSelectedKeys([]);
+            SolicitudInput.setValue("");
+            CodigoFacturaInput.setValue("");
             oMultiComboBox.setSelectedKeys([]);
             dateRangeEmision.setDateValue(null);
             dateRangeEmision.setSecondDateValue(null);
@@ -2348,7 +2352,7 @@ sap.ui.define([
                     filters: [
                         new Filter("i_value", FilterOperator.EQ, sValue),
                         new Filter("i_object", FilterOperator.EQ, "SOLFACT"),
-                        //new Filter("i_filter", FilterOperator.EQ, keyCentro)
+                        new Filter("i_filter", FilterOperator.EQ, sap.ui.getCore().getModel("Lifnr").getData().Lifnr)
                     ],
                     success: function (oData) {
                         if (oData.results.length) {
@@ -2397,7 +2401,7 @@ sap.ui.define([
                     filters: [
                         new Filter("i_value", FilterOperator.EQ, sValue),
                         new Filter("i_object", FilterOperator.EQ, "FACTUR"),
-                        //new Filter("i_filter", FilterOperator.EQ, keyCentro)
+                        new Filter("i_filter", FilterOperator.EQ, sap.ui.getCore().getModel("Lifnr").getData().Lifnr)
                     ],
                     success: function (oData) {
                         if (oData.results.length) {

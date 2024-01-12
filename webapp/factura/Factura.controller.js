@@ -136,13 +136,14 @@ sap.ui.define([
         },
 
         onImportarArchivoXml: async function (event) {
+            try {
             const files = event.getParameter("files");
             const fileUploader = event.getSource();
             if (files.length > 0) {
                 const file = files[0];
                 const dataXml = await this._readFiles(file);
 
-                if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice) {//dataXml.invoice
+                if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice && !dataXml.attacheddocument.attachment.externalreference.description) {//dataXml.invoice
                     MessageBox.error(`El archivo xml no cumple con el formato requerido`);
                     fileUploader.setValue("");
                     return;
@@ -229,6 +230,10 @@ sap.ui.define([
                 }
                 // this._destroyMessageStrip();
             }
+           }catch (error) {
+            MessageBox.error(`Se produjo un error al procesar el archivo XML: ${error.message}`);
+            fileUploader.setValue("");
+           }
         },
         onClearArchivoXml: function (event) {
             

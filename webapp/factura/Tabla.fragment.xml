@@ -6,8 +6,7 @@
                 path: 'conformidad',
                 descending: false
             }
-        }" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true"
-        growingThreshold="10" updateFinished=".onUpdateFinished" mode="None">
+        }" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="10" updateFinished=".onUpdateFinished" mode="None">
 
         <headerToolbar>
             <OverflowToolbar>
@@ -46,8 +45,17 @@
             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
                 <Label text="{i18n>unidadMedida}" design="Bold"/>
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="6rem">
-                <Label text="{i18n>cantidad}" design="Bold"/>
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>cantidad}" design="Bold" />
+            </Column>
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>cantidadIngresada}" design="Bold" />
+            </Column>
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>cantidadFacturada}" design="Bold" />
+            </Column>
+            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                <Label text="{i18n>cantidadPendiente}" design="Bold" />
             </Column>
             <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                 <Label text="{i18n>importe}" design="Bold"/>
@@ -75,9 +83,21 @@
                     <Text text="{TXZ01}" />
                     <Text text="{MEINS}" />
                     <ObjectNumber number="{
-                            path: 'MENGE',
-                            formatter: '.formatter.numberUnit'
-                        }" />
+                                    path: 'MENGE',
+                                    formatter: '.formatter.numberUnit'
+                                }" />
+                    <ObjectNumber number="{
+                                    path: 'MENGE_INGR',
+                                    formatter: '.formatter.numberUnit'
+                                }" />
+                    <ObjectNumber number="{
+                                    path: 'MENGE_FACT',
+                                    formatter: '.formatter.numberUnit'
+                                }" />
+                    <ObjectNumber number="{
+                                    path: 'MENGE_PEND',
+                                    formatter: '.formatter.numberUnit'
+                                }" />
                     <ObjectNumber number="{
                             parts:[{path:'NETPR',formatter: '.formatter.formatCurrency'}]                                                        
                         }" unit="{WAERS}" state="Information" />

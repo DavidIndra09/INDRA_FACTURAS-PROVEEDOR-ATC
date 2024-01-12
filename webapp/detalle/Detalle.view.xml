@@ -76,13 +76,16 @@
                                         <Label text="{i18n>unidadMedida}" design="Bold"/>
                                     </Column>
                                     <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                                        <Label text="{i18n>cantidad}" design="Bold" />
+                                    </Column>
+                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>cantidadIngresada}" design="Bold" />
                                     </Column>
                                      <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>cantidadFacturada}" design="Bold" />
                                     </Column>
                                      <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
-                                        <Label text="{i18n>cantidadporFacturar}" design="Bold" />
+                                        <Label text="{i18n>cantidadPendiente}" design="Bold" />
                                     </Column>
                                     <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                                         <Label text="{i18n>importe}" design="Bold" />
@@ -110,6 +113,10 @@
                                     formatter: '.formatter.numberUnit'
                                 }" />
                                       <ObjectNumber number="{
+                                    path: 'MENGE_INGR',
+                                    formatter: '.formatter.numberUnit'
+                                }" />
+                                   <ObjectNumber number="{
                                     path: 'MENGE_FACT',
                                     formatter: '.formatter.numberUnit'
                                 }" />
