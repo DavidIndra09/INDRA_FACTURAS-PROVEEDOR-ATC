@@ -42,7 +42,7 @@
             <Column demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>material}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
+            <Column demandPopin="true" minScreenWidth="Tablet" width="10rem">
                 <Label text="{i18n>descmaterial}" design="Bold"/>
             </Column>
             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
@@ -60,12 +60,10 @@
             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>cantidadPendiente}" design="Bold" />
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+            <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End" width="8rem">
                 <Label text="{i18n>importe}" design="Bold"/>
             </Column>
-            <Column hAlign="Center" width="5rem">
-                <Label text="" />
-            </Column>
+            
         </columns>
 
         <items>

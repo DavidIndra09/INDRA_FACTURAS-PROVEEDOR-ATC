@@ -1221,7 +1221,7 @@ sap.ui.define([
                     }
                 );
             }
-            posiciones.sort((a, b) => a.BELNR - b.BELNR);
+            //posiciones.sort((a, b) => a.BELNR - b.BELNR);
             let sumatoria = 0;
             /* posiciones.map(element => {                
                  sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );                

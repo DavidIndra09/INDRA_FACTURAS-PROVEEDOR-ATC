@@ -16,12 +16,17 @@ sap.ui.define([
          * @param {string} sValue the number string to be rounded
          * @returns {string} sValue with 2 digits rounded
          */
-        numberUnit: function (sValue) {
-            if (!sValue) {
-                return "";
+        numberUnit: function(sValue) {
+            if (sValue === 0 || sValue === "0") {
+              return "0.00";
             }
+          
+            if (!sValue) {
+              return "";
+            }
+          
             return parseFloat(sValue).toFixed(2);
-        },
+          },         
 
         formatDateView: function (date) {
             if (!date) return "";

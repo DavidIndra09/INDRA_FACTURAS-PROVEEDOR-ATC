@@ -794,7 +794,7 @@ sap.ui.define([
             }
 
 
-            aLista.sort((a, b) => b.SOLFAC - a.SOLFAC);
+            //aLista.sort((a, b) => b.SOLFAC - a.SOLFAC);
 
             MODEL.setProperty("/Facturas", aLista);
             sap.ui.core.BusyIndicator.hide();

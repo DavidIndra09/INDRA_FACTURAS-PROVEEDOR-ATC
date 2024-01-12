@@ -248,7 +248,7 @@ sap.ui.define([
                         });
                     });
 
-                    aLista.sort((a, b) => a.POSNR - b.POSNR);                    
+                    //aLista.sort((a, b) => a.POSNR - b.POSNR);                    
                     let oModelLista = new JSONModel(aLista);
                     oModelLista.setSizeLimit(99999999999)   
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 

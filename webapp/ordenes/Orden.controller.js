@@ -453,7 +453,7 @@ sap.ui.define([
                     }
                 );
             }  
-            posiciones.sort((a, b) => a.BELNR - b.BELNR);
+            //posiciones.sort((a, b) => a.BELNR - b.BELNR);
             MODEL.setProperty("/Ordenes", posiciones);
             that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
             sap.ui.core.BusyIndicator.hide();
@@ -498,7 +498,7 @@ sap.ui.define([
                     }
                 );
             }  
-            posiciones.sort((a, b) => a.BELNR - b.BELNR);
+            //posiciones.sort((a, b) => a.BELNR - b.BELNR);
             MODEL.setProperty("/CondPedido", posiciones);            
             that.getView().byId("idTableCondicionesPedido").setSelectedContextPaths([]);
             that.getView().byId("tableHeaderCondPedido").setText("Condiciones (" + posiciones.length +")");
@@ -657,7 +657,7 @@ sap.ui.define([
             // Validar que MENGE_PEND sea menor o igual a la diferencia entre MENGE_INGR y MENGE_FACT
             if (fMENGE_PEND > (fMENGE_INGR - fMENGE_FACT)) {
               // Si no es válido, mostrar un cuadro de mensaje de error y establecer el valor del input a 0
-              MessageBox.error("El valor ingresado no es válido", {
+              MessageBox.error("El valor ingresado no puede ser superior a la diferencia entre la cantidad ingresada y la cantidad facturada.", {
                 onClose: function() {
                   oInput.setValue(0);
                 }
