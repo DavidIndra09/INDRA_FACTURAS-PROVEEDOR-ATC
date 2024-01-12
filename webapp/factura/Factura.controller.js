@@ -534,7 +534,7 @@ sap.ui.define([
             MessageBox.confirm(`¿Está seguro de eliminar la conformidad ${orden.conformidad}?`, {
                 onClose: async function (action) {
                     if (action === "OK") {
-                        // const request = await this.deleteEntity(facturaModel, "/");
+                        // const request = await this.deleteEntity(facturaModel, "/");}
                         // logica temporal
                         const posiciones = MODEL.getProperty(path.slice(0, -2));
                         const ordenBorrar = MODEL.getProperty(path);
@@ -689,7 +689,7 @@ sap.ui.define([
 
             this._bindView("/Factura");
         },
-        onCalcularSumaPosiciones: function () {
+        onCalcularSumaPosiciones: function () {            
             let suma = 0;
             let posiciones = MODEL.getProperty("/Factura/conformidades/results");
             $.each(posiciones, function (i, element) {
@@ -932,6 +932,9 @@ sap.ui.define([
                     "matnr": item.MATNR,
                     "tipod": "B",
                     "menge": item.MENGE,
+                    "menge_ingr": item.MENGE_INGR,
+                    "menge_fact": item.MENGE_FACT,
+                    "menge_pend": item.MENGE_PEND,                    
                     "meins": item.MEINS,
                     //"NETPR": item.NETPR,
                     "netpr": item.NETPR,
@@ -1251,6 +1254,47 @@ sap.ui.define([
                 return valor;
             }
         },
+        eliminarFilasSeleccionadas: function(table, messageConfirm) {
+            var oTable = this.getView().byId(table);
+            var aSelectedItems = oTable.getSelectedItems();
+        
+            if (aSelectedItems.length > 0) {
+                // Muestra un mensaje de confirmación
+                sap.m.MessageBox.confirm(messageConfirm, {
+                    title: "Confirmar",
+                    onClose: function(oAction) {
+                        if (oAction === sap.m.MessageBox.Action.OK) {
+                            // Elimina las filas seleccionadas
+                            aSelectedItems.forEach(function(oSelectedItem) {
+                                var oContext = oSelectedItem.getBindingContext();
+                                var oModel = oContext.getModel();
+        
+                                // Verifica si el modelo es un ODataModel
+                                if (oModel instanceof sap.ui.model.odata.ODataModel) {
+                                    // Si es un ODataModel, utiliza la función remove
+                                    oModel.remove(oContext.getPath());
+                                } else {
+                                    // Si no es un ODataModel, asume que es un JSONModel y elimina la entrada del array
+                                    var aData = oModel.getProperty("/Factura/conformidades/results");
+                                    var iIndex = oContext.getProperty("Index"); // Asegúrate de tener una propiedad única para identificar las entradas
+                                    aData.splice(iIndex, 1);
+                                    oModel.setProperty("/Factura/conformidades/results", aData);
+                                }
+                            });
+        
+                            // Limpia la selección después de borrar
+                            oTable.removeSelections();
+                            that.onCalcularSumaPosiciones();
+                        }
+                    }
+                });
+            } else {
+                // Muestra un mensaje si no hay filas seleccionadas
+                sap.m.MessageToast.show("No hay filas seleccionadas para eliminar.");
+            }
+        }
+        
+        
         //   xmlToJson('<?xml version="1.0" encoding="UTF-8"?><atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"> <atom:content type="application/xml"> <m:properties> <d:Pernr>800001</d:Pernr> <d:Approve>X</d:Approve> </m:properties> </atom:content> <atom:link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/ToLeaveItem" type="application/atom+xml;type=feed" title="ZHR_APP_SRV.Header_Item"> <m:inline> <atom:feed> <atom:entry> <atom:content type="application/xml"> <m:properties> <d:Pernr></d:Pernr> <d:Index>0</d:Index> <d:RequestId>74867AF30B3A1ED4BDA9EDC88782C0EC</d:RequestId> </m:properties> </atom:content> </atom:entry> </atom:feed> </m:inline> </atom:link> </atom:entry>');
 
 

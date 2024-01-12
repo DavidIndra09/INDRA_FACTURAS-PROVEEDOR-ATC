@@ -219,8 +219,8 @@ sap.ui.define([
                             item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
                         }
                         else{
-                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) ); 
-                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
+                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) ); 
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) )).toFixed(2);
                         }
                         
                         item.WAERS = oCabecera.WAERS.split("-")[0];

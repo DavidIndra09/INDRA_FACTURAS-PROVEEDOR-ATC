@@ -188,8 +188,8 @@ sap.ui.define([
                 if(table.isAllSelectableSelected()){
                     var Allordenes = table.getModel().getData().Ordenes;
                     detalleFactura = Allordenes.map(item => {                                          
-                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) );
-                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE)) )).toFixed(2);
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) );
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) )).toFixed(2);
                         var find = pedido.find(fore=> fore == item.EBELN)
                         if(!find){
                             pedido.push(item.EBELN);
@@ -200,8 +200,8 @@ sap.ui.define([
                 else{
                     detalleFactura = selectedPaths.map(item => {
                         let element = MODEL.getProperty(item);                    
-                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) );
-                        element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)) )).toFixed(2);
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE_PEND)) );
+                        element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE_PEND)) )).toFixed(2);
                         
                         var find = pedido.find(fore=> fore == element.EBELN)
                         if(!find){
@@ -657,7 +657,7 @@ sap.ui.define([
             // Validar que MENGE_PEND sea menor o igual a la diferencia entre MENGE_INGR y MENGE_FACT
             if (fMENGE_PEND > (fMENGE_INGR - fMENGE_FACT)) {
               // Si no es válido, mostrar un cuadro de mensaje de error y establecer el valor del input a 0
-              MessageBox.error("El valor ingresado no puede ser superior a la diferencia entre la cantidad ingresada y la cantidad facturada.", {
+              MessageBox.error("Para el pedido " + oContext.getProperty("EBELN")  + " no es posible facturar más cantidad de la Ingresada por MIGO.", {
                 onClose: function() {
                   oInput.setValue(0);
                 }

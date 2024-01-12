@@ -794,7 +794,7 @@ sap.ui.define([
             }
 
 
-            //aLista.sort((a, b) => b.SOLFAC - a.SOLFAC);
+            aLista.sort((a, b) => b.SOLFAC - a.SOLFAC);
 
             MODEL.setProperty("/Facturas", aLista);
             sap.ui.core.BusyIndicator.hide();
@@ -1632,12 +1632,12 @@ sap.ui.define([
                 case "Solicitudes":
                     // Crear las columnas
                     aColumns = [
-                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "6rem", design: "Bold", hAlign: "Begin" },
                         { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT", path2: "ColorOrigen", width: "4rem", design: "Bold", hAlign: "Begin" },
                         //{ id: "LIFNRTEXT", label: "Proveedor", path: "LIFNRTEXT", width: "4rem", design: "Bold", hAlign: "Begin" },
                         { id: "FACTUR", label: "Factura Cliente", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
-                        { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "7rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
-                        { id: "FKDAT", label: "Fecha de Cont.", width: "6rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
+                        { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "6rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
+                        { id: "FKDAT", label: "Fecha de Cont.", width: "5rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold", hAlign: "End" },
                         { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },                        
                         { width: "5rem",label: "Info. adici.", path: "btnverDetalle" },

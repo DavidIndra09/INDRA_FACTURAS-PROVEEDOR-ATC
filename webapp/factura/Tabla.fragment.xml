@@ -1,24 +1,25 @@
 <core:FragmentDefinition xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <Table visible="{/Factura/visiblepos}" id="idtablaFactura" width="auto" items="{
+    <Table mode="MultiSelect" visible="{/Factura/visiblepos}" id="idtablaFactura" width="auto" items="{
             path: 'conformidades/results',
             sorter: {
                 path: 'conformidad',
                 descending: false
             }
-        }" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="10" updateFinished=".onUpdateFinished" mode="None">
+        }" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="10" updateFinished=".onUpdateFinished" >
 
         <headerToolbar>
             <OverflowToolbar>
                 <Title id="tableHeader" text="{facturaView>/facturaTableTitle}" level="H3"/>
                 <ToolbarSpacer />
+                <Button id="btnEliminarPosiciones" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idtablaFactura','¿Está seguro que desea eliminar las posiciones seleccionadas?')" text="Eliminar posiciones"/>
                 <Button type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
                 <!--enabled="{facturaView>/isBtnPosicionesEnabled}"-->
-                <SearchField id="searchField" tooltip="{i18n>ordenSearchTooltip}" liveChange="onBusquedaRapida">
+              <!--  <SearchField id="searchField" tooltip="{i18n>ordenSearchTooltip}" liveChange="onBusquedaRapida">
                     <layoutData>
                         <OverflowToolbarLayoutData maxWidth="200px" priority="NeverOverflow"/>
                     </layoutData>
-                </SearchField>
+                </SearchField> -->
             </OverflowToolbar>
         </headerToolbar>
 
@@ -26,9 +27,9 @@
             <Column >
                 <Label text="{i18n>conformidad}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
+         <!--   <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>posConformidad}" design="Bold"/>
-            </Column>
+            </Column> -->
             <Column demandPopin="true" minScreenWidth="Tablet" width="9rem">
                 <Label text="{i18n>ordenCompra}" design="Bold"/>
             </Column>
@@ -67,16 +68,17 @@
                     <ObjectStatus text="0.00" id="sumatoriaImporte" state="Information" />
                 </footer>
             </Column>
-            <Column hAlign="Center" width="5rem">
+          <!--  <Column hAlign="Center" width="5rem">
                 <Label text="" />
             </Column>
+            -->
         </columns>
 
         <items>
             <ColumnListItem press=".onPress">
                 <cells>
                     <ObjectIdentifier title="{BELNR}"/>
-                    <Text text="{BUZEI}" />
+                   <!-- <Text text="{BUZEI}" /> -->
                     <Text text="{EBELN}" />
                     <Text text="{EBELP}" />
                     <Text text="{MATNR}" />
@@ -106,7 +108,7 @@
                                     type: 'sap.ui.model.type.Currency',
                                     formatOptions: {showMeasure: false}
                                 }" unit="{WAERS}" state="Information" />
-                    <Button type="Reject" icon="sap-icon://delete" press="onEliminarRegistro"/>
+                  <!-- <Button type="Reject" icon="sap-icon://delete" press="onEliminarRegistro"/> -->
                 </cells>
             </ColumnListItem>
         </items>
