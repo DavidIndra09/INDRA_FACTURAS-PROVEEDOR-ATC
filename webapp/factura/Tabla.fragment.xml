@@ -12,7 +12,7 @@
             <OverflowToolbar>
                 <Title id="tableHeader" text="{facturaView>/facturaTableTitle}" level="H3"/>
                 <ToolbarSpacer />
-                <Button id="btnEliminarPosiciones" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idtablaFactura','¿Está seguro que desea eliminar las posiciones seleccionadas?')" text="Eliminar posiciones"/>
+                <Button id="btnEliminarPosiciones" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idtablaFactura','¿Está seguro que desea eliminar las posiciones seleccionadas?')" text=""/>
                 <Button type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
                 <!--enabled="{facturaView>/isBtnPosicionesEnabled}"-->
               <!--  <SearchField id="searchField" tooltip="{i18n>ordenSearchTooltip}" liveChange="onBusquedaRapida">

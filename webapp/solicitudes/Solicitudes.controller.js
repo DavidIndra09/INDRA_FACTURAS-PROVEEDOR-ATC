@@ -1632,17 +1632,17 @@ sap.ui.define([
                 case "Solicitudes":
                     // Crear las columnas
                     aColumns = [
-                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "6rem", design: "Bold", hAlign: "Begin" },
-                        { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT", path2: "ColorOrigen", width: "4rem", design: "Bold", hAlign: "Begin" },
+                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "6rem", design: "Bold",demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT", path2: "ColorOrigen", width: "4rem", design: "Bold",demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
                         //{ id: "LIFNRTEXT", label: "Proveedor", path: "LIFNRTEXT", width: "4rem", design: "Bold", hAlign: "Begin" },
                         { id: "FACTUR", label: "Factura Cliente", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "6rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FKDAT", label: "Fecha de Cont.", width: "5rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold", hAlign: "End" },
                         { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },                        
-                        { width: "5rem",label: "Info. adici.", path: "btnverDetalle" },
-                        { width: "3rem",label: "Mensajes", path: "iconErrores" },
-                        { width: "3rem",label: "Editar", path: "btnEditar" },
+                        { width: "3rem",label: "Info. adici.", path: "btnverDetalle",demandPopin: true, minScreenWidth: "Tablet",hAlign: "Begin" },
+                        { width: "3rem",label: "Mensajes", path: "iconErrores",demandPopin: true, minScreenWidth: "Tablet",hAlign: "Begin" },
+                        { width: "3rem",label: "Editar", path: "btnEditar",demandPopin: true, minScreenWidth: "Tablet",hAlign: "Begin" },
                         //{ width: "5rem", path: "btnEliminarSolicitud" }
                     ];
 
@@ -1652,7 +1652,9 @@ sap.ui.define([
                             hAlign: oColumnData.hAlign,
                             width: oColumnData.width || "auto",
                             header: new sap.m.Text({ text: oColumnData.label }),
-                            id: oColumnData.id
+                            id: oColumnData.id,
+                            minScreenWidth: oColumnData.minScreenWidth,
+                            demandPopin: oColumnData.demandPopin
                         });
                         // Agregar columnas al modelo
                         oTable.addColumn(oColumn);
@@ -2007,7 +2009,7 @@ sap.ui.define([
                 case "Solicitudes":
                     oTable = new sap.m.Table({
                         growingScrollToLoad: false,
-                        growingThreshold: 5,
+                        growingThreshold: 20,
                         growing: true,
                         id: "idFacturasTable",
                         width: "auto",

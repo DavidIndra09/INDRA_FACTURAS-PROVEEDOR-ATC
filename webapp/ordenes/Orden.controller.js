@@ -43,12 +43,14 @@ sap.ui.define([
             let oMultiInput1 = that.byId("mtIptOrdenCompra");
             let oMultiInput2 = that.byId("mtIptDescMaterial");
             let oMultiInput3 = that.byId("mtIptConformidades");
+            let oMultiInput4 = that.byId("mtIptClaseCondicion");
             // add validator
             let fnValidator = function (args) {
                 let text = args.text;
 
                 return new Token({ key: text, text: text });
             };
+            oMultiInput4.addValidator(fnValidator);
             oMultiInput1.addValidator(fnValidator);
             oMultiInput2.addValidator(fnValidator);
             oMultiInput3.addValidator(fnValidator);
@@ -305,7 +307,7 @@ sap.ui.define([
         },
         sumarPorEBELN: function (selectedPaths) {
             let primerValorPorEBELN = {};
-            let sumarTodos = true;
+            let sumarTodos = false;
         
             selectedPaths.forEach(item => {
                 let element = MODEL.getProperty(item);
@@ -470,9 +472,10 @@ sap.ui.define([
             this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
                 filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
             });
-            /*this.getView().byId("mtIptConformidades").getTokens().map(function (token) {
-                filters.push(new Filter("IR_BELNR", "EQ", token.getKey()));
+            this.getView().byId("mtIptClaseCondicion").getTokens().map(function (token) {
+                filters.push(new Filter("IR_KSCHL", "EQ", token.getKey()));
             });
+            /*
             this.getView().byId("mtIptDescMaterial").getTokens().map(function (token) {
                 filters.push(new Filter("IR_MATNR", "EQ", token.getKey()));
             });*/
@@ -508,6 +511,7 @@ sap.ui.define([
             that.byId("mtIptOrdenCompra").setTokens([]);
             that.byId("mtIptDescMaterial").setTokens([]);
             that.byId("mtIptConformidades").setTokens([]);
+            that.byId("mtIptClaseCondicion").setTokens([]);
             //ordenModel.setProperty("/Busqueda", {});
             //this._applySearch([]);
         },
@@ -529,6 +533,23 @@ sap.ui.define([
             ];
 
             this._applySearch(filters);
+        },
+        onBusquedaRapidaCondiciones: function (event) {
+            const query = event.getParameter("newValue");
+            const filters = [
+                new Filter({
+                    filters: [
+                        new Filter("KSCHL", "Contains", query),
+                        new Filter("KNUMV", "Contains", query),
+                        new Filter("EBELN", "Contains", query),
+                        //new Filter("EBELP", "Contains", query),                                            
+                       
+                    ],
+                    and: false
+                })
+            ];
+
+            this._applyCondiciones(filters);
         },
 
         /* =========================================================== */
@@ -617,6 +638,14 @@ sap.ui.define([
                 ordenModel.setProperty("/tableNoDataText", this.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
             }
         },
+        _applyCondiciones: function (aTableSearchState) {
+            var oTable = this.byId("idTableCondicionesPedido");
+            oTable.getBinding("items").filter(aTableSearchState, "Application");
+            // changes the noDataText of the list in case there are no filter results
+            if (aTableSearchState.length !== 0) {
+                ordenModel.setProperty("/tableNoDataText", this.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
+            }
+        },
         onShowHideFilters: function(oEvent){
             var classType = "sapUiSmallMarginTop";
             var state = oEvent.mParameters.state;
@@ -628,6 +657,7 @@ sap.ui.define([
                 that.byId("idTableCondicionesPedido").setVisible(true)  
                 that.byId("elementConformidades").setVisible(false);
                 that.byId("elementDescMaterial").setVisible(false);
+                that.byId("elementClaseCondicion").setVisible(true);
                 that.byId("SwitchTableCP").setState(true) 
                 that.byId("SwitchTableOC").setState(false)  
                 that.ongetCondPedido();          
@@ -639,6 +669,7 @@ sap.ui.define([
                 that.byId("idTableCondicionesPedido").setVisible(false) 
                 that.byId("elementConformidades").setVisible(true);
                 that.byId("elementDescMaterial").setVisible(true);
+                that.byId("elementClaseCondicion").setVisible(false);
                 that.byId("SwitchTableCP").setState(false)
                 that.byId("SwitchTableOC").setState(false)
 

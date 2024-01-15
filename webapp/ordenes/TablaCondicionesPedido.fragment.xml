@@ -28,7 +28,7 @@
                 <SearchField
                     id="searchFieldCondPedido"
                     tooltip="{i18n>ordenSearchTooltip}"                    
-                    liveChange="onBusquedaRapida">
+                    liveChange="onBusquedaRapidaCondiciones">
                     <layoutData>
                         <OverflowToolbarLayoutData
                             maxWidth="200px"

@@ -34,7 +34,8 @@
                 <f:actions>
                 <Button
                         icon="sap-icon://employee-lookup"
-                        text=""
+                         text="{= ${device>/system/phone} ? 'Cambiar proveedor' : ''}"
+    tooltip="{= ${device>/system/phone} ? 'Cambiar proveedor' : ''}"
                         type="Emphasized"
                         press="onMostrarSeleccionProveedor"
                     />

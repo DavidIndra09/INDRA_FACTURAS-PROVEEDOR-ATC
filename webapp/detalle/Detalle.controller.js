@@ -780,7 +780,57 @@ sap.ui.define([
                 // Muestra un mensaje si no hay filas seleccionadas
                 sap.m.MessageToast.show("No hay filas seleccionadas para eliminar.");
             }
-        }
+        },
+        formatMessages: function (Mensaje) {
+            let NuevoMensaje = "";
+            let count = 0;
+            Mensaje.map((mensaje) => {
+                count++;
+                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + "\n" /*.<br>"*/;
+            });
+            return NuevoMensaje;
+        },
+        onShowMessage: function () {
+            var oObject =  that.getOwnerComponent().getModel("oCabecera").getData();
+            var sMessage = that.parseJsonOrReturnStringForMessagePopup(oObject.TXTEST);
+            var MessageboxWidth = (sMessage.length>1)? "600px": "460px";
+            var typeMessageBox = (sMessage.length>1)? "information": "success";
+            var titleMessageBox = (sMessage.length>1)? "información": "Éxito";
+            var messageFormatter = that.formatMessages(sMessage);
+            if (oObject.ColorEstado == 'Error') {
+                MessageBox.error(messageFormatter, {
+                    stitle: "Error",
+                    actions: [MessageBox.Action.OK],
+                    //details: "<p> " + "➢" + " " + sMessage + "</p>",
+                    contentWidth: "500px"
+                });
+            }
+            else if(oObject.IconoEstado == "sap-icon://synchronize"){
+                MessageBox.information(messageFormatter, {
+                    stitle: "Información",
+                    actions: [MessageBox.Action.OK],
+                    //details: "<p> " + "➢" + " " + sMessage + "</p>",
+                    contentWidth: "500px"
+                }); 
+            }
+            else if(oObject.ESTADO == "06" || oObject.ESTADO == "09"){
+                MessageBox[typeMessageBox](messageFormatter, {
+                    stitle: titleMessageBox,
+                    actions: [MessageBox.Action.OK],
+                    //details: "<p> " + "➢" + " " + sMessage + "</p>",
+                    contentWidth: MessageboxWidth
+                }); 
+            }
+        },
+        parseJsonOrReturnStringForMessagePopup(str) {
+            try {
+                let respuesta = JSON.parse(str);
+                return respuesta.map(item => "[" + item.TYPE + "] - " + item.MESSAGE);
+            } catch (error) {
+                // Si no es un JSON válido, devolvemos el string original
+                return [str];
+            }
+        },
         
     });
 

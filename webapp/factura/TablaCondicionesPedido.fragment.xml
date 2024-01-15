@@ -25,8 +25,9 @@
                     text="Condiciones de pedido"
                     level="H3"/>
                 <ToolbarSpacer />
+                <Button id="btnEliminarCondPedido" type="Reject" icon="sap-icon://delete" press="eliminarCondPedido('idTableCondicionesPedido','¿Está seguro que desea eliminar las condiciones de pedido seleccionadas?')" text=""/>
                 <Button type="Emphasized" text="Agregar Condiciones pedido" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
-                <SearchField
+              <!-- <SearchField
                     id="searchFieldCondPedido"
                     tooltip="{i18n>ordenSearchTooltip}"                    
                     liveChange="onBusquedaRapida">
@@ -35,7 +36,7 @@
                             maxWidth="200px"
                             priority="NeverOverflow"/>
                     </layoutData>
-                </SearchField>
+                </SearchField> -->
                 <Switch visible="false" id="SwitchTableCP"  customTextOn="COND" customTextOff="POS" change="onShowHideFilters">
 				<layoutData>
 					<FlexItemData growFactor="1" />

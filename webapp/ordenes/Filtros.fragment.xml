@@ -44,13 +44,28 @@
                                             id="mtIptDescMaterial"
                                             value="{ordenView>descMaterial}"
                                             showSuggestion="false" 
-                                            showValueHelp="false"
+                                            showValueHelp="false"                                           
                                             placeholder="{i18n>placeholderMaterial}"
                                         />
                            <!-- <Input value="{ordenView>descMaterial}" placeholder="{i18n>placeholderMaterial}"/> -->
                         </form:fields>
                         <form:label>
                             <Label text="{i18n>material}" design="Bold"/>
+                        </form:label>
+                    </form:FormElement>
+                     <form:FormElement id="elementClaseCondicion"  visible="false">
+                        <form:fields>
+                         <MultiInput
+                                            id="mtIptClaseCondicion"
+                                            value="{ordenView>claseCondicion}"
+                                            showSuggestion="false" 
+                                            showValueHelp="false"
+                                            placeholder="{i18n>placeholderClaseCondicion}"
+                                        />
+                           <!-- <Input value="{ordenView>descMaterial}" placeholder="{i18n>placeholderMaterial}"/> -->
+                        </form:fields>
+                        <form:label>
+                            <Label text="{i18n>claseCondicion}" design="Bold"/>
                         </form:label>
                     </form:FormElement>
                     <!-- <form:FormElement>

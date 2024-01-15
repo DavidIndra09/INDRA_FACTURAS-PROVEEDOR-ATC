@@ -689,14 +689,20 @@ sap.ui.define([
 
             this._bindView("/Factura");
         },
-        onCalcularSumaPosiciones: function () {            
+        onCalcularSumaPosiciones: function (property,flow) {            
             let suma = 0;
-            let posiciones = MODEL.getProperty("/Factura/conformidades/results");
-            $.each(posiciones, function (i, element) {
-                suma = suma + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)));
-            });
+            let posiciones = MODEL.getProperty(property);
+            if(flow){
+                suma = that.sumarPorEBELN(posiciones);
+            }
+            else{
+                $.each(posiciones, function (i, element) {
+                    suma = suma + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)));
+                });
+            }            
             sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": suma }), "TotalNETPR");
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(suma));
+            that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(suma));
         },
 
         /**
@@ -822,7 +828,8 @@ sap.ui.define([
         validarDiferencia: async function () {
             let diferencia = MODEL.getProperty("/Factura/diferencia");
             var tolerancia = await that.ongetTolerancia();
-            let valid = (parseFloat(diferencia) <= parseFloat(tolerancia)) ? true : false;
+            let valid = (Math.abs(parseFloat(diferencia)) <= parseFloat(tolerancia)) ? true : false;
+            
             return valid;
         },
         _crearFactura: async function () {
@@ -1232,7 +1239,7 @@ sap.ui.define([
             MODEL.setProperty("/Factura/conformidades/results", posiciones);
             //sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
             //that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
-            that.onCalcularSumaPosiciones();
+            that.onCalcularSumaPosiciones("/Factura/conformidades/results",false);
             that.onCalcularDiferencia(ImporteBase);
             sap.ui.core.BusyIndicator.hide();
         },
@@ -1284,7 +1291,7 @@ sap.ui.define([
         
                             // Limpia la selección después de borrar
                             oTable.removeSelections();
-                            that.onCalcularSumaPosiciones();
+                            that.onCalcularSumaPosiciones("/Factura/conformidades/results",false);
                         }
                     }
                 });
@@ -1292,7 +1299,81 @@ sap.ui.define([
                 // Muestra un mensaje si no hay filas seleccionadas
                 sap.m.MessageToast.show("No hay filas seleccionadas para eliminar.");
             }
-        }
+        },
+        eliminarCondPedido: function(table, messageConfirm) {
+            var oTable = this.getView().byId(table);
+            var aSelectedItems = oTable.getSelectedItems();
+        
+            if (aSelectedItems.length > 0) {
+                // Muestra un mensaje de confirmación
+                sap.m.MessageBox.confirm(messageConfirm, {
+                    title: "Confirmar",
+                    onClose: function(oAction) {
+                        if (oAction === sap.m.MessageBox.Action.OK) {
+                            // Elimina las filas seleccionadas
+                            aSelectedItems.forEach(function(oSelectedItem) {
+                                var oContext = oSelectedItem.getBindingContext();
+                                var oModel = oContext.getModel();
+        
+                                // Verifica si el modelo es un ODataModel
+                                if (oModel instanceof sap.ui.model.odata.ODataModel) {
+                                    // Si es un ODataModel, utiliza la función remove
+                                    oModel.remove(oContext.getPath());
+                                } else {
+                                    // Si no es un ODataModel, asume que es un JSONModel y elimina la entrada del array
+                                    var aData = oModel.getProperty("/Factura/condpedido/results");
+                                    var iIndex = oContext.getProperty("Index"); // Asegúrate de tener una propiedad única para identificar las entradas
+                                    aData.splice(iIndex, 1);
+                                    oModel.setProperty("/Factura/condpedido/results", aData);
+                                }
+                            });
+        
+                            // Limpia la selección después de borrar
+                            oTable.removeSelections();
+                            that.onCalcularSumaPosiciones("/Factura/condpedido/results",true);
+                        }
+                    }
+                });
+            } else {
+                // Muestra un mensaje si no hay filas seleccionadas
+                sap.m.MessageToast.show("No hay filas seleccionadas para eliminar.");
+            }
+        },
+        sumarPorEBELN: function (oData) {
+            let primerValorPorEBELN = {};
+            let sumarTodos = true;
+        
+            oData.forEach(item => {
+                let element = item;
+                let ebeln = element.EBELN;
+                let kbetr = parseFloat(that.convertirFormato(element.KBETR));
+                let bsart = element.BSART;
+        
+                // Verificar si no hemos sumado KBETR para este EBELN
+                if (primerValorPorEBELN[ebeln] === undefined) {
+                    primerValorPorEBELN[ebeln] = kbetr;
+                }
+        
+                // Verificar la condición de BSART
+                if (bsart === "ZVEM") {
+                    sumarTodos = true; // Establecer a true si encontramos al menos un BSART igual a ZVEM
+                }
+            });
+        
+            let resultado;
+        
+            if (sumarTodos) {
+                // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
+                resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
+            } else {
+                // Obtener solo el primer valor de KBETR para cada valor único de EBELN
+                resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
+                    return total + valor;
+                }, 0);
+            }
+        
+            return resultado.toFixed(2);
+        },
         
         
         //   xmlToJson('<?xml version="1.0" encoding="UTF-8"?><atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"> <atom:content type="application/xml"> <m:properties> <d:Pernr>800001</d:Pernr> <d:Approve>X</d:Approve> </m:properties> </atom:content> <atom:link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/ToLeaveItem" type="application/atom+xml;type=feed" title="ZHR_APP_SRV.Header_Item"> <m:inline> <atom:feed> <atom:entry> <atom:content type="application/xml"> <m:properties> <d:Pernr></d:Pernr> <d:Index>0</d:Index> <d:RequestId>74867AF30B3A1ED4BDA9EDC88782C0EC</d:RequestId> </m:properties> </atom:content> </atom:entry> </atom:feed> </m:inline> </atom:link> </atom:entry>');

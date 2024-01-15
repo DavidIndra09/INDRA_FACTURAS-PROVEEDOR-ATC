@@ -57,6 +57,7 @@
                                 <ObjectStatus text="{
                                            parts: [{ path: 'oCabecera>/DescripcionEstado' }]
                                        }" state="{oCabecera>/ColorEstado}" icon="{oCabecera>/IconoEstado}" />
+                               
                             </form:fields>
                             <form:label>
                                 <Label text="Estado de factura" />
@@ -65,14 +66,23 @@
 
                         <form:FormElement>
                             <form:fields>
-                                <DatePicker required="true" id="FechaEmision" value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy"  valueFormat="dd.MM.yyyy" editable="{oCabecera>/Edit}" />
+                                <DatePicker required="true" id="FechaEmision" value="{oCabecera>/FEMISI}" displayFormat="dd.MM.yyyy" valueFormat="dd.MM.yyyy" editable="{oCabecera>/Edit}" />
 
                             </form:fields>
                             <form:label>
                                 <Label text="{i18n>fechaEmision}" />
                             </form:label>
                         </form:FormElement>
-                          <form:FormElement>
+                         <form:FormElement>
+                            <form:fields>                                                             
+                                <core:Icon width="1rem" src="sap-icon://message-popup" class="size1 sapUiTinyMargin" color="{oCabecera>/ColorIconMessage}" tooltip="{oCabecera>/Tooltip}" press="onShowMessage"/>
+                               
+                            </form:fields>
+                            <form:label>
+                                <Label text="Ver mensajes" />
+                            </form:label>
+                        </form:FormElement>
+                        <form:FormElement>
                             <form:fields>
                                 <Input id="ICodigoFacturaSAP" required="false" value="{
                                             parts:[{path:'oCabecera>/BELNR'}]
@@ -83,6 +93,7 @@
                                 <Label text="Factura SAP" />
                             </form:label>
                         </form:FormElement>
+                          
                         <form:FormElement>
                             <form:fields>
                                 <Input required="false" id="InputPedido" value="{
@@ -111,7 +122,7 @@
                                 <Label text="Fecha creación solicitud" />
                             </form:label>
                         </form:FormElement>
-                       <form:FormElement>
+                        <form:FormElement>
                             <form:fields>
                                 <Input required="true" id="InputImporte" value="{
                                             parts:[{path:'oCabecera>/IMPORT'}]     
@@ -120,7 +131,7 @@
                             <form:label>
                                 <Label text="{i18n>importe}" />
                             </form:label>
-                        </form:FormElement> 
+                        </form:FormElement>
                         <!-- <form:FormElement>
                             <form:fields>
                                 <Input value="{
