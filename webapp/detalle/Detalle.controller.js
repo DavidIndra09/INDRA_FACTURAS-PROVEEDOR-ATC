@@ -37,14 +37,14 @@ sap.ui.define([
             viewModel = new JSONModel({
                 busy: true,
                 delay: 0,
-                visibleconpedido:false,
-                visiblepos:true
+                visibleconpedido: false,
+                visiblepos: true
             });
 
 
             facturaModel = this.getOwnerComponent().getModel("facturaModel");
             ODATA_SAP = this.getOwnerComponent().getModel("ODATA_SAP");
-            sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle"); 
+            sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle");
             ODataUtilidadesModel = this.getOwnerComponent().getModel("ODataUtilidadesModel");
             this.getRouter().getRoute("detalle").attachPatternMatched(this._onDetalletMatched, this);
             this.setModel(viewModel, "detalleView");
@@ -62,15 +62,15 @@ sap.ui.define([
          * @public
          */
         onNavBack: function () {
-            try{            
-            sap.ui.core.BusyIndicator.show();
-            this.getRouter().navTo("solicitudes", {}, true);        
+            try {
+                sap.ui.core.BusyIndicator.show();
+                this.getRouter().navTo("solicitudes", {}, true);
             }
-            catch(error){
-                sap.ui.core.BusyIndicator.hide();  
+            catch (error) {
+                sap.ui.core.BusyIndicator.hide();
                 const errorType = "error";
                 MessageBox[errorType]("Se produjo un error al tratar de navegar al reporte de solicitudes: " + error.message);
-            }   
+            }
         },
 
         /* =========================================================== */
@@ -91,12 +91,12 @@ sap.ui.define([
                 oObject.total = (parseFloat(that.convertirFormato(oObject.IMPORT) * 1.19)).toFixed(2); /* Number(oObject.IGV)).toFixed(2)*/;
                 oObject.total = formatter.formatCurrency(oObject.total);
                 oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado" || oObject.DescripcionEstado == "Con Errores") ? true : false;
-                
-                await this.getwaershelp((oObject.WAERS).split("-")[0]);                
+
+                await this.getwaershelp((oObject.WAERS).split("-")[0]);
                 let waersCollection = that.getView().getModel("waershelp").getData();
-                var find = waersCollection.find(item=> item.VALUE == oObject.WAERS.split("-")[0].trim());
-                oObject.WAERS =  find.VALUE + " - " +find.TEXTO;
-                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones); 
+                var find = waersCollection.find(item => item.VALUE == oObject.WAERS.split("-")[0].trim());
+                oObject.WAERS = find.VALUE + " - " + find.TEXTO;
+                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
                 viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
@@ -106,7 +106,7 @@ sap.ui.define([
             } else {
                 viewModel.setProperty("/busy", false);
                 that.onNavBack();
-            }          
+            }
         },
         /**
          * Binds the view to the object path.
@@ -146,22 +146,22 @@ sap.ui.define([
             viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [codigoSolicitud]));
             viewModel.setProperty("/busy", false);
         },
-        buildModelDetail: function(oData){
+        buildModelDetail: function (oData) {
             let data = []
             $.each(oData, function (i, item) {
                 data.push({
-                     "EBELN":"",
-                     "EBELP":item.POSNR,
-                     "MATNR":item.MATERIAL,
-                     "TXZ01":"",
-                     "MEINS":item.M3_UNIT,
-                     "MENGE": item.CANTIDAD ,
-                     "NETPR":parseFloat(item.FOB_U || 0) + parseFloat(item.FLETE || 0) + parseFloat(item.SEGURO || 0),
-                     "WAERS":item.MONEDA
+                    "EBELN": "",
+                    "EBELP": item.POSNR,
+                    "MATNR": item.MATERIAL,
+                    "TXZ01": "",
+                    "MEINS": item.M3_UNIT,
+                    "MENGE": item.CANTIDAD,
+                    "NETPR": parseFloat(item.FOB_U || 0) + parseFloat(item.FLETE || 0) + parseFloat(item.SEGURO || 0),
+                    "WAERS": item.MONEDA
                 });
             });
 
-            return data;    
+            return data;
         },
         mostrarDetalle: function (sCODEFACT, oCabecera, posiciones) {
             sap.ui.core.BusyIndicator.show(0);
@@ -169,62 +169,62 @@ sap.ui.define([
             let aFilters = [];
             var aLista = []
             let Detalle = [];
-            var sumatoria = 0; 
+            var sumatoria = 0;
             aFilters.push(new Filter("I_SOLFAC", FilterOperator.EQ, sCODEFACT));
             aFilters.push(new Filter("I_BUKRS", FilterOperator.EQ, "1000"));
             ODATA_SAP.read("/getDetailSolFactSet", {
                 filters: aFilters,
                 success: function (data) {
-                    
-                    sap.ui.core.BusyIndicator.hide();                    
-                    if(data.results[0].ET_COND!="[]"){
+
+                    sap.ui.core.BusyIndicator.hide();
+                    if (data.results[0].ET_COND != "[]") {
                         viewModel.setProperty("/visibleconpedido", true);
                         viewModel.setProperty("/visiblepos", false);
                         Detalle = data.results[0].ET_COND;
                         aLista = JSON.parse(Detalle);
                     }
-                    else{
+                    else {
                         viewModel.setProperty("/visibleconpedido", false);
                         viewModel.setProperty("/visiblepos", true);
-                        Detalle = (oCabecera.TIPDAT== "XLSVEH")?data.results[0].ET_DETVE:data.results[0].ET_DET;
-                    
-                        if(oCabecera.TIPDAT== "XLSVEH"){
+                        Detalle = (oCabecera.TIPDAT == "XLSVEH") ? data.results[0].ET_DETVE : data.results[0].ET_DET;
+
+                        if (oCabecera.TIPDAT == "XLSVEH") {
                             aLista = that.buildModelDetail(JSON.parse(Detalle));
                         }
-                        else{
-                             aLista = JSON.parse(Detalle);
+                        else {
+                            aLista = JSON.parse(Detalle);
                         }
                     }
 
-                     
-                    let Documentos = data.results[0].ET_DOC;                    
-                    
-                    //if (posiciones.length > 0) {
-                        let posicionesParse = sap.ui.getCore().getModel("Detalle").getData().Posiciones;//JSON.parse(posiciones);
 
-                        if(posicionesParse.length>0){
-                            aLista.push(...posicionesParse);
-                            viewModel.setProperty("/visibleconpedido", sap.ui.getCore().getModel("Detalle").getData().CondPedidoTable);
-                            viewModel.setProperty("/visiblepos", sap.ui.getCore().getModel("Detalle").getData().PosicionesTable);
-                        }
-                        
+                    let Documentos = data.results[0].ET_DOC;
+
+                    //if (posiciones.length > 0) {
+                    let posicionesParse = sap.ui.getCore().getModel("Detalle").getData().Posiciones;//JSON.parse(posiciones);
+
+                    if (posicionesParse.length > 0) {
+                        aLista.push(...posicionesParse);
+                        viewModel.setProperty("/visibleconpedido", sap.ui.getCore().getModel("Detalle").getData().CondPedidoTable);
+                        viewModel.setProperty("/visiblepos", sap.ui.getCore().getModel("Detalle").getData().PosicionesTable);
+                    }
+
                     //}   
                     sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle"); //limpiamos las posiciones                 
-                    var VisibleTable =   viewModel.getProperty("/visibleconpedido") ;
-                    sumatoria = (VisibleTable)?that.sumarPorEBELN(aLista):0 ;
+                    var VisibleTable = viewModel.getProperty("/visibleconpedido");
+                    sumatoria = (VisibleTable) ? that.sumarPorEBELN(aLista) : 0;
                     $.each(aLista, function (i, item) {
-                       
-                        if(VisibleTable){
-                            
+
+                        if (VisibleTable) {
+
                             item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
                         }
-                        else{
-                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) ); 
-                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) )).toFixed(2);
+                        else {
+                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)));
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)))).toFixed(2);
                         }
-                        
+
                         item.WAERS = oCabecera.WAERS.split("-")[0];
-                        
+
                     });
                     let aListaDocumentos = JSON.parse(Documentos);
                     let adjuntos = [];
@@ -232,8 +232,8 @@ sap.ui.define([
                     that.getView().byId("btnAddPosiciones").setEnabled(oCabecera.Edit);
                     that.getView().byId("AdjuntosUploader").setEnabled(oCabecera.Edit);
                     that.getView().byId("btnEliminarPosiciones").setEnabled(oCabecera.Edit);
-                    that.getView().byId("btnEliminarCondPedido").setEnabled(oCabecera.Edit);                    
-                    
+                    that.getView().byId("btnEliminarCondPedido").setEnabled(oCabecera.Edit);
+
                     $.each(aListaDocumentos, function (i, item) {
 
                         adjuntos.push({
@@ -250,11 +250,11 @@ sap.ui.define([
 
                     //aLista.sort((a, b) => a.POSNR - b.POSNR);                    
                     let oModelLista = new JSONModel(aLista);
-                    oModelLista.setSizeLimit(99999999999)   
+                    oModelLista.setSizeLimit(99999999999)
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
-                    (viewModel.getProperty("/visibleconpedido"))?that.byId("idTableCondicionesPedido").setModel(oModelLista):that.byId("idtablaFactura").setModel(oModelLista);                    
+                    (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").setModel(oModelLista) : that.byId("idtablaFactura").setModel(oModelLista);
                     that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
@@ -273,26 +273,26 @@ sap.ui.define([
         sumarPorEBELN: function (oData) {
             let primerValorPorEBELN = {};
             let sumarTodos = true;
-        
+
             oData.forEach(item => {
                 let element = item;
                 let ebeln = element.EBELN;
                 let kbetr = parseFloat(that.convertirFormato(element.KBETR));
                 let bsart = element.BSART;
-        
+
                 // Verificar si no hemos sumado KBETR para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
                     primerValorPorEBELN[ebeln] = kbetr;
                 }
-        
+
                 // Verificar la condición de BSART
                 if (bsart === "ZVEM") {
                     sumarTodos = true; // Establecer a true si encontramos al menos un BSART igual a ZVEM
                 }
             });
-        
+
             let resultado;
-        
+
             if (sumarTodos) {
                 // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
@@ -302,7 +302,7 @@ sap.ui.define([
                     return total + valor;
                 }, 0);
             }
-        
+
             return resultado.toFixed(2);
         },
         convertirCadenaAFecha(cadenaFecha) {
@@ -466,19 +466,19 @@ sap.ui.define([
                 }
             });
 
-            if(tablaconpedido){
+            if (tablaconpedido) {
                 conpedido = condicionPedidos.map(item => {
-                    return {                   
+                    return {
                         "ebeln": item.EBELN,
                         "kbetr": item.KBETR,
                         "knumv": item.KNUMV,
                         "kposn": item.KPOSN,
                         "kschl": item.KSCHL,
-                        "waers": item.WAERS                  
+                        "waers": item.WAERS
                     }
                 });
             }
-            else{
+            else {
                 conformidades = posiciones.map(item => {
                     return {
                         "mandt": "",
@@ -493,6 +493,9 @@ sap.ui.define([
                         "matnr": item.MATNR,
                         "tipod": "B",
                         "menge": item.MENGE,
+                        "menge_ingr": item.MENGE_INGR,
+                        "menge_fact": item.MENGE_FACT,
+                        "menge_pend": item.MENGE_PEND,
                         "meins": item.MEINS,
                         "NETPR": item.NETPR,
                         "waers": item.WAERS,
@@ -505,7 +508,7 @@ sap.ui.define([
             }
 
             let oReturn = that.ongetModelCabecera(cabecera);
-            
+
             /*{
                 "ESTADO": cabecera.ESTADO,
                 "WAERS": cabecera.WAERS.split("-")[0].trim(),
@@ -523,12 +526,12 @@ sap.ui.define([
                 "IT_DOC": JSON.stringify(adjuntoModel),
                 "IT_COND": JSON.stringify(conpedido)
             };
-            
+
 
             return obj;
         },
-        ongetModelCabecera:function(Data){
-            
+        ongetModelCabecera: function (Data) {
+
             return {
                 "INCO1": Data.INCO1,
                 "INCO2": Data.INCO2,
@@ -537,19 +540,19 @@ sap.ui.define([
                 "DATBL": Data.DATBL,
                 "PRTSL": Data.PRTSL,
                 "PRTEN": Data.PRTEN,
-                "TPTRA": Data.TPTRA, 
+                "TPTRA": Data.TPTRA,
                 "EKGRP": Data.EKGRP,
                 "EKORG": Data.EKORG,
                 "EBELN": Data.EBELN,
                 "TIPDAT": Data.TIPDAT,
-                "ESTADO": (Data.EBELN!="" && (Data.TIPDAT == "XLSVEH" || Data.TIPDAT == "XLSREP"))?"09":Data.ESTADO,
-                "WAERS": Data.WAERS.split("-")[0].trim() ,
-                "LIFNR": Data.LIFNR,                
+                "ESTADO": (Data.EBELN != "" && (Data.TIPDAT == "XLSVEH" || Data.TIPDAT == "XLSREP")) ? "09" : Data.ESTADO,
+                "WAERS": Data.WAERS.split("-")[0].trim(),
+                "LIFNR": Data.LIFNR,
                 "FEMISI": that.formatFecha(Data.FEMISI),
                 "IMPORT": that.convertirFormato((Data.IMPORT).toString()),
                 "SOLFAC": Data.SOLFAC,
                 "FCRESO": that.formatFecha(Data.FCRESO),
-                "BSART" : Data.BSART,
+                "BSART": Data.BSART,
                 "FACTUR": Data.FACTUR
             }
 
@@ -574,17 +577,17 @@ sap.ui.define([
         },
         formatFecha: function (fecha) {
             var fechaFormateada = "";
-            if(fecha.includes("/")){
+            if (fecha.includes("/")) {
                 var [dia, mes, anio] = fecha.split('/');
-                fechaFormateada = `${anio}${mes}${dia}`; 
+                fechaFormateada = `${anio}${mes}${dia}`;
             }
-            else{
-             var [dia, mes, anio] = fecha.split('.');
-             fechaFormateada = `${anio}${mes}${dia}`;  
-            }          
+            else {
+                var [dia, mes, anio] = fecha.split('.');
+                fechaFormateada = `${anio}${mes}${dia}`;
+            }
             return fechaFormateada;
         },
-        onInitStateInputs:function(){
+        onInitStateInputs: function () {
             //that.getView().byId("InputFactura").setValueState("None");
             that.getView().byId("FechaEmision").setValueState("None");
             that.getView().byId("InputImporte").setValueState("None");
@@ -594,13 +597,13 @@ sap.ui.define([
         onValidarCampos: function () {
             let valid = true;
             let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
-           /* if (oCabecera.FACTUR == "") {
-                that.getView().byId("InputFactura").setValueState("Error")
-                valid = false;
-            }
-            else {
-                that.getView().byId("InputFactura").setValueState("None")
-            }*/
+            /* if (oCabecera.FACTUR == "") {
+                 that.getView().byId("InputFactura").setValueState("Error")
+                 valid = false;
+             }
+             else {
+                 that.getView().byId("InputFactura").setValueState("None")
+             }*/
 
             if (oCabecera.FEMISI == "") {
                 that.getView().byId("FechaEmision").setValueState("Error")
@@ -623,14 +626,14 @@ sap.ui.define([
             else {
                 that.getView().byId("InputSelectWaers").setValueState("None")
             }
-          /*  if (oCabecera.EBELN == "") {
-                that.getView().byId("InputPedido").setValueState("Error")
-                valid = false;
-            }
-            else {
-                that.getView().byId("InputPedido").setValueState("None")
-            }
-            */
+            /*  if (oCabecera.EBELN == "") {
+                  that.getView().byId("InputPedido").setValueState("Error")
+                  valid = false;
+              }
+              else {
+                  that.getView().byId("InputPedido").setValueState("None")
+              }
+              */
             return valid;
         },
         actualizarFactura: async function () {
@@ -643,7 +646,7 @@ sap.ui.define([
                     return;
                 }
                 var data = this._getDataFactura();
-                
+
                 const request = await this.createEntity(ODATA_SAP, "/crearSolFactSet", data);
                 const type = "success";
                 sap.ui.core.BusyIndicator.hide();
@@ -655,7 +658,7 @@ sap.ui.define([
                         this.getRouter().navTo("solicitudes", {}, false);
                     }.bind(this)
                 });
-            } catch (error) {             
+            } catch (error) {
                 sap.ui.core.BusyIndicator.hide();
                 const errorType = "error";
                 MessageBox[errorType]("Se produjo un error al actualizar la factura. Error: " + error.message);
@@ -679,11 +682,11 @@ sap.ui.define([
         },
         onNavOrdenes: function () {
             try {
-            sap.ui.core.BusyIndicator.show();
-            this.getRouter().navTo("orden", {}, false);
+                sap.ui.core.BusyIndicator.show();
+                this.getRouter().navTo("orden", {}, false);
             }
-            catch(error){
-                sap.ui.core.BusyIndicator.hide();  
+            catch (error) {
+                sap.ui.core.BusyIndicator.hide();
                 const errorType = "error";
                 MessageBox[errorType]("Se produjo un error al tratar de navegar a la selección de pedidos: " + error.message);
             }
@@ -746,10 +749,10 @@ sap.ui.define([
             //oCabecera.IMPORT = formatter.formatCurrency(oCabecera.IMPORT);
             that.getOwnerComponent().getModel("oCabecera").refresh(true);
         },
-        eliminarFilasSeleccionadas: function(table,messageConfirm) {
-            var oTable = that.getView().byId(table); 
+        eliminarFilasSeleccionadas: function (table, messageConfirm) {
+            var oTable = that.getView().byId(table);
             var aSelectedItems = oTable.getSelectedItems();
-        
+
             if (aSelectedItems.length > 0) {
                 // Muestra un mensaje de confirmación
                 sap.m.MessageBox.confirm(messageConfirm, {
@@ -759,20 +762,20 @@ sap.ui.define([
                             // Elimina las filas seleccionadas
                             aSelectedItems.forEach(function (oSelectedItem) {
                                 oTable.removeItem(oSelectedItem);
-                            });       
-                          
+                            });
+
                             // Limpia la selección después de borrar
                             oTable.removeSelections();
                             var data = [];
-                           var Items =  oTable.getItems();
-                           Items.forEach(function (oItem) {
-                            var oBindingContext = oItem.getBindingContext();
-                            var oRowData = oBindingContext.getObject();
-                            data.push(oRowData);
-                            
-                        });
-                           
-                           that.byId("idtablaFactura").setModel(new JSONModel(data))
+                            var Items = oTable.getItems();
+                            Items.forEach(function (oItem) {
+                                var oBindingContext = oItem.getBindingContext();
+                                var oRowData = oBindingContext.getObject();
+                                data.push(oRowData);
+
+                            });
+
+                            that.byId("idtablaFactura").setModel(new JSONModel(data))
                         }
                     }
                 });
@@ -791,11 +794,11 @@ sap.ui.define([
             return NuevoMensaje;
         },
         onShowMessage: function () {
-            var oObject =  that.getOwnerComponent().getModel("oCabecera").getData();
+            var oObject = that.getOwnerComponent().getModel("oCabecera").getData();
             var sMessage = that.parseJsonOrReturnStringForMessagePopup(oObject.TXTEST);
-            var MessageboxWidth = (sMessage.length>1)? "600px": "460px";
-            var typeMessageBox = (sMessage.length>1)? "information": "success";
-            var titleMessageBox = (sMessage.length>1)? "información": "Éxito";
+            var MessageboxWidth = (sMessage.length > 1) ? "600px" : "460px";
+            var typeMessageBox = (sMessage.length > 1) ? "information" : "success";
+            var titleMessageBox = (sMessage.length > 1) ? "información" : "Éxito";
             var messageFormatter = that.formatMessages(sMessage);
             if (oObject.ColorEstado == 'Error') {
                 MessageBox.error(messageFormatter, {
@@ -805,21 +808,21 @@ sap.ui.define([
                     contentWidth: "500px"
                 });
             }
-            else if(oObject.IconoEstado == "sap-icon://synchronize"){
+            else if (oObject.IconoEstado == "sap-icon://synchronize") {
                 MessageBox.information(messageFormatter, {
                     stitle: "Información",
                     actions: [MessageBox.Action.OK],
                     //details: "<p> " + "➢" + " " + sMessage + "</p>",
                     contentWidth: "500px"
-                }); 
+                });
             }
-            else if(oObject.ESTADO == "06" || oObject.ESTADO == "09"){
+            else if (oObject.ESTADO == "06" || oObject.ESTADO == "09") {
                 MessageBox[typeMessageBox](messageFormatter, {
                     stitle: titleMessageBox,
                     actions: [MessageBox.Action.OK],
                     //details: "<p> " + "➢" + " " + sMessage + "</p>",
                     contentWidth: MessageboxWidth
-                }); 
+                });
             }
         },
         parseJsonOrReturnStringForMessagePopup(str) {
@@ -831,7 +834,7 @@ sap.ui.define([
                 return [str];
             }
         },
-        
+
     });
 
 });

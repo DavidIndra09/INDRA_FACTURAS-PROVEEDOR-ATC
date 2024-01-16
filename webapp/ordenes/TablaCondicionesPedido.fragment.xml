@@ -15,7 +15,7 @@
         noDataText="{ordenView>/tableNoDataText}"
         busyIndicatorDelay="{ordenView>/tableBusyDelay}"
         growing="true"
-        growingThreshold="10"       
+        growingThreshold="20"       
         mode="MultiSelect">
         
         <headerToolbar>

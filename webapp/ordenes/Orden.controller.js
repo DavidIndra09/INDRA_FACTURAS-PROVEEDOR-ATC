@@ -187,7 +187,7 @@ sap.ui.define([
                 var rowDetails = [];
                 let sumatoria = 0;
                 var pedido = [];
-                if(table.isAllSelectableSelected()){
+                if(table.isAllSelectableSelected() && this.getView().byId("searchField").getValue() == ""){
                     var Allordenes = table.getModel().getData().Ordenes;
                     detalleFactura = Allordenes.map(item => {                                          
                         sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) );
@@ -417,6 +417,7 @@ sap.ui.define([
             //that.byId("SwitchTableOC").getState();
         },
         onBuscarOrdenes: async function () {
+            try {
             sap.ui.core.BusyIndicator.show();
             const busqueda = ordenModel.getProperty("/Busqueda");
             const filters = [];
@@ -447,7 +448,7 @@ sap.ui.define([
             }
             else{
                 MessageBox.information(
-                    "No existen pedidos confirmados para el proveedor seleccionado.",
+                    "No existen pedidos confirmados para el proveedor seleccionado o ya existe una factura.",
                     {
                         title: "No se encontraron resultados",
                         actions: [MessageBox.Action.CLOSE],
@@ -459,8 +460,14 @@ sap.ui.define([
             MODEL.setProperty("/Ordenes", posiciones);
             that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
             sap.ui.core.BusyIndicator.hide();
+        } catch (error) {
+            sap.ui.core.BusyIndicator.hide();
+            MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
+                   
+        }
         },
         ongetCondPedido: async function () {
+            try {
             sap.ui.core.BusyIndicator.show();
             const busqueda = ordenModel.getProperty("/Busqueda");
             const filters = [];
@@ -506,6 +513,11 @@ sap.ui.define([
             that.getView().byId("idTableCondicionesPedido").setSelectedContextPaths([]);
             that.getView().byId("tableHeaderCondPedido").setText("Condiciones (" + posiciones.length +")");
             sap.ui.core.BusyIndicator.hide();
+        } catch (error) {
+            sap.ui.core.BusyIndicator.hide();
+            MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
+                   
+        }
         },
         onLimpiarFiltros: function () {
             that.byId("mtIptOrdenCompra").setTokens([]);

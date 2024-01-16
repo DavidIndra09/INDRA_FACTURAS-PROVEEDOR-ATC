@@ -6,7 +6,7 @@
                 path: 'conformidad',
                 descending: false
             }
-        }" noDataText="{ordenView>/tableNoDataText}" busyIndicatorDelay="{ordenView>/tableBusyDelay}" growing="true" growingThreshold="10" updateFinished=".onUpdateFinished" mode="MultiSelect">
+        }" noDataText="{ordenView>/tableNoDataText}" busyIndicatorDelay="{ordenView>/tableBusyDelay}" growing="true" growingThreshold="20" updateFinished=".onUpdateFinished" mode="MultiSelect">
 
         <headerToolbar>
             <OverflowToolbar>

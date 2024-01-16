@@ -6,7 +6,7 @@
                 path: 'conformidad',
                 descending: false
             }
-        }" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="10" updateFinished=".onUpdateFinished" >
+        }" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="20" updateFinished=".onUpdateFinished" >
 
         <headerToolbar>
             <OverflowToolbar>

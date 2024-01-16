@@ -43,7 +43,7 @@
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection >
                         <ScrollContainer height='15rem' vertical="true">
-                            <Table visible="{detalleView>/visiblepos}" id="idtablaFactura" mode="MultiSelect" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="10" noDataText="No hay Posiciones">
+                            <Table visible="{detalleView>/visiblepos}" id="idtablaFactura" mode="MultiSelect" items="{path: '/'}" class="sapUiTinyMarginTop" width="auto" updateFinished="onReviewsLoaded" growing="true" growingThreshold="20" noDataText="No hay Posiciones">
                                 <headerToolbar>
                                     <OverflowToolbar>
                                         <Title text="" />
@@ -139,7 +139,7 @@
                                 </items>
                             </Table>
                             <!--Tabla de condición de pedidos-->
-                            <Table visible="{detalleView>/visibleconpedido}" id="idTableCondicionesPedido" width="auto" items="{path: '/'}" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="10" mode="MultiSelect">
+                            <Table visible="{detalleView>/visibleconpedido}" id="idTableCondicionesPedido" width="auto" items="{path: '/'}" noDataText="{facturaView>/tableNoDataText}" busyIndicatorDelay="{facturaView>/tableBusyDelay}" growing="true" growingThreshold="20" mode="MultiSelect">
 
                                 <headerToolbar>
                                     <OverflowToolbar>
