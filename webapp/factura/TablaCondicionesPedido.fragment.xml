@@ -88,13 +88,13 @@
                     <Text text="{KPOSN}" /> 
                     <Text text="{KSCHL}" /> 
                      <ObjectNumber number="{
-                            parts:[{path:'KBETR',formatter: '.formatter.formatCurrency'}]                                                        
-                        }" unit="{WAERS}" state="Information" />  
+                            parts:[{path:'KWETR',formatter: '.formatter.formatCurrency'}]                                                        
+                        }" unit="{WAERK}" state="Information" />  
                     <!--    <ObjectNumber number="{
                             parts:[{path:'TOTAL',formatter: '.formatter.formatCurrency'}]                                                        
                         }" unit="{WAERS}" state="Information" />  -->
                    
-                    <Text text="{WAERS}" /> 
+                    <Text text="{WAERK}" /> 
                        
                 </cells>
             </ColumnListItem>

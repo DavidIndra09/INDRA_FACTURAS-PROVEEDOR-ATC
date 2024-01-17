@@ -707,7 +707,10 @@ sap.ui.define([
             let suma = 0;
             let posiciones = MODEL.getProperty(property);
             if(flow){
-                suma = that.sumarPorEBELN(posiciones);
+                $.each(posiciones, function (i, element) {
+                    suma = suma + (parseFloat(that.convertirFormato(element.KWETR)));
+                });
+                //suma = that.sumarPorEBELN(posiciones);
             }
             else{
                 $.each(posiciones, function (i, element) {
@@ -969,7 +972,7 @@ sap.ui.define([
             const conpedido = factura.condpedido.results.map(item => {
                 return {
                     "ebeln": item.EBELN,
-                    "kbetr": item.KBETR,
+                    "KWETR": item.KWETR,
                     "knumv": item.KNUMV,
                     "kposn": item.KPOSN,
                     "kschl": item.KSCHL,
@@ -1360,12 +1363,12 @@ sap.ui.define([
             oData.forEach(item => {
                 let element = item;
                 let ebeln = element.EBELN;
-                let kbetr = parseFloat(that.convertirFormato(element.KBETR));
+                let KWETR = parseFloat(that.convertirFormato(element.KWETR));
                 let bsart = element.BSART;
         
-                // Verificar si no hemos sumado KBETR para este EBELN
+                // Verificar si no hemos sumado KWETR para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
-                    primerValorPorEBELN[ebeln] = kbetr;
+                    primerValorPorEBELN[ebeln] = KWETR;
                 }
         
                 // Verificar la condición de BSART
@@ -1377,10 +1380,10 @@ sap.ui.define([
             let resultado;
         
             if (sumarTodos) {
-                // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
+                // Sumar todos los valores de KWETR si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
             } else {
-                // Obtener solo el primer valor de KBETR para cada valor único de EBELN
+                // Obtener solo el primer valor de KWETR para cada valor único de EBELN
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
                     return total + valor;
                 }, 0);

@@ -251,21 +251,7 @@ sap.ui.define([
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }
         },
-        onAgregarCondicionPedido: async function () {
-            /*  let object = that.onValidarIndicadorImpuesto();
-              if (!object.valid) {                
-                  let formattermessage = that.formatMessages(object.mensaje);
-                  MessageBox.warning(
-                      formattermessage,
-                      {
-                          title: "Falta indicador de impuesto.",
-                          actions: [MessageBox.Action.CLOSE],
-                          //details: htmlmessage
-                      }
-                  );
-                  return;
-              }
-              */
+        onAgregarCondicionPedido: async function () {            
             const table = this.getView().byId("idTableCondicionesPedido");
             const selectedPaths = table.getSelectedContextPaths();
             let detalleFactura;
@@ -287,29 +273,29 @@ sap.ui.define([
                 if (table.isAllSelectableSelected()) {
                     var AllCondicionPedido = table.getModel().getData().CondPedido;
                     detalleFactura = AllCondicionPedido.map(item => {
-                        //sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KBETR)));
-                        item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KWETR)));
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.KWETR)))).toFixed(2);
                         var find = pedido.find(fore => fore == item.EBELN)
                         if (!find) {
                             pedido.push(item.EBELN);
                         }
                         return item;
                     });
-                    sumatoria = that.sumarPorEBELN(selectedPaths);
+                    //sumatoria = that.sumarPorEBELN(selectedPaths);
 
                 }
                 else {
                     detalleFactura = selectedPaths.map(item => {
                         let element = MODEL.getProperty(item);
-                        //sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.KBETR)));
-                        element.TOTAL = ((parseFloat(that.convertirFormato(element.KBETR)))).toFixed(2);
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.KWETR)));
+                        element.TOTAL = ((parseFloat(that.convertirFormato(element.KWETR)))).toFixed(2);
                         var find = pedido.find(fore => fore == element.EBELN)
                         if (!find) {
                             pedido.push(element.EBELN);
                         }
                         return MODEL.getProperty(item);
                     });
-                    sumatoria = that.sumarPorEBELN(selectedPaths);
+                    //sumatoria = that.sumarPorEBELN(selectedPaths);
 
                 }
 
@@ -335,12 +321,12 @@ sap.ui.define([
             selectedPaths.forEach(item => {
                 let element = MODEL.getProperty(item);
                 let ebeln = element.EBELN;
-                let kbetr = parseFloat(that.convertirFormato(element.KBETR));
+                let KWETR = parseFloat(that.convertirFormato(element.KWETR));
                 let bsart = element.BSART;
 
-                // Verificar si no hemos sumado KBETR para este EBELN
+                // Verificar si no hemos sumado KWETR para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
-                    primerValorPorEBELN[ebeln] = kbetr;
+                    primerValorPorEBELN[ebeln] = KWETR;
                 }
 
                 // Verificar la condición de BSART
@@ -352,10 +338,10 @@ sap.ui.define([
             let resultado;
 
             if (sumarTodos) {
-                // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
+                // Sumar todos los valores de KWETR si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
             } else {
-                // Obtener solo el primer valor de KBETR para cada valor único de EBELN
+                // Obtener solo el primer valor de KWETR para cada valor único de EBELN
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
                     return total + valor;
                 }, 0);
@@ -364,26 +350,7 @@ sap.ui.define([
             return resultado.toFixed(2);
         },
 
-        /* sumarPorEBELN:function(selectedPaths) {
-            let primerValorPorEBELN = {};
-
-            selectedPaths.forEach(item => {
-                let element = MODEL.getProperty(item);
-                let ebeln = element.EBELN;
-                let kbetr = parseFloat(that.convertirFormato(element.KBETR));
         
-                // Verificar si no hemos sumado KBETR para este EBELN
-                if (primerValorPorEBELN[ebeln] === undefined) {
-                    primerValorPorEBELN[ebeln] = kbetr;
-                }
-            });
-        
-            let sumaTotal = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
-
-            return sumaTotal.toFixed(2);
-        
-        },
-        */
         convertirFormato(valor) {
             // Reemplazar las comas con una cadena vacía
             const valorSinComas = valor.toString().replace(/,/g, '');
