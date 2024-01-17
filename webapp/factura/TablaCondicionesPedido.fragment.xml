@@ -62,6 +62,9 @@
             </Column>
              <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
                 <Label text="Importe" design="Bold"/>
+                <footer>
+                    <ObjectStatus text="0.00" id="sumatoriaImporteCP" state="Information" />
+                </footer>
             </Column>
           <!--    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                 <Label text="{i18n>total}" design="Bold" />
@@ -71,9 +74,7 @@
             </Column> -->
             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto" visible="false">
                 <Label text="Moneda" design="Bold"/>
-                <footer>
-                    <ObjectStatus text="0.00" id="sumatoriaImporteCP" state="Information" />
-                </footer>
+                
             </Column>            
         </columns>
 
