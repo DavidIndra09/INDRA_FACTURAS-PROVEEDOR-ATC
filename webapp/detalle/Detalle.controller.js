@@ -488,8 +488,15 @@ sap.ui.define([
                 let find = posicionesOriginal.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR);  
                 if(find){                 
 
-                    let existingItem = posiciones.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR && 
-                        element.BORRADO == "X");
+                    var existingItem;
+                        if(cabecera.TIPDAT == "XLSVEH"){
+                            existingItem = posiciones.find(element =>  element.EBELP == item.EBELP && element.BORRADO == "X");
+                        }
+                        else{
+                            existingItem = posiciones.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR && 
+                                element.BORRADO == "X");
+                        }
+                         
                     if (!existingItem) {
                         find.BORRADO = "X"
                         posiciones.push(item);
