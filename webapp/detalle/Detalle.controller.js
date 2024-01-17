@@ -14,7 +14,7 @@ sap.ui.define([
         facturaModel,
         ODataUtilidadesModel,
         AdjuntosOriginal = [],
-        AdjuntosEliminados = [],    
+        AdjuntosEliminados = [],
         condicionesPedidoOriginal = [],
         condicionesPedidoEliminado = [],
         posicionesEliminado = [],
@@ -100,17 +100,78 @@ sap.ui.define([
                 let waersCollection = that.getView().getModel("waershelp").getData();
                 var find = waersCollection.find(item => item.VALUE == oObject.WAERS.split("-")[0].trim());
                 oObject.WAERS = find.VALUE + " - " + find.TEXTO;
-                that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
+                
+                if (oParameters.arguments.navFrom == "Solicitudes") {
+                    AdjuntosEliminados = [];
+                    condicionesPedidoEliminado = [];
+                    posicionesEliminado = [];
+                    that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
+                }
+                else{
+                    that.AgregarData(oObject);
+                }
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
                 const resourceBundle = this.getResourceBundle();
                 viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
                 viewModel.setProperty("/detalleViewSubTitle", resourceBundle.getText("detalleViewSubTitle", [oParameters.arguments.proveedor]));
                 viewModel.setProperty("/busy", false);
-                viewModel.setProperty("/busy", false);
+                viewModel.setProperty("/busy", false);                
             } else {
                 viewModel.setProperty("/busy", false);
                 that.onNavBack();
             }
+        },
+        AgregarData: function(oCabecera){
+            var aLista = (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").getModel().getData() : that.byId("idtablaFactura").getModel().getData(),
+                sumatoria = 0,
+                resourceBundle = that.getResourceBundle();
+            let posicionesParse = sap.ui.getCore().getModel("Detalle").getData().Posiciones;//JSON.parse(posiciones);
+
+            if (posicionesParse.length > 0) {
+                aLista.push(...posicionesParse);
+                viewModel.setProperty("/visibleconpedido", sap.ui.getCore().getModel("Detalle").getData().CondPedidoTable);
+                viewModel.setProperty("/visiblepos", sap.ui.getCore().getModel("Detalle").getData().PosicionesTable);
+            }
+            //}   
+            sap.ui.getCore().setModel(new JSONModel({ "Posiciones": [] }), "Detalle"); //limpiamos las posiciones                 
+            var VisibleTable = viewModel.getProperty("/visibleconpedido");
+            sumatoria = (VisibleTable) ? that.sumarPorEBELN(aLista) : 0;
+            $.each(aLista, function (i, item) {
+
+                if (VisibleTable) {
+
+                    item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
+                }
+                else {
+                    sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)));
+                    item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)))).toFixed(2);
+                }
+
+                item.WAERS = oCabecera.WAERS.split("-")[0];
+
+            });
+            
+          
+            that.getView().byId("btnAddCondPedido").setEnabled(oCabecera.Edit);
+            that.getView().byId("btnAddPosiciones").setEnabled(oCabecera.Edit);
+            that.getView().byId("AdjuntosUploader").setEnabled(oCabecera.Edit);
+            that.getView().byId("btnEliminarPosiciones").setEnabled(oCabecera.Edit);
+            that.getView().byId("btnEliminarCondPedido").setEnabled(oCabecera.Edit);
+
+            (viewModel.getProperty("/visibleconpedido")) ? aLista.sort((a, b) => a.KPOSN - b.KPOSN) : aLista.sort((a, b) => a.POSNR - b.POSNR);
+            let oModelLista = new JSONModel(aLista);
+            oModelLista.setSizeLimit(99999999999)
+            //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
+            let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
+            let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
+
+            (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").setModel(oModelLista) : that.byId("idtablaFactura").setModel(oModelLista);
+            (viewModel.getProperty("/visibleconpedido")) ? that.byId("tableSection").setTitle("Condiciones de pedido" + " (" + aLista.length + ")") : that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
+            //that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
+            //that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
+            that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria));
+            that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(sumatoria));
+            sap.ui.core.BusyIndicator.hide();
         },
         /**
          * Binds the view to the object path.
@@ -223,8 +284,8 @@ sap.ui.define([
                             item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
                         }
                         else {
-                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH")?item.MENGE:item.MENGE_PEND)));
-                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH")?item.MENGE:item.MENGE_PEND)))).toFixed(2);
+                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)));
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)))).toFixed(2);
                         }
 
                         item.WAERS = oCabecera.WAERS.split("-")[0];
@@ -252,31 +313,33 @@ sap.ui.define([
                         });
                     });
 
-                    (viewModel.getProperty("/visibleconpedido"))? aLista.sort((a, b) => a.KPOSN - b.KPOSN):aLista.sort((a, b) => a.POSNR - b.POSNR);                    
+                    (viewModel.getProperty("/visibleconpedido")) ? aLista.sort((a, b) => a.KPOSN - b.KPOSN) : aLista.sort((a, b) => a.POSNR - b.POSNR);
                     let oModelLista = new JSONModel(aLista);
                     oModelLista.setSizeLimit(99999999999)
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
 
-                    if((viewModel.getProperty("/visibleconpedido"))){
-                             if((condicionesPedidoOriginal.length == 0)){
-                                condicionesPedidoOriginal = aLista
-                             }
+                    
 
-                    }
-                    else{
-                        if((posicionesOriginal.length == 0)){
-                            posicionesOriginal = aLista
-                         }
-                    }
-                     
                     (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").setModel(oModelLista) : that.byId("idtablaFactura").setModel(oModelLista);
-                    (viewModel.getProperty("/visibleconpedido")) ? that.byId("tableSection").setTitle("Condiciones de pedido" + " (" + aLista.length + ")")  :that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
+                    (viewModel.getProperty("/visibleconpedido")) ? that.byId("tableSection").setTitle("Condiciones de pedido" + " (" + aLista.length + ")") : that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
                     that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria));
                     that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(sumatoria));
+                    
+                    if ((viewModel.getProperty("/visibleconpedido"))) {
+                        if ((condicionesPedidoOriginal.length == 0)) {
+                            condicionesPedidoOriginal = aLista
+                        }
+
+                    }
+                    else {
+                        if ((posicionesOriginal.length == 0)) {
+                            posicionesOriginal = aLista
+                        }
+                    }
                     AdjuntosOriginal = [...adjuntos];
                 },
                 error: function (err) {
@@ -437,7 +500,7 @@ sap.ui.define([
             let condicionPedidos = that.byId("idTableCondicionesPedido").getModel().getData();
             let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             let cabecera = that.getOwnerComponent().getModel("oCabecera").getData();
-            let PosnrMax = that.onObtenerPosicionAdjunto();            
+            let PosnrMax = that.onObtenerPosicionAdjunto();
             let conformidades = [];
             let conpedido = [];
             var tablaconpedido = viewModel.getProperty("/visibleconpedido")
@@ -484,37 +547,37 @@ sap.ui.define([
             });
 
             //Lógica para posiciones eliminadas
-            $.each(posicionesEliminado, function(i,item){
-                let find = posicionesOriginal.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR);  
-                if(find){                 
+            $.each(posicionesEliminado, function (i, item) {
+                let find = posicionesOriginal.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR);
+                if (find) {
 
                     var existingItem;
-                        if(cabecera.TIPDAT == "XLSVEH"){
-                            existingItem = posiciones.find(element =>  element.EBELP == item.EBELP && element.BORRADO == "X");
-                        }
-                        else{
-                            existingItem = posiciones.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR && 
-                                element.BORRADO == "X");
-                        }
-                         
+                    if (cabecera.TIPDAT == "XLSVEH") {
+                        existingItem = posiciones.find(element => element.EBELP == item.EBELP && element.BORRADO == "X");
+                    }
+                    else {
+                        existingItem = posiciones.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR &&
+                            element.BORRADO == "X");
+                    }
+
                     if (!existingItem) {
                         find.BORRADO = "X"
                         posiciones.push(item);
-                    } 
-                }  
+                    }
+                }
 
             });
 
             //Lógica para condiciones de pedido eliminadas
-            $.each(condicionesPedidoEliminado, function(i,item){
+            $.each(condicionesPedidoEliminado, function (i, item) {
                 let find = condicionesPedidoOriginal.find(element => element.EBELN == item.EBELN && element.KNUMV == item.KNUMV && element.KPOSN == item.KPOSN);
-                if(find){                    
-                    let existingItem = condicionPedidos.find(element => element.EBELN == item.EBELN && element.KNUMV == item.KNUMV && element.KPOSN == item.KPOSN && 
+                if (find) {
+                    let existingItem = condicionPedidos.find(element => element.EBELN == item.EBELN && element.KNUMV == item.KNUMV && element.KPOSN == item.KPOSN &&
                         element.BORRADO == "X");
                     if (!existingItem) {
                         find.BORRADO = "X"
                         condicionPedidos.push(item);
-                    }                    
+                    }
                 }
             });
 
@@ -574,7 +637,7 @@ sap.ui.define([
                 "SOLFAC": cabecera.SOLFAC
             }
             */
-           
+
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
                 "IT_DET": JSON.stringify(conformidades),
@@ -816,12 +879,12 @@ sap.ui.define([
                         if (oAction === sap.m.MessageBox.Action.OK) {
                             // Elimina las filas seleccionadas
                             aSelectedItems.forEach(function (oSelectedItem) {
-                                if(table == "idtablaFactura"){
+                                if (table == "idtablaFactura") {
                                     posicionesEliminado.push(oSelectedItem.getBindingContext().getObject());
                                 }
-                                else{
+                                else {
                                     condicionesPedidoEliminado.push(oSelectedItem.getBindingContext().getObject());
-                                }                                
+                                }
                                 oTable.removeItem(oSelectedItem);
                             });
 

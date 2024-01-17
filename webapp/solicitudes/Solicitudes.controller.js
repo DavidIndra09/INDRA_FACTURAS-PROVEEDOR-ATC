@@ -169,7 +169,8 @@ sap.ui.define([
             that.getRouter().navTo(page, {
                 codigoSolicitud: codigoSolicitud,
                 proveedor: that.getView().byId("ProveedorSeleccionado").getText().trim(),
-                posiciones: JSON.stringify(array)
+                posiciones: JSON.stringify(array),
+                navFrom: "Solicitudes"
             }, true);
         },
 

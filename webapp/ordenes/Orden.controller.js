@@ -88,7 +88,8 @@ sap.ui.define([
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],
                         proveedor: sPreviousHash.split("/")[2],
-                        posiciones: "1"
+                        posiciones: "1",
+                        navFrom:"Ordenes"
                     },
                         true);
                 }
