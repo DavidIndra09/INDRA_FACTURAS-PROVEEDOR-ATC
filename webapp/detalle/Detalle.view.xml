@@ -144,7 +144,7 @@
                                 <headerToolbar>
                                     <OverflowToolbar>
                                         <ToolbarSpacer />
-                                        <Button id="btnEliminarCondPedido" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idTableCondicionesPedido','¿Está seguro que desea eliminar las condiciones de pedido seleccionadas?')" text="Eliminar condiciones de pedido"/>
+                                        <Button id="btnEliminarCondPedido" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idTableCondicionesPedido','¿Está seguro que desea eliminar las condiciones de pedido seleccionadas?')" text=""/>
                                         <Button id="btnAddCondPedido" type="Emphasized" text="Agregar Condiciones pedido" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
                                         <SearchField visible="false" id="searchFieldCondPedido" tooltip="{i18n>ordenSearchTooltip}" liveChange="onBusquedaRapida">
                                             <layoutData>

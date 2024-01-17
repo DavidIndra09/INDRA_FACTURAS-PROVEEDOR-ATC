@@ -14,7 +14,11 @@ sap.ui.define([
         facturaModel,
         ODataUtilidadesModel,
         AdjuntosOriginal = [],
-        AdjuntosEliminados = [],
+        AdjuntosEliminados = [],    
+        condicionesPedidoOriginal = [],
+        condicionesPedidoEliminado = [],
+        posicionesEliminado = [],
+        posicionesOriginal = [],
         ODATA_SAP;
 
     return BaseController.extend("usil.com.createinvoice.atc.detalle.Detalle", {
@@ -254,6 +258,19 @@ sap.ui.define([
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
+
+                    if((viewModel.getProperty("/visibleconpedido"))){
+                             if((condicionesPedidoOriginal.length == 0)){
+                                condicionesPedidoOriginal = aLista
+                             }
+
+                    }
+                    else{
+                        if((posicionesOriginal.length == 0)){
+                            posicionesOriginal = aLista
+                         }
+                    }
+                     
                     (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").setModel(oModelLista) : that.byId("idtablaFactura").setModel(oModelLista);
                     (viewModel.getProperty("/visibleconpedido")) ? that.byId("tableSection").setTitle("Condiciones de pedido" + " (" + aLista.length + ")")  :that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
@@ -466,6 +483,34 @@ sap.ui.define([
                 }
             });
 
+            //Lógica para posiciones eliminadas
+            $.each(posicionesEliminado, function(i,item){
+                let find = posicionesOriginal.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR);  
+                if(find){                 
+
+                    let existingItem = posiciones.find(element => element.EBELN == item.EBELN && element.EBELP == item.EBELP && element.MATNR == item.MATNR && 
+                        element.BORRADO == "X");
+                    if (!existingItem) {
+                        find.BORRADO = "X"
+                        posiciones.push(item);
+                    } 
+                }  
+
+            });
+
+            //Lógica para condiciones de pedido eliminadas
+            $.each(condicionesPedidoEliminado, function(i,item){
+                let find = condicionesPedidoOriginal.find(element => element.EBELN == item.EBELN && element.KNUMV == item.KNUMV && element.KPOSN == item.KPOSN);
+                if(find){                    
+                    let existingItem = condicionPedidos.find(element => element.EBELN == item.EBELN && element.KNUMV == item.KNUMV && element.KPOSN == item.KPOSN && 
+                        element.BORRADO == "X");
+                    if (!existingItem) {
+                        find.BORRADO = "X"
+                        condicionPedidos.push(item);
+                    }                    
+                }
+            });
+
             if (tablaconpedido) {
                 conpedido = condicionPedidos.map(item => {
                     return {
@@ -474,7 +519,8 @@ sap.ui.define([
                         "knumv": item.KNUMV,
                         "kposn": item.KPOSN,
                         "kschl": item.KSCHL,
-                        "waers": item.WAERS
+                        "waers": item.WAERS,
+                        "borrado": item.BORRADO
                     }
                 });
             }
@@ -502,7 +548,8 @@ sap.ui.define([
                         "txz01": item.TXZ01,
                         "belnr": item.BELNR,
                         //"solfac": item.SOLFAC,
-                        "mwskz": item.MWSKZ
+                        "mwskz": item.MWSKZ,
+                        "borrado": item.BORRADO
                     }
                 });
             }
@@ -520,6 +567,7 @@ sap.ui.define([
                 "SOLFAC": cabecera.SOLFAC
             }
             */
+           
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
                 "IT_DET": JSON.stringify(conformidades),
@@ -761,6 +809,12 @@ sap.ui.define([
                         if (oAction === sap.m.MessageBox.Action.OK) {
                             // Elimina las filas seleccionadas
                             aSelectedItems.forEach(function (oSelectedItem) {
+                                if(table == "idtablaFactura"){
+                                    posicionesEliminado.push(oSelectedItem.getBindingContext().getObject());
+                                }
+                                else{
+                                    condicionesPedidoEliminado.push(oSelectedItem.getBindingContext().getObject());
+                                }                                
                                 oTable.removeItem(oSelectedItem);
                             });
 
