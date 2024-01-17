@@ -219,8 +219,8 @@ sap.ui.define([
                             item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
                         }
                         else {
-                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)));
-                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)))).toFixed(2);
+                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH")?item.MENGE:item.MENGE_PEND)));
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH")?item.MENGE:item.MENGE_PEND)))).toFixed(2);
                         }
 
                         item.WAERS = oCabecera.WAERS.split("-")[0];
@@ -248,14 +248,14 @@ sap.ui.define([
                         });
                     });
 
-                    //aLista.sort((a, b) => a.POSNR - b.POSNR);                    
+                    (viewModel.getProperty("/visibleconpedido"))? aLista.sort((a, b) => a.KPOSN - b.KPOSN):aLista.sort((a, b) => a.POSNR - b.POSNR);                    
                     let oModelLista = new JSONModel(aLista);
                     oModelLista.setSizeLimit(99999999999)
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
                     (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").setModel(oModelLista) : that.byId("idtablaFactura").setModel(oModelLista);
-                    that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
+                    (viewModel.getProperty("/visibleconpedido")) ? that.byId("tableSection").setTitle("Condiciones de pedido" + " (" + aLista.length + ")")  :that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
                     that.getView().byId("AdjuntosDetalle").setModel(new JSONModel({ "Adjuntos": adjuntos }));
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
                     that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria));
@@ -420,7 +420,7 @@ sap.ui.define([
             let condicionPedidos = that.byId("idTableCondicionesPedido").getModel().getData();
             let adjuntos = that.getView().byId("AdjuntosDetalle").getModel().getData().Adjuntos;
             let cabecera = that.getOwnerComponent().getModel("oCabecera").getData();
-            let PosnrMax = that.onObtenerPosicionAdjunto();
+            let PosnrMax = that.onObtenerPosicionAdjunto();            
             let conformidades = [];
             let conpedido = [];
             var tablaconpedido = viewModel.getProperty("/visibleconpedido")
@@ -775,7 +775,7 @@ sap.ui.define([
 
                             });
 
-                            that.byId("idtablaFactura").setModel(new JSONModel(data))
+                            that.byId(table).setModel(new JSONModel(data))
                         }
                     }
                 });

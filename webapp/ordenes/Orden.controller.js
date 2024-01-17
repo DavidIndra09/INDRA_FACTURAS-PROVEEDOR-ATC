@@ -77,13 +77,13 @@ sap.ui.define([
          * If not, it will replace the current entry of the browser history with the worklist route.
          * @public
          */
-        onNavBack: function (detalleFactura,value) {
+        onNavBack: function (detalleFactura, value) {
             var sPreviousHash = History.getInstance().getPreviousHash();
             if (sPreviousHash !== undefined) {
                 // eslint-disable-next-line sap-no-history-manipulation
                 if (sPreviousHash.includes("Detalle")) {
-                    let data = detalleFactura;                    
-                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones":data,"CondPedidoTable":value,"PosicionesTable":!value }), "Detalle")
+                    let data = detalleFactura;
+                    sap.ui.getCore().setModel(new JSONModel({ "Posiciones": data, "CondPedidoTable": value, "PosicionesTable": !value }), "Detalle")
                     sap.ui.core.BusyIndicator.show();
                     that.getRouter().navTo("detalle", {
                         codigoSolicitud: sPreviousHash.split("/")[1],
@@ -101,7 +101,7 @@ sap.ui.define([
                 this.getRouter().navTo("solicitudes", {}, true);
             }
         },
-        onNavSolicitudes: function(){
+        onNavSolicitudes: function () {
             sap.ui.core.BusyIndicator.show();
             this.getRouter().navTo("solicitudes", {}, true);
         },
@@ -112,6 +112,7 @@ sap.ui.define([
                 iTotalItems = oEvent.getParameter("total");
             // only update the counter if the length is final and
             // the table is not empty
+            
             if (iTotalItems && oTable.getBinding("items").isLengthFinal()) {
                 sTitle = this.getResourceBundle().getText("ordenTableTitleCount", [iTotalItems]);
             } else {
@@ -127,12 +128,12 @@ sap.ui.define([
 
             $.each(data, function (i, item) {
                 let element = MODEL.getProperty(item);
-                if(element!=undefined){
+                if (element != undefined) {
                     if (element.MWSKZ == "") {
                         object.valid = false;
                         object.mensaje.push("El pedido " + element.EBELN + " no cuenta con indicador de impuesto. Por favor actualizar desde la tx me22n");
                     }
-                }               
+                }
 
             });
             return object;
@@ -142,18 +143,18 @@ sap.ui.define([
             let count = 0;
             Mensaje.map((mensaje) => {
                 count++;
-                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + "\n" /*.<br>"*/; 
+                NuevoMensaje = NuevoMensaje + count + ". " + mensaje + "\n" /*.<br>"*/;
             });
             return NuevoMensaje;
         },
-        onEvaluarAgregar: async function(){
+        onEvaluarAgregar: async function () {
             let tableOC = that.byId("idTableOrdenes").getVisible();
-            if(tableOC){
-             that.onAgregarOrdenes();
+            if (tableOC) {
+                that.onAgregarOrdenes();
             }
-            else{
-             that.onAgregarCondicionPedido();
-            }     
+            else {
+                that.onAgregarCondicionPedido();
+            }
         },
         onAgregarOrdenes: async function () {
             let object = that.onValidarIndicadorImpuesto();
@@ -187,33 +188,54 @@ sap.ui.define([
                 var rowDetails = [];
                 let sumatoria = 0;
                 var pedido = [];
-                if(table.isAllSelectableSelected() && this.getView().byId("searchField").getValue() == ""){
+                if (table.isAllSelectableSelected() && this.getView().byId("searchField").getValue() == "") {
                     var Allordenes = table.getModel().getData().Ordenes;
-                    detalleFactura = Allordenes.map(item => {                                          
-                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) );
-                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)) )).toFixed(2);
-                        var find = pedido.find(fore=> fore == item.EBELN)
-                        if(!find){
+                    detalleFactura = Allordenes.map(item => {
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)));
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)))).toFixed(2);
+                        var find = pedido.find(fore => fore == item.EBELN)
+                        if (!find) {
                             pedido.push(item.EBELN);
                         }
                         return item;
                     });
                 }
-                else{
+                else if (table.isAllSelectableSelected() && this.getView().byId("searchField").getValue() != "") {
+                    var aLastContextData = table.getBinding("items").aLastContextData;
+                    var jsonString = '[' + aLastContextData.join(',') + ']';
+                    var parsedDataArray= [];
+
+                    try {
+                        parsedDataArray = JSON.parse(jsonString);
+                        console.log(parsedDataArray);
+                    } catch (error) {
+                        console.error("Error parsing JSON:", error);
+                    }
+                    detalleFactura = parsedDataArray.map(item => {
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)));
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato(item.MENGE_PEND)))).toFixed(2);
+                        var find = pedido.find(fore => fore == item.EBELN)
+                        if (!find) {
+                            pedido.push(item.EBELN);
+                        }
+                        return item;
+                    });
+                }
+                else {
                     detalleFactura = selectedPaths.map(item => {
-                        let element = MODEL.getProperty(item);                    
-                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE_PEND)) );
-                        element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE_PEND)) )).toFixed(2);
-                        
-                        var find = pedido.find(fore=> fore == element.EBELN)
-                        if(!find){
+                        let element = MODEL.getProperty(item);
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE_PEND)));
+                        element.TOTAL = ((parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE_PEND)))).toFixed(2);
+
+                        var find = pedido.find(fore => fore == element.EBELN)
+                        if (!find) {
                             pedido.push(element.EBELN);
                         }
                         return MODEL.getProperty(item);
                     });
-                    
+
                 }
-                
+
                 MODEL.setProperty("/Factura/pedido", pedido.join(";"));
                 MODEL.setProperty("/Factura/conformidades/results", detalleFactura);
                 MODEL.setProperty("/Factura/condpedido/results", []);
@@ -223,26 +245,26 @@ sap.ui.define([
                 sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
                 MODEL.setProperty("/Ordenes", []);
-                this.onNavBack(detalleFactura,false);
+                this.onNavBack(detalleFactura, false);
             } else {
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }
         },
         onAgregarCondicionPedido: async function () {
-          /*  let object = that.onValidarIndicadorImpuesto();
-            if (!object.valid) {                
-                let formattermessage = that.formatMessages(object.mensaje);
-                MessageBox.warning(
-                    formattermessage,
-                    {
-                        title: "Falta indicador de impuesto.",
-                        actions: [MessageBox.Action.CLOSE],
-                        //details: htmlmessage
-                    }
-                );
-                return;
-            }
-            */
+            /*  let object = that.onValidarIndicadorImpuesto();
+              if (!object.valid) {                
+                  let formattermessage = that.formatMessages(object.mensaje);
+                  MessageBox.warning(
+                      formattermessage,
+                      {
+                          title: "Falta indicador de impuesto.",
+                          actions: [MessageBox.Action.CLOSE],
+                          //details: htmlmessage
+                      }
+                  );
+                  return;
+              }
+              */
             const table = this.getView().byId("idTableCondicionesPedido");
             const selectedPaths = table.getSelectedContextPaths();
             let detalleFactura;
@@ -261,46 +283,46 @@ sap.ui.define([
                 var rowDetails = [];
                 let sumatoria = 0;
                 var pedido = [];
-                if(table.isAllSelectableSelected()){
+                if (table.isAllSelectableSelected()) {
                     var AllCondicionPedido = table.getModel().getData().CondPedido;
-                    detalleFactura = AllCondicionPedido.map(item => {                       
+                    detalleFactura = AllCondicionPedido.map(item => {
                         //sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KBETR)));
                         item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
-                        var find = pedido.find(fore=> fore == item.EBELN)
-                        if(!find){
+                        var find = pedido.find(fore => fore == item.EBELN)
+                        if (!find) {
                             pedido.push(item.EBELN);
                         }
                         return item;
                     });
-                     sumatoria = that.sumarPorEBELN(selectedPaths);
-                    
+                    sumatoria = that.sumarPorEBELN(selectedPaths);
+
                 }
-                else{
+                else {
                     detalleFactura = selectedPaths.map(item => {
                         let element = MODEL.getProperty(item);
                         //sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.KBETR)));
                         element.TOTAL = ((parseFloat(that.convertirFormato(element.KBETR)))).toFixed(2);
-                        var find = pedido.find(fore=> fore == element.EBELN)
-                        if(!find){
+                        var find = pedido.find(fore => fore == element.EBELN)
+                        if (!find) {
                             pedido.push(element.EBELN);
                         }
                         return MODEL.getProperty(item);
                     });
-                     sumatoria = that.sumarPorEBELN(selectedPaths);
-                    
+                    sumatoria = that.sumarPorEBELN(selectedPaths);
+
                 }
-                
-                
+
+
                 MODEL.setProperty("/Factura/pedido", pedido.join(";"));
                 MODEL.setProperty("/Factura/conformidades/results", []);
                 MODEL.setProperty("/Factura/condpedido/results", detalleFactura);
                 MODEL.setProperty("/Factura/visibleconpedido", true);
                 MODEL.setProperty("/Factura/visiblepos", false);
-                
+
                 sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
                 var oDetailInvoiceModel = new JSONModel(rowDetails);
                 MODEL.setProperty("/CondPedido", []);
-                this.onNavBack(detalleFactura,true);
+                this.onNavBack(detalleFactura, true);
             } else {
                 MessageBox.error("Debe seleccionar por lo menos un registro.");
             }
@@ -308,26 +330,26 @@ sap.ui.define([
         sumarPorEBELN: function (selectedPaths) {
             let primerValorPorEBELN = {};
             let sumarTodos = false;
-        
+
             selectedPaths.forEach(item => {
                 let element = MODEL.getProperty(item);
                 let ebeln = element.EBELN;
                 let kbetr = parseFloat(that.convertirFormato(element.KBETR));
                 let bsart = element.BSART;
-        
+
                 // Verificar si no hemos sumado KBETR para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
                     primerValorPorEBELN[ebeln] = kbetr;
                 }
-        
+
                 // Verificar la condición de BSART
                 if (bsart === "ZVEM") {
                     sumarTodos = true; // Establecer a true si encontramos al menos un BSART igual a ZVEM
                 }
             });
-        
+
             let resultado;
-        
+
             if (sumarTodos) {
                 // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
@@ -337,10 +359,10 @@ sap.ui.define([
                     return total + valor;
                 }, 0);
             }
-        
+
             return resultado.toFixed(2);
         },
-        
+
         /* sumarPorEBELN:function(selectedPaths) {
             let primerValorPorEBELN = {};
 
@@ -405,119 +427,119 @@ sap.ui.define([
                 MessageBox.error("Debe seleccionar al menos un registro.");
             }
         },
-        onEvaluarBusqueda: async function(){
-            
+        onEvaluarBusqueda: async function () {
+
             let tableOC = that.byId("idTableOrdenes").getVisible();
-            if(tableOC){
-             that.onBuscarOrdenes();
+            if (tableOC) {
+                that.onBuscarOrdenes();
             }
-            else{
-             that.ongetCondPedido();
+            else {
+                that.ongetCondPedido();
             }
             //that.byId("SwitchTableOC").getState();
         },
         onBuscarOrdenes: async function () {
             try {
-            sap.ui.core.BusyIndicator.show();
-            const busqueda = ordenModel.getProperty("/Busqueda");
-            const filters = [];
-            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;            
-            filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
-            filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
-            //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
-            filters.push(new Filter("I_ELIKZ", "EQ", "X"));
-            this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
-                filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
-            });
-            this.getView().byId("mtIptConformidades").getTokens().map(function (token) {
-                filters.push(new Filter("IR_BELNR", "EQ", token.getKey()));
-            });
-            this.getView().byId("mtIptDescMaterial").getTokens().map(function (token) {
-                filters.push(new Filter("IR_MATNR", "EQ", token.getKey()));
-            });
-
-            let parameters = { filters: filters };
-            const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
-            var posiciones = [];
-            if(request.results.length>0){
-                posiciones = JSON.parse(request.results[0].ET_DATA);
-                $.each(posiciones, function (i, item) {
-                    item.NETPR = (item.NETPR).toString();
-                    item.MENGE = (item.MENGE).toString();
+                sap.ui.core.BusyIndicator.show();
+                const busqueda = ordenModel.getProperty("/Busqueda");
+                const filters = [];
+                let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
+                filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
+                filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
+                //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+                filters.push(new Filter("I_ELIKZ", "EQ", "X"));
+                this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
+                    filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
                 });
+                this.getView().byId("mtIptConformidades").getTokens().map(function (token) {
+                    filters.push(new Filter("IR_BELNR", "EQ", token.getKey()));
+                });
+                this.getView().byId("mtIptDescMaterial").getTokens().map(function (token) {
+                    filters.push(new Filter("IR_MATNR", "EQ", token.getKey()));
+                });
+
+                let parameters = { filters: filters };
+                const request = await this.readEntity(ODATA_SAP, "/getOrdenCompraSet", parameters);
+                var posiciones = [];
+                if (request.results.length > 0) {
+                    posiciones = JSON.parse(request.results[0].ET_DATA);
+                    $.each(posiciones, function (i, item) {
+                        item.NETPR = (item.NETPR).toString();
+                        item.MENGE = (item.MENGE).toString();
+                    });
+                }
+                else {
+                    MessageBox.information(
+                        "No existen pedidos confirmados para el proveedor seleccionado o ya existe una factura.",
+                        {
+                            title: "No se encontraron resultados",
+                            actions: [MessageBox.Action.CLOSE],
+                            //details: htmlmessage
+                        }
+                    );
+                }
+                //posiciones.sort((a, b) => a.BELNR - b.BELNR);
+                MODEL.setProperty("/Ordenes", posiciones);
+                that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length + ")");
+                sap.ui.core.BusyIndicator.hide();
+            } catch (error) {
+                sap.ui.core.BusyIndicator.hide();
+                MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
+
             }
-            else{
-                MessageBox.information(
-                    "No existen pedidos confirmados para el proveedor seleccionado o ya existe una factura.",
-                    {
-                        title: "No se encontraron resultados",
-                        actions: [MessageBox.Action.CLOSE],
-                        //details: htmlmessage
-                    }
-                );
-            }  
-            //posiciones.sort((a, b) => a.BELNR - b.BELNR);
-            MODEL.setProperty("/Ordenes", posiciones);
-            that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
-            sap.ui.core.BusyIndicator.hide();
-        } catch (error) {
-            sap.ui.core.BusyIndicator.hide();
-            MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
-                   
-        }
         },
         ongetCondPedido: async function () {
             try {
-            sap.ui.core.BusyIndicator.show();
-            const busqueda = ordenModel.getProperty("/Busqueda");
-            const filters = [];
-            let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;            
-            filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
-            filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
-            //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
-            //filters.push(new Filter("I_ELIKZ", "EQ", "X"));
-            this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
-                filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
-            });
-            this.getView().byId("mtIptClaseCondicion").getTokens().map(function (token) {
-                filters.push(new Filter("IR_KSCHL", "EQ", token.getKey()));
-            });
-            /*
-            this.getView().byId("mtIptDescMaterial").getTokens().map(function (token) {
-                filters.push(new Filter("IR_MATNR", "EQ", token.getKey()));
-            });*/
-
-            let parameters = { filters: filters };
-            
-            const request = await this.readEntity(ODATA_SAP, "/getCondPedidoSet", parameters);
-            var posiciones = [];
-            if(request.results.length>0){
-                posiciones = JSON.parse(request.results[0].ET_DATA);
-                /*$.each(posiciones, function (i, item) {
-                    item.NETPR = (item.NETPR).toString();
-                    item.MENGE = (item.MENGE).toString();
+                sap.ui.core.BusyIndicator.show();
+                const busqueda = ordenModel.getProperty("/Busqueda");
+                const filters = [];
+                let lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
+                filters.push(new Filter("IR_BUKRS", "EQ", "1000"));
+                filters.push(new Filter("IR_LIFNR", "EQ", /*"0000000034"*/lifnr));
+                //filters.push(new Filter("I_LOEKZ", "EQ", "X"));
+                //filters.push(new Filter("I_ELIKZ", "EQ", "X"));
+                this.getView().byId("mtIptOrdenCompra").getTokens().map(function (token) {
+                    filters.push(new Filter("IR_EBELN", "EQ", token.getKey()));
+                });
+                this.getView().byId("mtIptClaseCondicion").getTokens().map(function (token) {
+                    filters.push(new Filter("IR_KSCHL", "EQ", token.getKey()));
+                });
+                /*
+                this.getView().byId("mtIptDescMaterial").getTokens().map(function (token) {
+                    filters.push(new Filter("IR_MATNR", "EQ", token.getKey()));
                 });*/
+
+                let parameters = { filters: filters };
+
+                const request = await this.readEntity(ODATA_SAP, "/getCondPedidoSet", parameters);
+                var posiciones = [];
+                if (request.results.length > 0) {
+                    posiciones = JSON.parse(request.results[0].ET_DATA);
+                    /*$.each(posiciones, function (i, item) {
+                        item.NETPR = (item.NETPR).toString();
+                        item.MENGE = (item.MENGE).toString();
+                    });*/
+                }
+                else {
+                    MessageBox.information(
+                        "No existen pedidos con condiciones para el proveedor seleccionado.",
+                        {
+                            title: "No se encontraron resultados",
+                            actions: [MessageBox.Action.CLOSE],
+                            //details: htmlmessage
+                        }
+                    );
+                }
+                //posiciones.sort((a, b) => a.BELNR - b.BELNR);
+                MODEL.setProperty("/CondPedido", posiciones);
+                that.getView().byId("idTableCondicionesPedido").setSelectedContextPaths([]);
+                that.getView().byId("tableHeaderCondPedido").setText("Condiciones (" + posiciones.length + ")");
+                sap.ui.core.BusyIndicator.hide();
+            } catch (error) {
+                sap.ui.core.BusyIndicator.hide();
+                MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
+
             }
-            else{
-                MessageBox.information(
-                    "No existen pedidos con condiciones para el proveedor seleccionado.",
-                    {
-                        title: "No se encontraron resultados",
-                        actions: [MessageBox.Action.CLOSE],
-                        //details: htmlmessage
-                    }
-                );
-            }  
-            //posiciones.sort((a, b) => a.BELNR - b.BELNR);
-            MODEL.setProperty("/CondPedido", posiciones);            
-            that.getView().byId("idTableCondicionesPedido").setSelectedContextPaths([]);
-            that.getView().byId("tableHeaderCondPedido").setText("Condiciones (" + posiciones.length +")");
-            sap.ui.core.BusyIndicator.hide();
-        } catch (error) {
-            sap.ui.core.BusyIndicator.hide();
-            MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
-                   
-        }
         },
         onLimpiarFiltros: function () {
             that.byId("mtIptOrdenCompra").setTokens([]);
@@ -537,8 +559,8 @@ sap.ui.define([
                         new Filter("EBELN", "Contains", query),
                         //new Filter("EBELP", "Contains", query),
                         new Filter("MATNR", "Contains", query),
-                        new Filter("TXZ01", "Contains", query),                      
-                       
+                        new Filter("TXZ01", "Contains", query),
+
                     ],
                     and: false
                 })
@@ -555,7 +577,7 @@ sap.ui.define([
                         new Filter("KNUMV", "Contains", query),
                         new Filter("EBELN", "Contains", query),
                         //new Filter("EBELP", "Contains", query),                                            
-                       
+
                     ],
                     and: false
                 })
@@ -579,7 +601,7 @@ sap.ui.define([
             if (lifnr == undefined) {
                 that.onNavSolicitudes();
                 return;
-            }       
+            }
             MODEL.setProperty("/Ordenes", []);
             MODEL.setProperty("/CondPedido", []);
             var tableOrdenes = this.getView().byId("idTableOrdenes");
@@ -616,7 +638,7 @@ sap.ui.define([
             MODEL.setProperty("/Ordenes", posiciones);
             //this._seleccionarTabla(posiciones);
             */
-            
+
             //that.onBuscarOrdenes();
             that.onEvaluarBusqueda();
         },
@@ -658,55 +680,55 @@ sap.ui.define([
                 ordenModel.setProperty("/tableNoDataText", this.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
             }
         },
-        onShowHideFilters: function(oEvent){
+        onShowHideFilters: function (oEvent) {
             var classType = "sapUiSmallMarginTop";
             var state = oEvent.mParameters.state;
-            
-            if(oEvent.getSource().getId().includes("SwitchTableOC")){
-                that.byId("btnFilterBuscar").addStyleClass(classType);  
-                that.byId("btnFilterLimpiar").addStyleClass(classType);  
-                that.byId("idTableOrdenes").setVisible(false)   
-                that.byId("idTableCondicionesPedido").setVisible(true)  
+
+            if (oEvent.getSource().getId().includes("SwitchTableOC")) {
+                that.byId("btnFilterBuscar").addStyleClass(classType);
+                that.byId("btnFilterLimpiar").addStyleClass(classType);
+                that.byId("idTableOrdenes").setVisible(false)
+                that.byId("idTableCondicionesPedido").setVisible(true)
                 that.byId("elementConformidades").setVisible(false);
                 that.byId("elementDescMaterial").setVisible(false);
                 that.byId("elementClaseCondicion").setVisible(true);
-                that.byId("SwitchTableCP").setState(true) 
-                that.byId("SwitchTableOC").setState(false)  
-                that.ongetCondPedido();          
+                that.byId("SwitchTableCP").setState(true)
+                that.byId("SwitchTableOC").setState(false)
+                that.ongetCondPedido();
             }
-            else{
-                that.byId("btnFilterBuscar").removeStyleClass(classType);  
-                that.byId("btnFilterLimpiar").removeStyleClass(classType);                    
-                that.byId("idTableOrdenes").setVisible(true)  
-                that.byId("idTableCondicionesPedido").setVisible(false) 
+            else {
+                that.byId("btnFilterBuscar").removeStyleClass(classType);
+                that.byId("btnFilterLimpiar").removeStyleClass(classType);
+                that.byId("idTableOrdenes").setVisible(true)
+                that.byId("idTableCondicionesPedido").setVisible(false)
                 that.byId("elementConformidades").setVisible(true);
                 that.byId("elementDescMaterial").setVisible(true);
                 that.byId("elementClaseCondicion").setVisible(false);
                 that.byId("SwitchTableCP").setState(false)
                 that.byId("SwitchTableOC").setState(false)
 
-            }           
-             
-            
+            }
+
+
         },
-        onValidarMontoIngresado: function(oEvent) {
+        onValidarMontoIngresado: function (oEvent) {
             var oInput = oEvent.getSource();
             var oContext = oInput.getBindingContext();
-      
+
             var fMENGE_PEND = parseFloat(oEvent.getParameter("value"));
             var fMENGE_INGR = parseFloat(oContext.getProperty("MENGE_INGR"));
             var fMENGE_FACT = parseFloat(oContext.getProperty("MENGE_FACT"));
-      
+
             // Validar que MENGE_PEND sea menor o igual a la diferencia entre MENGE_INGR y MENGE_FACT
             if (fMENGE_PEND > (fMENGE_INGR - fMENGE_FACT)) {
-              // Si no es válido, mostrar un cuadro de mensaje de error y establecer el valor del input a 0
-              MessageBox.error("Para el pedido " + oContext.getProperty("EBELN")  + " no es posible facturar más cantidad de la Ingresada por MIGO.", {
-                onClose: function() {
-                  oInput.setValue(0);
-                }
-              });
+                // Si no es válido, mostrar un cuadro de mensaje de error y establecer el valor del input a 0
+                MessageBox.error("Para el pedido " + oContext.getProperty("EBELN") + " no es posible facturar más cantidad de la Ingresada por MIGO.", {
+                    onClose: function () {
+                        oInput.setValue(0);
+                    }
+                });
             }
-          }
+        }
     });
 
 });

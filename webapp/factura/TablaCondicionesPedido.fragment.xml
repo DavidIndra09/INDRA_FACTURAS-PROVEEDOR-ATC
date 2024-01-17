@@ -15,6 +15,7 @@
         noDataText="{facturaView>/tableNoDataText}"
         busyIndicatorDelay="{facturaView>/tableBusyDelay}"
         growing="true"
+        updateFinished="onUpdateFinishedConPedido"
         growingThreshold="20"        
         mode="MultiSelect">
         
@@ -22,7 +23,7 @@
             <OverflowToolbar>
                 <Title
                     id="tableHeaderCondPedido"
-                    text="Condiciones de pedido"
+                    text="{facturaView>/CondicionesPedidoTableTitle}"
                     level="H3"/>
                 <ToolbarSpacer />
                 <Button id="btnEliminarCondPedido" type="Reject" icon="sap-icon://delete" press="eliminarCondPedido('idTableCondicionesPedido','¿Está seguro que desea eliminar las condiciones de pedido seleccionadas?')" text=""/>

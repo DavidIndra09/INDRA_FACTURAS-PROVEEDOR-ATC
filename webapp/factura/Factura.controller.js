@@ -119,6 +119,20 @@ sap.ui.define([
             }
             nuevafacturaModel.setProperty("/facturaTableTitle", sTitle);
         },
+        onUpdateFinishedConPedido: function (oEvent) {
+            // update the worklist's object counter after the table update
+            var sTitle,
+                oTable = oEvent.getSource(),
+                iTotalItems = oEvent.getParameter("total");
+            // only update the counter if the length is final and
+            // the table is not empty
+            if (iTotalItems && oTable.getBinding("items").isLengthFinal()) {
+                sTitle = this.getResourceBundle().getText("CondicionesPedidoTableTitleCount", [iTotalItems]);
+            } else {
+                sTitle = this.getResourceBundle().getText("CondicionesPedidoTableTitle");
+            }
+            nuevafacturaModel.setProperty("/CondicionesPedidoTableTitle", sTitle);
+        },
 
 
         /**
