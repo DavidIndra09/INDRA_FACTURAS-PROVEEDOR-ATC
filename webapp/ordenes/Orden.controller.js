@@ -496,6 +496,7 @@ sap.ui.define([
                         } else if (facturaMoneda === "USD") {
                             item.IMPORTECOND = item.KWETR;
                         }
+                        item.WAERK = facturaMoneda;
                     });                   
                 }
                 else {
