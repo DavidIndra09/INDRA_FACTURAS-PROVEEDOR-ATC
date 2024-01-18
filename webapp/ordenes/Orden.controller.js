@@ -21,6 +21,8 @@ sap.ui.define([
     let MODEL,
         that,
         ordenModel,
+        ParamMoneda = "",
+        ParamNavFrom = "",
         ODATA_SAP;
     return BaseController.extend("usil.com.createinvoice.atc.ordenes.Orden", {
 
@@ -79,19 +81,23 @@ sap.ui.define([
          */
         onNavBack: function (detalleFactura, value) {
             var sPreviousHash = History.getInstance().getPreviousHash();
-            if (sPreviousHash !== undefined) {
+            
+            if (ParamNavFrom !== "") {
                 // eslint-disable-next-line sap-no-history-manipulation
-                if (sPreviousHash.includes("Detalle")) {
+                if (ParamNavFrom.includes("detalle")) {
                     let data = detalleFactura;
                     sap.ui.getCore().setModel(new JSONModel({ "Posiciones": data, "CondPedidoTable": value, "PosicionesTable": !value }), "Detalle")
                     sap.ui.core.BusyIndicator.show();
                     that.getRouter().navTo("detalle", {
-                        codigoSolicitud: sPreviousHash.split("/")[1],
-                        proveedor: sPreviousHash.split("/")[2],
+                        codigoSolicitud: "d",//sPreviousHash.split("/")[1],
+                        proveedor: "d",//sPreviousHash.split("/")[2],
                         posiciones: "1",
                         navFrom:"Ordenes"
                     },
                         true);
+                }
+                else if(ParamNavFrom.includes("factura")){
+                    this.getRouter().navTo("factura", {}, true); 
                 }
                 else {
                     history.go(-1);
@@ -273,8 +279,8 @@ sap.ui.define([
                 if (table.isAllSelectableSelected()) {
                     var AllCondicionPedido = table.getModel().getData().CondPedido;
                     detalleFactura = AllCondicionPedido.map(item => {
-                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KWETR)));
-                        item.TOTAL = ((parseFloat(that.convertirFormato(item.KWETR)))).toFixed(2);
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.IMPORTECOND)));
+                        item.TOTAL = ((parseFloat(that.convertirFormato(item.IMPORTECOND)))).toFixed(2);
                         var find = pedido.find(fore => fore == item.EBELN)
                         if (!find) {
                             pedido.push(item.EBELN);
@@ -287,8 +293,8 @@ sap.ui.define([
                 else {
                     detalleFactura = selectedPaths.map(item => {
                         let element = MODEL.getProperty(item);
-                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.KWETR)));
-                        element.TOTAL = ((parseFloat(that.convertirFormato(element.KWETR)))).toFixed(2);
+                        sumatoria = sumatoria + (parseFloat(that.convertirFormato(element.IMPORTECOND)));
+                        element.TOTAL = ((parseFloat(that.convertirFormato(element.IMPORTECOND)))).toFixed(2);
                         var find = pedido.find(fore => fore == element.EBELN)
                         if (!find) {
                             pedido.push(element.EBELN);
@@ -321,12 +327,12 @@ sap.ui.define([
             selectedPaths.forEach(item => {
                 let element = MODEL.getProperty(item);
                 let ebeln = element.EBELN;
-                let KWETR = parseFloat(that.convertirFormato(element.KWETR));
+                let IMPORTECOND = parseFloat(that.convertirFormato(element.IMPORTECOND));
                 let bsart = element.BSART;
 
-                // Verificar si no hemos sumado KWETR para este EBELN
+                // Verificar si no hemos sumado IMPORTECOND para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
-                    primerValorPorEBELN[ebeln] = KWETR;
+                    primerValorPorEBELN[ebeln] = IMPORTECOND;
                 }
 
                 // Verificar la condición de BSART
@@ -338,10 +344,10 @@ sap.ui.define([
             let resultado;
 
             if (sumarTodos) {
-                // Sumar todos los valores de KWETR si al menos un BSART es igual a ZVEM
+                // Sumar todos los valores de IMPORTECOND si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
             } else {
-                // Obtener solo el primer valor de KWETR para cada valor único de EBELN
+                // Obtener solo el primer valor de IMPORTECOND para cada valor único de EBELN
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
                     return total + valor;
                 }, 0);
@@ -481,12 +487,16 @@ sap.ui.define([
 
                 const request = await this.readEntity(ODATA_SAP, "/getCondPedidoSet", parameters);
                 var posiciones = [];
-                if (request.results.length > 0) {
-                    posiciones = JSON.parse(request.results[0].ET_DATA);
-                    /*$.each(posiciones, function (i, item) {
-                        item.NETPR = (item.NETPR).toString();
-                        item.MENGE = (item.MENGE).toString();
-                    });*/
+                if (request.results.length > 0) {                                    
+                    posiciones = JSON.parse(request.results[0].ET_DATA);                    
+                    var facturaMoneda = ParamMoneda;
+                    posiciones.forEach(function(item) {
+                        if (facturaMoneda === "COP") {
+                            item.IMPORTECOND = item.KBETR;
+                        } else if (facturaMoneda === "USD") {
+                            item.IMPORTECOND = item.KWETR;
+                        }
+                    });                   
                 }
                 else {
                     MessageBox.information(
@@ -498,7 +508,8 @@ sap.ui.define([
                         }
                     );
                 }
-                //posiciones.sort((a, b) => a.BELNR - b.BELNR);
+                //posiciones.sort((a, b) => a.BELNR - b.BELNR);                
+                
                 MODEL.setProperty("/CondPedido", posiciones);
                 that.getView().byId("idTableCondicionesPedido").setSelectedContextPaths([]);
                 that.getView().byId("tableHeaderCondPedido").setText("Condiciones (" + posiciones.length + ")");
@@ -569,7 +580,9 @@ sap.ui.define([
             if (lifnr == undefined) {
                 that.onNavSolicitudes();
                 return;
-            }
+            }            
+            ParamMoneda = oEvent.getParameters().arguments.moneda 
+            ParamNavFrom = oEvent.getParameters().arguments.navFrom 
             MODEL.setProperty("/Ordenes", []);
             MODEL.setProperty("/CondPedido", []);
             var tableOrdenes = this.getView().byId("idTableOrdenes");

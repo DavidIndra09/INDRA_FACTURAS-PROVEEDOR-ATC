@@ -96,12 +96,13 @@ sap.ui.define([
                 oObject.total = formatter.formatCurrency(oObject.total);
                 oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado" || oObject.DescripcionEstado == "Con Errores") ? true : false;
 
-                await this.getwaershelp((oObject.WAERS).split("-")[0]);
+                
+                
+                if (oParameters.arguments.navFrom == "Solicitudes") {
+                    await this.getwaershelp((oObject.WAERS).split("-")[0]);
                 let waersCollection = that.getView().getModel("waershelp").getData();
                 var find = waersCollection.find(item => item.VALUE == oObject.WAERS.split("-")[0].trim());
                 oObject.WAERS = find.VALUE + " - " + find.TEXTO;
-                
-                if (oParameters.arguments.navFrom == "Solicitudes") {
                     AdjuntosEliminados = [];
                     condicionesPedidoEliminado = [];
                     posicionesEliminado = [];
@@ -139,8 +140,8 @@ sap.ui.define([
             $.each(aLista, function (i, item) {
 
                 if (VisibleTable) {
-                    sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KWETR)));
-                    item.TOTAL = ((parseFloat(that.convertirFormato(item.KWETR)))).toFixed(2);
+                    sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.IMPORTECOND)));
+                    item.TOTAL = ((parseFloat(that.convertirFormato(item.IMPORTECOND)))).toFixed(2);
                 }
                 else {
                     sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)));
@@ -280,8 +281,8 @@ sap.ui.define([
                     $.each(aLista, function (i, item) {
 
                         if (VisibleTable) {
-                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KWETR)));
-                            item.TOTAL = ((parseFloat(that.convertirFormato(item.KWETR)))).toFixed(2);
+                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.IMPORTECOND)));
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.IMPORTECOND)))).toFixed(2);
                         }
                         else {
                             sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)));
@@ -357,12 +358,12 @@ sap.ui.define([
             oData.forEach(item => {
                 let element = item;
                 let ebeln = element.EBELN;
-                let KWETR = parseFloat(that.convertirFormato(element.KWETR));
+                let IMPORTECOND = parseFloat(that.convertirFormato(element.IMPORTECOND));
                 let bsart = element.BSART;
 
-                // Verificar si no hemos sumado KWETR para este EBELN
+                // Verificar si no hemos sumado IMPORTECOND para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
-                    primerValorPorEBELN[ebeln] = KWETR;
+                    primerValorPorEBELN[ebeln] = IMPORTECOND;
                 }
 
                 // Verificar la condición de BSART
@@ -374,10 +375,10 @@ sap.ui.define([
             let resultado;
 
             if (sumarTodos) {
-                // Sumar todos los valores de KWETR si al menos un BSART es igual a ZVEM
+                // Sumar todos los valores de IMPORTECOND si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
             } else {
-                // Obtener solo el primer valor de KWETR para cada valor único de EBELN
+                // Obtener solo el primer valor de IMPORTECOND para cada valor único de EBELN
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
                     return total + valor;
                 }, 0);
@@ -585,7 +586,7 @@ sap.ui.define([
                 conpedido = condicionPedidos.map(item => {
                     return {
                         "ebeln": item.EBELN,
-                        "KWETR": item.KWETR,
+                        "IMPORTECOND": item.IMPORTECOND,
                         "knumv": item.KNUMV,
                         "kposn": item.KPOSN,
                         "kschl": item.KSCHL,
@@ -801,7 +802,17 @@ sap.ui.define([
         onNavOrdenes: function () {
             try {
                 sap.ui.core.BusyIndicator.show();
-                this.getRouter().navTo("orden", {}, false);
+                let valid = that.onValidarMonedarObligatoria();
+                if (!valid) {
+                    MessageBox.warning("El campo moneda es obligatorio.");
+                    sap.ui.core.BusyIndicator.hide()
+                    return;
+                }
+                let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
+                this.getRouter().navTo("orden", {
+                    "moneda":oCabecera.WAERS.split("-")[0].trim(),
+                    "navFrom":"detalle"
+                }, true);
             }
             catch (error) {
                 sap.ui.core.BusyIndicator.hide();
@@ -958,7 +969,18 @@ sap.ui.define([
                 return [str];
             }
         },
-
+        onValidarMonedarObligatoria: function () {
+            let valid = true;
+            const factura = that.getOwnerComponent().getModel("oCabecera").getData();            
+            if (factura.WAERS == undefined || factura.WAERS == "") {
+                that.getView().byId("InputSelectWaers").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputSelectWaers").setValueState("None")
+            }
+            return valid;
+        },
     });
 
 });

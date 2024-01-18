@@ -75,7 +75,7 @@
                     <Text text="{KPOSN}" /> 
                     <Text text="{KSCHL}" /> 
                      <ObjectNumber number="{
-                            parts:[{path:'KWETR',formatter: '.formatter.formatCurrency'}]                                                        
+                            parts:[{path:'IMPORTECOND',formatter: '.formatter.formatCurrency'}]                                                        
                         }" unit="{WAERK}" state="Information" />  
                     <Text text="{WAERK}" />                         
                 </cells>

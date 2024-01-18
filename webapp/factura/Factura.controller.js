@@ -92,7 +92,18 @@ sap.ui.define([
         onNavOrdenes: function () {
             try {
                 sap.ui.core.BusyIndicator.show();
-                this.getRouter().navTo("orden", {}, false);
+                let valid = that.onValidarMonedarObligatoria();
+                if (!valid) {
+                    MessageBox.warning("El campo moneda es obligatorio.");
+                    sap.ui.core.BusyIndicator.hide()
+                    return;
+                }   
+                const factura = MODEL.getProperty("/Factura")
+                var facturaMoneda = factura.moneda.split("-")[0].trim();             
+                this.getRouter().navTo("orden", {
+                    "moneda":facturaMoneda,
+                    "navFrom":"factura"
+                }, true);
             } catch (error) {
 
             }
@@ -151,106 +162,106 @@ sap.ui.define([
 
         onImportarArchivoXml: async function (event) {
             try {
-            const files = event.getParameter("files");
-            const fileUploader = event.getSource();
-            if (files.length > 0) {
-                const file = files[0];
-                const dataXml = await this._readFiles(file);
+                const files = event.getParameter("files");
+                const fileUploader = event.getSource();
+                if (files.length > 0) {
+                    const file = files[0];
+                    const dataXml = await this._readFiles(file);
 
-                if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice && !dataXml.attacheddocument.attachment.externalreference.description) {//dataXml.invoice
-                    MessageBox.error(`El archivo xml no cumple con el formato requerido`);
-                    fileUploader.setValue("");
-                    return;
+                    if (!dataXml.attacheddocument.attachment.externalreference.description.invoice && !dataXml.invoice && !dataXml.attacheddocument.attachment.externalreference.description) {//dataXml.invoice
+                        MessageBox.error(`El archivo xml no cumple con el formato requerido`);
+                        fileUploader.setValue("");
+                        return;
+                    }
+                    const invoice = (dataXml.attacheddocument) ? ((dataXml.attacheddocument.attachment.externalreference.description.invoice) ? dataXml.attacheddocument.attachment.externalreference.description.invoice : dataXml.attacheddocument.attachment.externalreference.description) : dataXml.invoice//dataXml.invoice;
+
+                    let version = invoice.ublversionid;
+                    version = parseFloat(version);
+                    if (version <= 2.0) {
+                        MessageBox.error(`La version ${version} no es compatible, se requiere 2.0 o superior`);
+                        fileUploader.setValue("");
+                        return;
+                    }
+
+                    const datosFactura = {
+                        //version: invoice.ublversionid,
+                        numeroSerie: invoice.id,
+                        fechaEmision: invoice.issuedate,
+                        //fechaVencimiento: invoice.paymentterms.paymentduedate,
+                        //tipoDocumento: invoice.invoicetypecode,
+                        tipoMoneda: (invoice.documentcurrencycode) ? invoice.documentcurrencycode : invoice.note.documentcurrencycode,
+                        //rucEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
+                        //nombreComercialEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
+                        //numeroDocumentoReceptor: invoice.accountingcustomerparty.party.partyidentification.id,
+                        //tipoDocumentoReceptor: "",
+                        //nombresReceptor: invoice.accountingcustomerparty.party.partylegalentity.registrationname,
+                        //unidadMedida: "",
+                        //cantidad: invoice.invoiceline.invoicedquantity,
+                        //codigoProducto: invoice.invoiceline.item.sellersitemidentification.id,
+                        //codigoProductoSunat: "",
+                        //descripcionItem: invoice.invoiceline.item.description,
+                        //precioUnitario: invoice.invoiceline.price.priceamount,
+                        //igvItem: invoice.invoiceline.taxtotal.taxamount,
+                        //valorVentaItem: invoice.invoiceline.pricingreference.alternativeconditionprice.priceamount,
+                        //descuentoItem: false,
+                        //totalValorVenta: "",
+                        //totalDescuentos: "",
+                        //sumatoriaIgv: invoice.taxtotal.taxamount,
+                        ordenReference: (invoice.orderreference) ? invoice.orderreference.id : ((typeof invoice.note === 'object' && invoice.note !== null && invoice.note.orderreference && invoice.note.orderreference.id) ? invoice.note.orderreference.id : ""),
+                        //(invoice.orderreference) ? invoice.orderreference.id :(typeof invoice.note === 'object' )?invoice.note.orderreference.id:"",
+                        nitproovedor: (invoice.accountingsupplierparty) ? invoice.accountingsupplierparty.party.partytaxscheme.companyid : "",
+                        importe: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.lineextensionamount : invoice.note.legalmonetarytotal.lineextensionamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
+                        total: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.payableamount : invoice.note.legalmonetarytotal.payableamount,
+                        //sociedad: "3000"
+                    };
+
+                    MODEL.setProperty("/facturaXml", datosFactura);
+
+                    const fechaEmisionView = formatter.formatDateImportacion(datosFactura.fechaEmision);
+                    const fechaEmisionParamenter = formatter.formatDateParameter(fechaEmisionView);
+                    MODEL.setProperty("/Factura/codigoFactura", datosFactura.numeroSerie);
+                    MODEL.setProperty("/Factura/fechaEmision", fechaEmisionView);
+                    MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
+                    MODEL.setProperty("/Factura/importe", datosFactura.importe);
+                    MODEL.setProperty("/Factura/total", datosFactura.total);
+                    await this.getwaershelp(datosFactura.tipoMoneda);
+                    let waersCollection = that.getView().getModel("waershelp").getData();
+                    var find = waersCollection.find(item => item.VALUE == datosFactura.tipoMoneda);
+                    var moneda = (find) ? (find.VALUE + " - " + find.TEXTO) : datosFactura.tipoMoneda;
+                    MODEL.setProperty("/Factura/moneda", moneda);
+                    //MODEL.setProperty("/Factura/sociedad", datosFactura.sociedad);
+
+                    nuevafacturaModel.setProperty("/isEnabledCabecera", true);
+                    MODEL.setProperty("/Factura/estado", "No validado");
+                    MODEL.setProperty("/Factura/estadoState", "Information");
+                    MODEL.setProperty("/Factura/estadoIcon", "sap-icon://information");
+                    MODEL.setProperty("/Factura/estadoCp", "");
+
+                    var validCaracter = datosFactura.ordenReference.substring(0, 2) === "45";
+                    if (validCaracter) {
+                        MODEL.setProperty("/Factura/pedido", datosFactura.ordenReference);
+                        let oMultiInputPedido = that.byId("pedido");
+                        oMultiInputPedido.addToken(new Token({ key: datosFactura.ordenReference, text: datosFactura.ordenReference }))
+                        that.onBuscarOC(datosFactura.ordenReference, datosFactura.importe);
+                    }
+                    else {
+                        var SplitOrdenReference = (datosFactura.ordenReference.includes(";")) ? datosFactura.ordenReference.split(";") : [];
+                        let oMultiInputNumfaBl = that.byId("InputNumfactBl");
+                        $.each(SplitOrdenReference, function (i, item) {
+                            oMultiInputNumfaBl.addToken(new Token({ key: item, text: item }))
+                        });
+                        MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference);
+
+                    }
+                    // this._destroyMessageStrip();
                 }
-                const invoice = (dataXml.attacheddocument) ? ((dataXml.attacheddocument.attachment.externalreference.description.invoice) ? dataXml.attacheddocument.attachment.externalreference.description.invoice : dataXml.attacheddocument.attachment.externalreference.description) : dataXml.invoice//dataXml.invoice;
-
-                let version = invoice.ublversionid;
-                version = parseFloat(version);
-                if (version <= 2.0) {
-                    MessageBox.error(`La version ${version} no es compatible, se requiere 2.0 o superior`);
-                    fileUploader.setValue("");
-                    return;
-                }
-
-                const datosFactura = {
-                    //version: invoice.ublversionid,
-                    numeroSerie: invoice.id,
-                    fechaEmision: invoice.issuedate,
-                    //fechaVencimiento: invoice.paymentterms.paymentduedate,
-                    //tipoDocumento: invoice.invoicetypecode,
-                    tipoMoneda: (invoice.documentcurrencycode) ? invoice.documentcurrencycode : invoice.note.documentcurrencycode,
-                    //rucEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
-                    //nombreComercialEmisor: invoice.accountingsupplierparty.party.partyidentification.id,
-                    //numeroDocumentoReceptor: invoice.accountingcustomerparty.party.partyidentification.id,
-                    //tipoDocumentoReceptor: "",
-                    //nombresReceptor: invoice.accountingcustomerparty.party.partylegalentity.registrationname,
-                    //unidadMedida: "",
-                    //cantidad: invoice.invoiceline.invoicedquantity,
-                    //codigoProducto: invoice.invoiceline.item.sellersitemidentification.id,
-                    //codigoProductoSunat: "",
-                    //descripcionItem: invoice.invoiceline.item.description,
-                    //precioUnitario: invoice.invoiceline.price.priceamount,
-                    //igvItem: invoice.invoiceline.taxtotal.taxamount,
-                    //valorVentaItem: invoice.invoiceline.pricingreference.alternativeconditionprice.priceamount,
-                    //descuentoItem: false,
-                    //totalValorVenta: "",
-                    //totalDescuentos: "",
-                    //sumatoriaIgv: invoice.taxtotal.taxamount,
-                    ordenReference: (invoice.orderreference) ? invoice.orderreference.id : ((typeof invoice.note === 'object' && invoice.note !== null && invoice.note.orderreference && invoice.note.orderreference.id) ? invoice.note.orderreference.id : ""),
-                    //(invoice.orderreference) ? invoice.orderreference.id :(typeof invoice.note === 'object' )?invoice.note.orderreference.id:"",
-                    nitproovedor: (invoice.accountingsupplierparty) ? invoice.accountingsupplierparty.party.partytaxscheme.companyid : "",
-                    importe: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.lineextensionamount : invoice.note.legalmonetarytotal.lineextensionamount,//(invoice.taxtotal)?invoice.taxtotal.taxsubtotal.taxableamount:invoice.note.taxtotal.taxsubtotal.taxableamount, ///
-                    total: (invoice.legalmonetarytotal) ? invoice.legalmonetarytotal.payableamount : invoice.note.legalmonetarytotal.payableamount,
-                    //sociedad: "3000"
-                };
-
-                MODEL.setProperty("/facturaXml", datosFactura);
-
-                const fechaEmisionView = formatter.formatDateImportacion(datosFactura.fechaEmision);
-                const fechaEmisionParamenter = formatter.formatDateParameter(fechaEmisionView);
-                MODEL.setProperty("/Factura/codigoFactura", datosFactura.numeroSerie);
-                MODEL.setProperty("/Factura/fechaEmision", fechaEmisionView);
-                MODEL.setProperty("/Factura/fechaEmisionParameter", fechaEmisionParamenter);
-                MODEL.setProperty("/Factura/importe", datosFactura.importe);
-                MODEL.setProperty("/Factura/total", datosFactura.total);
-                await this.getwaershelp(datosFactura.tipoMoneda);
-                let waersCollection = that.getView().getModel("waershelp").getData();
-                var find = waersCollection.find(item => item.VALUE == datosFactura.tipoMoneda);
-                var moneda = (find) ? (find.VALUE + " - " + find.TEXTO) : datosFactura.tipoMoneda;
-                MODEL.setProperty("/Factura/moneda", moneda);
-                //MODEL.setProperty("/Factura/sociedad", datosFactura.sociedad);
-
-                nuevafacturaModel.setProperty("/isEnabledCabecera", true);
-                MODEL.setProperty("/Factura/estado", "No validado");
-                MODEL.setProperty("/Factura/estadoState", "Information");
-                MODEL.setProperty("/Factura/estadoIcon", "sap-icon://information");
-                MODEL.setProperty("/Factura/estadoCp", "");
-
-                var validCaracter = datosFactura.ordenReference.substring(0, 2) === "45";
-                if (validCaracter) {
-                    MODEL.setProperty("/Factura/pedido", datosFactura.ordenReference);
-                    let oMultiInputPedido = that.byId("pedido");                   
-                    oMultiInputPedido.addToken(new Token({ key: datosFactura.ordenReference, text: datosFactura.ordenReference }))                    
-                    that.onBuscarOC(datosFactura.ordenReference, datosFactura.importe);
-                }
-                else {
-                    var SplitOrdenReference = (datosFactura.ordenReference.includes(";")) ? datosFactura.ordenReference.split(";") : [];
-                    let oMultiInputNumfaBl = that.byId("InputNumfactBl");
-                    $.each(SplitOrdenReference, function (i, item) {
-                        oMultiInputNumfaBl.addToken(new Token({ key: item, text: item }))
-                    });
-                    MODEL.setProperty("/Factura/Numfa", datosFactura.ordenReference);
-
-                }
-                // this._destroyMessageStrip();
+            } catch (error) {
+                MessageBox.error(`Se produjo un error al procesar el archivo XML: ${error.message}`);
+                fileUploader.setValue("");
             }
-           }catch (error) {
-            MessageBox.error(`Se produjo un error al procesar el archivo XML: ${error.message}`);
-            fileUploader.setValue("");
-           }
         },
         onClearArchivoXml: function (event) {
-            
+
             MODEL.setProperty("/facturaXml", {});
             MODEL.setProperty("/Factura/codigoFactura", "");
             MODEL.setProperty("/Factura/fechaEmision", "");
@@ -265,7 +276,7 @@ sap.ui.define([
             MODEL.setProperty("/Factura/moneda", "");
             MODEL.setProperty("/Factura/Numfa", "");
             MODEL.setProperty("/Factura/pedido", "")
-            
+
             nuevafacturaModel.setProperty("/isEnabledCabecera", true);
             nuevafacturaModel.setProperty("/isBtnPosicionesEnabled", false);
             const fileUploader = this.getView().byId("fileUploader");
@@ -703,20 +714,20 @@ sap.ui.define([
 
             this._bindView("/Factura");
         },
-        onCalcularSumaPosiciones: function (property,flow) {            
+        onCalcularSumaPosiciones: function (property, flow) {
             let suma = 0;
             let posiciones = MODEL.getProperty(property);
-            if(flow){
+            if (flow) {
                 $.each(posiciones, function (i, element) {
-                    suma = suma + (parseFloat(that.convertirFormato(element.KWETR)));
+                    suma = suma + (parseFloat(that.convertirFormato(element.IMPORTECOND)));
                 });
                 //suma = that.sumarPorEBELN(posiciones);
             }
-            else{
+            else {
                 $.each(posiciones, function (i, element) {
                     suma = suma + (parseFloat(that.convertirFormato(element.NETPR)) * parseFloat(that.convertirFormato(element.MENGE)));
                 });
-            }            
+            }
             sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": suma }), "TotalNETPR");
             that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(suma));
             that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(suma));
@@ -846,7 +857,7 @@ sap.ui.define([
             let diferencia = MODEL.getProperty("/Factura/diferencia");
             var tolerancia = await that.ongetTolerancia();
             let valid = (Math.abs(parseFloat(diferencia)) <= parseFloat(tolerancia)) ? true : false;
-            
+
             return valid;
         },
         _crearFactura: async function () {
@@ -883,6 +894,18 @@ sap.ui.define([
                 }.bind(this)
             });
             // this.closeDialog("CreateInvoice");
+        },
+        onValidarMonedarObligatoria: function () {
+            let valid = true;
+            const factura = MODEL.getProperty("/Factura");
+            if (factura.moneda == undefined || factura.moneda == "") {
+                that.getView().byId("InputSelectWaers").setValueState("Error")
+                valid = false;
+            }
+            else {
+                that.getView().byId("InputSelectWaers").setValueState("None")
+            }
+            return valid;
         },
         onValidarCampos: function () {
             let valid = true;
@@ -958,7 +981,7 @@ sap.ui.define([
                     "menge": item.MENGE,
                     "menge_ingr": item.MENGE_INGR,
                     "menge_fact": item.MENGE_FACT,
-                    "menge_pend": item.MENGE_PEND,                    
+                    "menge_pend": item.MENGE_PEND,
                     "meins": item.MEINS,
                     //"NETPR": item.NETPR,
                     "netpr": item.NETPR,
@@ -972,7 +995,7 @@ sap.ui.define([
             const conpedido = factura.condpedido.results.map(item => {
                 return {
                     "ebeln": item.EBELN,
-                    "KWETR": item.KWETR,
+                    "IMPORTECOND": item.IMPORTECOND,
                     "knumv": item.KNUMV,
                     "kposn": item.KPOSN,
                     "kschl": item.KSCHL,
@@ -1256,7 +1279,7 @@ sap.ui.define([
             MODEL.setProperty("/Factura/conformidades/results", posiciones);
             //sap.ui.getCore().setModel(new JSONModel({ "TotalNETPR": sumatoria }), "TotalNETPR")
             //that.getView().byId("tableHeader").setText("Posiciones (" + posiciones.length +")");
-            that.onCalcularSumaPosiciones("/Factura/conformidades/results",false);
+            that.onCalcularSumaPosiciones("/Factura/conformidades/results", false);
             that.onCalcularDiferencia(ImporteBase);
             sap.ui.core.BusyIndicator.hide();
         },
@@ -1278,21 +1301,21 @@ sap.ui.define([
                 return valor;
             }
         },
-        eliminarFilasSeleccionadas: function(table, messageConfirm) {
+        eliminarFilasSeleccionadas: function (table, messageConfirm) {
             var oTable = this.getView().byId(table);
             var aSelectedItems = oTable.getSelectedItems();
-        
+
             if (aSelectedItems.length > 0) {
                 // Muestra un mensaje de confirmación
                 sap.m.MessageBox.confirm(messageConfirm, {
                     title: "Confirmar",
-                    onClose: function(oAction) {
+                    onClose: function (oAction) {
                         if (oAction === sap.m.MessageBox.Action.OK) {
                             // Elimina las filas seleccionadas
-                            aSelectedItems.forEach(function(oSelectedItem) {
+                            aSelectedItems.forEach(function (oSelectedItem) {
                                 var oContext = oSelectedItem.getBindingContext();
                                 var oModel = oContext.getModel();
-        
+
                                 // Verifica si el modelo es un ODataModel
                                 if (oModel instanceof sap.ui.model.odata.ODataModel) {
                                     // Si es un ODataModel, utiliza la función remove
@@ -1305,10 +1328,10 @@ sap.ui.define([
                                     oModel.setProperty("/Factura/conformidades/results", aData);
                                 }
                             });
-        
+
                             // Limpia la selección después de borrar
                             oTable.removeSelections();
-                            that.onCalcularSumaPosiciones("/Factura/conformidades/results",false);
+                            that.onCalcularSumaPosiciones("/Factura/conformidades/results", false);
                         }
                     }
                 });
@@ -1317,21 +1340,21 @@ sap.ui.define([
                 sap.m.MessageToast.show("No hay filas seleccionadas para eliminar.");
             }
         },
-        eliminarCondPedido: function(table, messageConfirm) {
+        eliminarCondPedido: function (table, messageConfirm) {
             var oTable = this.getView().byId(table);
             var aSelectedItems = oTable.getSelectedItems();
-        
+
             if (aSelectedItems.length > 0) {
                 // Muestra un mensaje de confirmación
                 sap.m.MessageBox.confirm(messageConfirm, {
                     title: "Confirmar",
-                    onClose: function(oAction) {
+                    onClose: function (oAction) {
                         if (oAction === sap.m.MessageBox.Action.OK) {
                             // Elimina las filas seleccionadas
-                            aSelectedItems.forEach(function(oSelectedItem) {
+                            aSelectedItems.forEach(function (oSelectedItem) {
                                 var oContext = oSelectedItem.getBindingContext();
                                 var oModel = oContext.getModel();
-        
+
                                 // Verifica si el modelo es un ODataModel
                                 if (oModel instanceof sap.ui.model.odata.ODataModel) {
                                     // Si es un ODataModel, utiliza la función remove
@@ -1344,10 +1367,10 @@ sap.ui.define([
                                     oModel.setProperty("/Factura/condpedido/results", aData);
                                 }
                             });
-        
+
                             // Limpia la selección después de borrar
                             oTable.removeSelections();
-                            that.onCalcularSumaPosiciones("/Factura/condpedido/results",true);
+                            that.onCalcularSumaPosiciones("/Factura/condpedido/results", true);
                         }
                     }
                 });
@@ -1359,40 +1382,40 @@ sap.ui.define([
         sumarPorEBELN: function (oData) {
             let primerValorPorEBELN = {};
             let sumarTodos = true;
-        
+
             oData.forEach(item => {
                 let element = item;
                 let ebeln = element.EBELN;
-                let KWETR = parseFloat(that.convertirFormato(element.KWETR));
+                let IMPORTECOND = parseFloat(that.convertirFormato(element.IMPORTECOND));
                 let bsart = element.BSART;
-        
-                // Verificar si no hemos sumado KWETR para este EBELN
+
+                // Verificar si no hemos sumado IMPORTECOND para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
-                    primerValorPorEBELN[ebeln] = KWETR;
+                    primerValorPorEBELN[ebeln] = IMPORTECOND;
                 }
-        
+
                 // Verificar la condición de BSART
                 if (bsart === "ZVEM") {
                     sumarTodos = true; // Establecer a true si encontramos al menos un BSART igual a ZVEM
                 }
             });
-        
+
             let resultado;
-        
+
             if (sumarTodos) {
-                // Sumar todos los valores de KWETR si al menos un BSART es igual a ZVEM
+                // Sumar todos los valores de IMPORTECOND si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
             } else {
-                // Obtener solo el primer valor de KWETR para cada valor único de EBELN
+                // Obtener solo el primer valor de IMPORTECOND para cada valor único de EBELN
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
                     return total + valor;
                 }, 0);
             }
-        
+
             return resultado.toFixed(2);
         },
-        
-        
+
+
         //   xmlToJson('<?xml version="1.0" encoding="UTF-8"?><atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"> <atom:content type="application/xml"> <m:properties> <d:Pernr>800001</d:Pernr> <d:Approve>X</d:Approve> </m:properties> </atom:content> <atom:link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/ToLeaveItem" type="application/atom+xml;type=feed" title="ZHR_APP_SRV.Header_Item"> <m:inline> <atom:feed> <atom:entry> <atom:content type="application/xml"> <m:properties> <d:Pernr></d:Pernr> <d:Index>0</d:Index> <d:RequestId>74867AF30B3A1ED4BDA9EDC88782C0EC</d:RequestId> </m:properties> </atom:content> </atom:entry> </atom:feed> </m:inline> </atom:link> </atom:entry>');
 
 
