@@ -6,7 +6,8 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "../model/formatter",
     "sap/m/MessageBox",
-], function (BaseController, JSONModel, History, Filter, FilterOperator, formatter, MessageBox) {
+    "sap/ui/export/Spreadsheet",
+], function (BaseController, JSONModel, History, Filter, FilterOperator, formatter, MessageBox,Spreadsheet) {
     "use strict";
 
     let that,
@@ -96,19 +97,19 @@ sap.ui.define([
                 oObject.total = formatter.formatCurrency(oObject.total);
                 oObject.enabled = (oObject.DescripcionEstado == "Creado" || oObject.DescripcionEstado == "Rechazado" || oObject.DescripcionEstado == "Con Errores") ? true : false;
 
-                
-                
+
+
                 if (oParameters.arguments.navFrom == "Solicitudes") {
                     await this.getwaershelp((oObject.WAERS).split("-")[0]);
-                let waersCollection = that.getView().getModel("waershelp").getData();
-                var find = waersCollection.find(item => item.VALUE == oObject.WAERS.split("-")[0].trim());
-                oObject.WAERS = find.VALUE + " - " + find.TEXTO;
+                    let waersCollection = that.getView().getModel("waershelp").getData();
+                    var find = waersCollection.find(item => item.VALUE == oObject.WAERS.split("-")[0].trim());
+                    oObject.WAERS = find.VALUE + " - " + find.TEXTO;
                     AdjuntosEliminados = [];
                     condicionesPedidoEliminado = [];
                     posicionesEliminado = [];
                     that.mostrarDetalle(oParameters.arguments.codigoSolicitud, oObject, oParameters.arguments.posiciones);
                 }
-                else{
+                else {
                     that.AgregarData(oObject);
                 }
                 that.getOwnerComponent().getModel("oCabecera").refresh(true);
@@ -116,13 +117,13 @@ sap.ui.define([
                 viewModel.setProperty("/detalleViewTitle", resourceBundle.getText("detalleViewTitle", [oParameters.arguments.codigoSolicitud]));
                 viewModel.setProperty("/detalleViewSubTitle", resourceBundle.getText("detalleViewSubTitle", [oParameters.arguments.proveedor]));
                 viewModel.setProperty("/busy", false);
-                viewModel.setProperty("/busy", false);                
+                viewModel.setProperty("/busy", false);
             } else {
                 viewModel.setProperty("/busy", false);
                 that.onNavBack();
             }
         },
-        AgregarData: function(oCabecera){
+        AgregarData: function (oCabecera) {
             var aLista = (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").getModel().getData() : that.byId("idtablaFactura").getModel().getData(),
                 sumatoria = 0,
                 resourceBundle = that.getResourceBundle();
@@ -151,8 +152,8 @@ sap.ui.define([
                 item.WAERS = oCabecera.WAERS.split("-")[0];
 
             });
-            
-          
+
+
             that.getView().byId("btnAddCondPedido").setEnabled(oCabecera.Edit);
             that.getView().byId("btnAddPosiciones").setEnabled(oCabecera.Edit);
             that.getView().byId("AdjuntosUploader").setEnabled(oCabecera.Edit);
@@ -316,13 +317,13 @@ sap.ui.define([
 
                     (viewModel.getProperty("/visibleconpedido")) ? aLista.sort((a, b) => a.KPOSN - b.KPOSN) : aLista.sort((a, b) => a.POSNR - b.POSNR);
                     let oModelLista = new JSONModel(aLista);
-                    debugger
+
                     oModelLista.setSizeLimit(99999999999)
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
                     let sTitleAjuntosTable = resourceBundle.getText("detalleViewAdjuntos");
 
-                    
+
 
                     (viewModel.getProperty("/visibleconpedido")) ? that.byId("idTableCondicionesPedido").setModel(oModelLista) : that.byId("idtablaFactura").setModel(oModelLista);
                     (viewModel.getProperty("/visibleconpedido")) ? that.byId("tableSection").setTitle("Condiciones de pedido" + " (" + aLista.length + ")") : that.byId("tableSection").setTitle(sTitlePositionTable + " (" + aLista.length + ")");
@@ -330,7 +331,7 @@ sap.ui.define([
                     that.byId("adjuntosPageSection").setTitle(sTitleAjuntosTable + " (" + adjuntos.length + ")");
                     that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria));
                     that.getView().byId("sumatoriaImporteCP").setText(formatter.formatCurrency(sumatoria));
-                    
+
                     if ((viewModel.getProperty("/visibleconpedido"))) {
                         if ((condicionesPedidoOriginal.length == 0)) {
                             condicionesPedidoOriginal = aLista
@@ -564,7 +565,7 @@ sap.ui.define([
 
                     if (!existingItem) {
                         find.BORRADO = "X"
-                        posiciones.push(item);
+                        posiciones.push(find);
                     }
                 }
 
@@ -578,7 +579,7 @@ sap.ui.define([
                         element.BORRADO == "X");
                     if (!existingItem) {
                         find.BORRADO = "X"
-                        condicionPedidos.push(item);
+                        condicionPedidos.push(find);
                     }
                 }
             });
@@ -811,8 +812,8 @@ sap.ui.define([
                 }
                 let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
                 this.getRouter().navTo("orden", {
-                    "moneda":oCabecera.WAERS.split("-")[0].trim(),
-                    "navFrom":"detalle"
+                    "moneda": oCabecera.WAERS.split("-")[0].trim(),
+                    "navFrom": "detalle"
                 }, true);
             }
             catch (error) {
@@ -972,7 +973,7 @@ sap.ui.define([
         },
         onValidarMonedarObligatoria: function () {
             let valid = true;
-            const factura = that.getOwnerComponent().getModel("oCabecera").getData();            
+            const factura = that.getOwnerComponent().getModel("oCabecera").getData();
             if (factura.WAERS == undefined || factura.WAERS == "") {
                 that.getView().byId("InputSelectWaers").setValueState("Error")
                 valid = false;
@@ -981,6 +982,58 @@ sap.ui.define([
                 that.getView().byId("InputSelectWaers").setValueState("None")
             }
             return valid;
+        },
+        ExportExcel: function (idTable) {
+            let oView = that.getView();
+            var table = oView.byId(idTable);
+            var aData = table.getModel().getData();
+            var columns = [];
+            if (aData.length > 0) {
+                columns = that.getColumnas(table);
+                that.DownLoadExcel(aData, columns, "Reporte");
+            }
+            else {
+                MessageBox.information(
+                    "No se obtuvo información para exportar",
+                    {
+                        title: "Descargar Excel: Sin datos para exportar",
+                        actions: [MessageBox.Action.OK]
+                    }
+                );
+            }            
+
+        },
+        DownLoadExcel: function (Data, Columns, name) {
+            var mSettings = {
+                workbook: {
+                    columns: Columns,
+                },
+                dataSource: Data,
+                fileName: name + ".xlsx"
+            };
+            var oSpreadsheet = new Spreadsheet(mSettings);
+            oSpreadsheet.build();
+        },
+        getColumnas(Table) {
+            var columnas = [];
+            var Columns = Table.getColumns();
+            $.each(Columns, function (i, item) {
+                if((item.getId()).includes("EBELNCOND")){
+                    columnas.push({
+                        "label": item.getHeader().getText(),
+                        "property": "EBELN",
+                        "type": "string"
+                    })
+                
+                }else if(!(item.getId()).includes("_")) {
+                    columnas.push({
+                        "label": item.getHeader().getText(),
+                        "property": item.getId().split("--").pop() ,
+                        "type": "string"
+                    })
+                }
+            });
+            return columnas;
         },
     });
 

@@ -28,6 +28,7 @@
                 <ToolbarSpacer />
                 <Button id="btnEliminarCondPedido" type="Reject" icon="sap-icon://delete" press="eliminarCondPedido('idTableCondicionesPedido','¿Está seguro que desea eliminar las condiciones de pedido seleccionadas?')" text=""/>
                 <Button type="Emphasized" text="Agregar Condiciones pedido" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
+                 <Button tooltip="Descargar Excel" icon="sap-icon://download" press="ExportExcel('idTableCondicionesPedido')"/>
               <!-- <SearchField
                     id="searchFieldCondPedido"
                     tooltip="{i18n>ordenSearchTooltip}"                    
@@ -47,20 +48,20 @@
         </headerToolbar>
 
         <columns>           
-            <Column demandPopin="true" minScreenWidth="Tablet"  width="auto">
+            <Column id="EBELNCOND" demandPopin="true" minScreenWidth="Tablet"  width="auto">
                 <Label text="{i18n>ordenCompra}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+            <Column id="KNUMV" demandPopin="true" minScreenWidth="Tablet" width="auto">
                 <Label text="Condición documento" design="Bold"/>
             </Column>
 
-            <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+            <Column id="KPOSN" demandPopin="true" minScreenWidth="Tablet" width="auto">
                 <Label text="Posición" design="Bold"/>
             </Column>
-             <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+             <Column id="KSCHL" demandPopin="true" minScreenWidth="Tablet" width="auto">
                 <Label text="Clase condición" design="Bold"/>
             </Column>
-             <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
+             <Column id="KBETR" hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
                 <Label text="Importe" design="Bold"/>
                 <footer>
                     <ObjectStatus text="0.00" id="sumatoriaImporteCP" state="Information" />

@@ -50,47 +50,48 @@
                                         <ToolbarSpacer />
                                         <Button id="btnEliminarPosiciones" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idtablaFactura','¿Está seguro que desea eliminar las posiciones seleccionadas?')" text=""/>
                                         <Button id="btnAddPosiciones" type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
+                                        <Button tooltip="Descargar Excel" icon="sap-icon://download" press="ExportExcel('idtablaFactura')"/>
                                     </OverflowToolbar>
                                 </headerToolbar>
                                 <columns>
-                                    <Column>
+                                    <Column id="BELNR">
                                         <Label text="{i18n>conformidad}" design="Bold" />
                                     </Column>
                                     <!--  <Column demandPopin="true" minScreenWidth="Tablet">
                                     <Label text="{i18n>posConformidad}" design="Bold" />
                                 </Column> -->
-                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                    <Column id="EBELN" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>ordenCompra}" design="Bold" />
                                     </Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                    <Column id="EBELP" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>posOrden}" design="Bold" />
                                     </Column>
 
-                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                    <Column id="MATNR" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>material}" design="Bold"/>
                                     </Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet" width="12rem">
+                                    <Column id="TXZ01" demandPopin="true" minScreenWidth="Tablet" width="12rem">
                                         <Label text="{i18n>descmaterial}" design="Bold"/>
                                     </Column>
-                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
+                                    <Column id="MEINS" hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
                                         <Label text="{i18n>unidadMedida}" design="Bold"/>
                                     </Column>
-                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                                    <Column id="MENGE" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>cantidad}" design="Bold" />
                                     </Column>
-                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                                    <Column id="MENGE_INGR" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>cantidadIngresada}" design="Bold" />
                                     </Column>
-                                     <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                                     <Column id="MENGE_FACT" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>cantidadFacturada}" design="Bold" />
                                     </Column>
-                                     <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+                                     <Column id="MENGE_PEND" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                                         <Label text="{i18n>cantidadPendiente}" design="Bold" />
                                     </Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+                                    <Column id="NETPR" demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                                         <Label text="{i18n>importe}" design="Bold" />
                                     </Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+                                    <Column id="TOTAL" demandPopin="true" minScreenWidth="Tablet" hAlign="End">
                                         <Label text="{i18n>total}" design="Bold" />
                                         <footer>
                                             <ObjectStatus text="0.00" id="sumatoriaImporte" state="Information" />
@@ -146,6 +147,7 @@
                                         <ToolbarSpacer />
                                         <Button id="btnEliminarCondPedido" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idTableCondicionesPedido','¿Está seguro que desea eliminar las condiciones de pedido seleccionadas?')" text=""/>
                                         <Button id="btnAddCondPedido" type="Emphasized" text="Agregar Condiciones pedido" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
+                                         <Button tooltip="Descargar Excel" icon="sap-icon://download" press="ExportExcel('idTableCondicionesPedido')"/>
                                         <SearchField visible="false" id="searchFieldCondPedido" tooltip="{i18n>ordenSearchTooltip}" liveChange="onBusquedaRapida">
                                             <layoutData>
                                                 <OverflowToolbarLayoutData maxWidth="200px" priority="NeverOverflow"/>
@@ -160,20 +162,20 @@
                                 </headerToolbar>
 
                                 <columns>
-                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                    <Column id="EBELNCOND" demandPopin="true" minScreenWidth="Tablet" width="auto">
                                         <Label text="{i18n>ordenCompra}" design="Bold"/>
                                     </Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                    <Column id="KNUMV" demandPopin="true" minScreenWidth="Tablet" width="auto">
                                         <Label text="Condición documento" design="Bold"/>
                                     </Column>
 
-                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                    <Column id="KPOSN" demandPopin="true" minScreenWidth="Tablet" width="auto">
                                         <Label text="Posición" design="Bold"/>
                                     </Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                    <Column id="KSCHL" demandPopin="true" minScreenWidth="Tablet" width="auto">
                                         <Label text="Clase condición" design="Bold"/>
                                     </Column>
-                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
+                                    <Column id="KBETR" hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto">
                                         <Label text="Importe" design="Bold"/>
                                         <footer>
                                             <ObjectStatus text="0.00" id="sumatoriaImporteCP" state="Information" />
@@ -186,7 +188,7 @@
                                         </footer>
                                     </Column>
                                     -->
-                                    <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto" visible="false">
+                                    <Column id="WAERS" hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="auto" visible="false">
                                         <Label text="Moneda" design="Bold"/>
                                     </Column>
                                 </columns>

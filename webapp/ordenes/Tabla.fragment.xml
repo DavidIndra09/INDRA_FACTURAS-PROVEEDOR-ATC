@@ -22,45 +22,46 @@
                         <FlexItemData growFactor="1" />
                     </layoutData>
                 </Switch>
+                <Button tooltip="Descargar Excel" icon="sap-icon://download" press="ExportExcel('idTableOrdenes')"/>
             </OverflowToolbar>
         </headerToolbar>
 
         <columns>
-            <Column >
+            <Column id="BELNR">
                 <Label text="{i18n>conformidad}" design="Bold"/>
             </Column>
             <!-- <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>posConformidad}" design="Bold"/> 
             </Column>-->
-            <Column demandPopin="true" minScreenWidth="Tablet" width="9rem">
+            <Column id="EBELN" demandPopin="true" minScreenWidth="Tablet" width="9rem">
                 <Label text="{i18n>ordenCompra}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" width="6rem">
+            <Column id="EBELP" demandPopin="true" minScreenWidth="Tablet" width="6rem">
                 <Label text="{i18n>posOrden}" design="Bold"/>
             </Column>
 
-            <Column demandPopin="true" minScreenWidth="Tablet">
+            <Column id="MATNR" demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>material}" design="Bold"/>
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" width="10rem">
+            <Column id="TXZ01" demandPopin="true" minScreenWidth="Tablet" width="10rem">
                 <Label text="{i18n>descmaterial}" design="Bold"/>
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
+            <Column id="MEINS" hAlign="End" demandPopin="true" minScreenWidth="Tablet" width="4rem">
                 <Label text="{i18n>unidadMedida}" design="Bold"/>
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+            <Column id="MENGE" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>cantidad}" design="Bold" />
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+            <Column id="MENGE_INGR" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>cantidadIngresada}" design="Bold" />
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+            <Column id="MENGE_FACT" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>cantidadFacturada}" design="Bold" />
             </Column>
-            <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet">
+            <Column id="MENGE_PEND" hAlign="End" demandPopin="true" minScreenWidth="Tablet">
                 <Label text="{i18n>cantidadPendiente}" design="Bold" />
             </Column>
-            <Column demandPopin="true" minScreenWidth="Tablet" hAlign="End" width="8rem">
+            <Column id="NETPR" demandPopin="true" minScreenWidth="Tablet" hAlign="End" width="8rem">
                 <Label text="{i18n>importe}" design="Bold"/>
             </Column>
             

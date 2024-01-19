@@ -2220,6 +2220,21 @@ sap.ui.define([
                             })
                         }
                     });
+                    columnas.push({
+                        "label": "Pedido",
+                        "property": "EBELN",
+                        "type": "string"
+                    })
+                    columnas.push({
+                        "label": "Factura SAP",
+                        "property": "BELNR",
+                        "type": "string"
+                    })
+                    columnas.push({
+                        "label": "Fecha creación solicitud",
+                        "property": "FCRESO",
+                        "type": "string"
+                    })
                     break;
 
                 case "Vehiculos":

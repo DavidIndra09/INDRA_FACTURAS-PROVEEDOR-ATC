@@ -8,6 +8,7 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "sap/ui/core/format/DateFormat",
     'sap/m/Token',
+    "sap/ui/export/Spreadsheet",
 ], function (
     BaseController,
     JSONModel,
@@ -17,7 +18,8 @@ sap.ui.define([
     Filter,
     FilterOperator,
     DateFormat,
-    Token
+    Token,
+    Spreadsheet
 ) {
     "use strict";
     let MODEL,
@@ -1414,7 +1416,59 @@ sap.ui.define([
 
             return resultado.toFixed(2);
         },
+        ExportExcel: function (idTable) {
+            const factura = MODEL.getProperty("/Factura");
+            let oView = that.getView();
+            var table = oView.byId(idTable);
+            var aData = (idTable=="idTableCondicionesPedido")?factura.condpedido.results:factura.conformidades.results;
+            var columns = [];
+            if (aData.length > 0) {
+                columns = that.getColumnas(table);
+                that.DownLoadExcel(aData, columns, "Reporte");
+            }
+            else {
+                MessageBox.information(
+                    "No se obtuvo información para exportar",
+                    {
+                        title: "Descargar Excel: Sin datos para exportar",
+                        actions: [MessageBox.Action.OK]
+                    }
+                );
+            }            
 
+        },
+        DownLoadExcel: function (Data, Columns, name) {
+            var mSettings = {
+                workbook: {
+                    columns: Columns,
+                },
+                dataSource: Data,
+                fileName: name + ".xlsx"
+            };
+            var oSpreadsheet = new Spreadsheet(mSettings);
+            oSpreadsheet.build();
+        },
+        getColumnas(Table) {
+            var columnas = [];
+            var Columns = Table.getColumns();
+            $.each(Columns, function (i, item) {
+                if((item.getId()).includes("EBELNCOND")){
+                    columnas.push({
+                        "label": item.getHeader().getText(),
+                        "property": "EBELN",
+                        "type": "string"
+                    })
+                
+                }else if(!(item.getId()).includes("_")) {
+                    columnas.push({
+                        "label": item.getHeader().getText(),
+                        "property": item.getId().split("--").pop() ,
+                        "type": "string"
+                    })
+                }
+            });
+            return columnas;
+        },
 
         //   xmlToJson('<?xml version="1.0" encoding="UTF-8"?><atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"> <atom:content type="application/xml"> <m:properties> <d:Pernr>800001</d:Pernr> <d:Approve>X</d:Approve> </m:properties> </atom:content> <atom:link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/ToLeaveItem" type="application/atom+xml;type=feed" title="ZHR_APP_SRV.Header_Item"> <m:inline> <atom:feed> <atom:entry> <atom:content type="application/xml"> <m:properties> <d:Pernr></d:Pernr> <d:Index>0</d:Index> <d:RequestId>74867AF30B3A1ED4BDA9EDC88782C0EC</d:RequestId> </m:properties> </atom:content> </atom:entry> </atom:feed> </m:inline> </atom:link> </atom:entry>');
 

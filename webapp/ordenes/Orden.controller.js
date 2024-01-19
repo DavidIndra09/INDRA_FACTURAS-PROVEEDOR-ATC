@@ -7,6 +7,7 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     'sap/m/Token',
+    "sap/ui/export/Spreadsheet",
 ], function (
     BaseController,
     JSONModel,
@@ -15,7 +16,8 @@ sap.ui.define([
     formatter,
     Filter,
     FilterOperator,
-    Token
+    Token,
+    Spreadsheet
 ) {
     "use strict";
     let MODEL,
@@ -712,7 +714,59 @@ sap.ui.define([
                     }
                 });
             }
-        }
+        },
+        ExportExcel: function (idTable) {
+            let oView = that.getView();
+            var table = oView.byId(idTable);
+            var aData = (idTable=="idTableCondicionesPedido")?table.getModel().getData().CondPedido:table.getModel().getData().Ordenes;
+            var columns = [];
+            if (aData.length > 0) {
+                columns = that.getColumnas(table);
+                that.DownLoadExcel(aData, columns, "Reporte");
+            }
+            else {
+                MessageBox.information(
+                    "No se obtuvo información para exportar",
+                    {
+                        title: "Descargar Excel: Sin datos para exportar",
+                        actions: [MessageBox.Action.OK]
+                    }
+                );
+            }            
+
+        },
+        DownLoadExcel: function (Data, Columns, name) {
+            var mSettings = {
+                workbook: {
+                    columns: Columns,
+                },
+                dataSource: Data,
+                fileName: name + ".xlsx"
+            };
+            var oSpreadsheet = new Spreadsheet(mSettings);
+            oSpreadsheet.build();
+        },
+        getColumnas(Table) {
+            var columnas = [];
+            var Columns = Table.getColumns();
+            $.each(Columns, function (i, item) {
+                if((item.getId()).includes("EBELNCOND")){
+                    columnas.push({
+                        "label": item.getHeader().getText(),
+                        "property": "EBELN",
+                        "type": "string"
+                    })
+                
+                }else if(!(item.getId()).includes("_")) {
+                    columnas.push({
+                        "label": item.getHeader().getText(),
+                        "property": item.getId().split("--").pop() ,
+                        "type": "string"
+                    })
+                }
+            });
+            return columnas;
+        },
     });
 
 });
