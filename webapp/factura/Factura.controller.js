@@ -995,7 +995,7 @@ sap.ui.define([
             const conpedido = factura.condpedido.results.map(item => {
                 return {
                     "ebeln": item.EBELN,
-                    "IMPORTECOND": item.IMPORTECOND,
+                    "kbetr": item.IMPORTECOND,
                     "knumv": item.KNUMV,
                     "kposn": item.KPOSN,
                     "kschl": item.KSCHL,

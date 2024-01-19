@@ -97,7 +97,9 @@ sap.ui.define([
                         true);
                 }
                 else if(ParamNavFrom.includes("factura")){
-                    this.getRouter().navTo("factura", {}, true); 
+                    this.getRouter().navTo("factura", {
+                        codigoSolicitud: "P",
+                    }, true); 
                 }
                 else {
                     history.go(-1);
@@ -596,8 +598,8 @@ sap.ui.define([
             ordenModel.setProperty("/Busqueda", {});
             let parameters = { filters: [] };
             lifnr = sap.ui.getCore().getModel("Lifnr").getData().Lifnr;
-            let oMultiInput1 = that.byId("mtIptOrdenCompra");
-            oMultiInput1.setTokens([]);
+            let oMultiInput1 = that.byId("mtIptOrdenCompra");           
+            that.onLimpiarFiltros();
             if (MODEL.getProperty("/Factura/pedido") != "" && MODEL.getProperty("/Factura/pedido") != undefined) {
                 let oNewToken = new sap.m.Token({
                     key: MODEL.getProperty("/Factura/pedido"), // Asigna el valor deseado para la key

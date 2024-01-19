@@ -140,8 +140,8 @@ sap.ui.define([
             $.each(aLista, function (i, item) {
 
                 if (VisibleTable) {
-                    sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.IMPORTECOND)));
-                    item.TOTAL = ((parseFloat(that.convertirFormato(item.IMPORTECOND)))).toFixed(2);
+                    sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KBETR)));
+                    item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
                 }
                 else {
                     sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)));
@@ -281,8 +281,8 @@ sap.ui.define([
                     $.each(aLista, function (i, item) {
 
                         if (VisibleTable) {
-                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.IMPORTECOND)));
-                            item.TOTAL = ((parseFloat(that.convertirFormato(item.IMPORTECOND)))).toFixed(2);
+                            sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.KBETR)));
+                            item.TOTAL = ((parseFloat(that.convertirFormato(item.KBETR)))).toFixed(2);
                         }
                         else {
                             sumatoria = sumatoria + (parseFloat(that.convertirFormato(item.NETPR)) * parseFloat(that.convertirFormato((oCabecera.TIPDAT == "XLSVEH") ? item.MENGE : item.MENGE_PEND)));
@@ -316,6 +316,7 @@ sap.ui.define([
 
                     (viewModel.getProperty("/visibleconpedido")) ? aLista.sort((a, b) => a.KPOSN - b.KPOSN) : aLista.sort((a, b) => a.POSNR - b.POSNR);
                     let oModelLista = new JSONModel(aLista);
+                    debugger
                     oModelLista.setSizeLimit(99999999999)
                     //that.getView().byId("sumatoriaImporte").setText(formatter.formatCurrency(sumatoria)); 
                     let sTitlePositionTable = resourceBundle.getText("detalleViewTableSection");
@@ -358,12 +359,12 @@ sap.ui.define([
             oData.forEach(item => {
                 let element = item;
                 let ebeln = element.EBELN;
-                let IMPORTECOND = parseFloat(that.convertirFormato(element.IMPORTECOND));
+                let KBETR = parseFloat(that.convertirFormato(element.KBETR));
                 let bsart = element.BSART;
 
-                // Verificar si no hemos sumado IMPORTECOND para este EBELN
+                // Verificar si no hemos sumado KBETR para este EBELN
                 if (primerValorPorEBELN[ebeln] === undefined) {
-                    primerValorPorEBELN[ebeln] = IMPORTECOND;
+                    primerValorPorEBELN[ebeln] = KBETR;
                 }
 
                 // Verificar la condición de BSART
@@ -375,10 +376,10 @@ sap.ui.define([
             let resultado;
 
             if (sumarTodos) {
-                // Sumar todos los valores de IMPORTECOND si al menos un BSART es igual a ZVEM
+                // Sumar todos los valores de KBETR si al menos un BSART es igual a ZVEM
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => total + valor, 0);
             } else {
-                // Obtener solo el primer valor de IMPORTECOND para cada valor único de EBELN
+                // Obtener solo el primer valor de KBETR para cada valor único de EBELN
                 resultado = Object.values(primerValorPorEBELN).reduce((total, valor) => {
                     return total + valor;
                 }, 0);
@@ -586,7 +587,7 @@ sap.ui.define([
                 conpedido = condicionPedidos.map(item => {
                     return {
                         "ebeln": item.EBELN,
-                        "IMPORTECOND": item.IMPORTECOND,
+                        "KBETR": item.KBETR,
                         "knumv": item.KNUMV,
                         "kposn": item.KPOSN,
                         "kschl": item.KSCHL,
