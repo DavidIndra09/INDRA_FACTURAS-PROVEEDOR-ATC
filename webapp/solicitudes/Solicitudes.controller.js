@@ -1500,7 +1500,7 @@ sap.ui.define([
             }
         },
         obtenerValorAleatorio: function (value) {
-            let indicador = ""
+            let indicador = "None"
             switch (value) {
                 case "NACION":
                     indicador = "Success";
