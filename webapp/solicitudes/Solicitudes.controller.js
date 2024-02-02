@@ -836,8 +836,8 @@ sap.ui.define([
                     break;
 
                 case "04":
-                    object.state = "None";
-                    object.icon = "sap-icon://sys-enter-2";
+                    object.state = "Warning";
+                    object.icon = "sap-icon://synchronize";
                     break;
                 case "05":
                     object.state = "Error";
@@ -896,7 +896,8 @@ sap.ui.define([
 
 
                         //copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "03" : "02";
-                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "09" : "02";
+                        //copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "09" : "02";
+                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "12" : "09";
                         copiedObject.FCRESO = formatter.formatearFechaString(copiedObject.FCRESO);
                         copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
                         copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);

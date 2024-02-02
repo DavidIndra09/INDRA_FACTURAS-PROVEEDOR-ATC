@@ -101,10 +101,11 @@ sap.ui.define([
                     return;
                 }   
                 const factura = MODEL.getProperty("/Factura")
-                var facturaMoneda = factura.moneda.split("-")[0].trim();             
+                var facturaMoneda = factura.moneda.split("-")[0].trim();                             
                 this.getRouter().navTo("orden", {
                     "moneda":facturaMoneda,
-                    "navFrom":"factura"
+                    "navFrom":"factura",
+                    "switchstring": (MODEL.getProperty("/Factura/visiblepos"))?"SwitchTableOC":"SwitchTableCP"
                 }, true);
             } catch (error) {
 
@@ -1469,6 +1470,22 @@ sap.ui.define([
             });
             return columnas;
         },
+        onShowHideTables: function(oEvent){
+
+            if (oEvent.getSource().getId().includes("SwitchTableOC")) {
+                MODEL.setProperty("/Factura/visibleconpedido", true);
+                MODEL.setProperty("/Factura/visiblepos", false);
+                that.byId("SwitchTableCP").setState(true)
+                that.byId("SwitchTableOC").setState(false)
+            }
+            else{
+                MODEL.setProperty("/Factura/visibleconpedido", false);
+                MODEL.setProperty("/Factura/visiblepos", true);
+                that.byId("SwitchTableCP").setState(false)
+                that.byId("SwitchTableOC").setState(false)
+            }
+            
+        }
 
         //   xmlToJson('<?xml version="1.0" encoding="UTF-8"?><atom:entry xmlns:atom="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"> <atom:content type="application/xml"> <m:properties> <d:Pernr>800001</d:Pernr> <d:Approve>X</d:Approve> </m:properties> </atom:content> <atom:link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/ToLeaveItem" type="application/atom+xml;type=feed" title="ZHR_APP_SRV.Header_Item"> <m:inline> <atom:feed> <atom:entry> <atom:content type="application/xml"> <m:properties> <d:Pernr></d:Pernr> <d:Index>0</d:Index> <d:RequestId>74867AF30B3A1ED4BDA9EDC88782C0EC</d:RequestId> </m:properties> </atom:content> </atom:entry> </atom:feed> </m:inline> </atom:link> </atom:entry>');
 

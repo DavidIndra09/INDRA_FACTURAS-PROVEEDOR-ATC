@@ -39,7 +39,7 @@
                             priority="NeverOverflow"/>
                     </layoutData>
                 </SearchField> -->
-                <Switch visible="false" id="SwitchTableCP"  customTextOn="COND" customTextOff="POS" change="onShowHideFilters">
+                <Switch id="SwitchTableCP"  customTextOn="COND" customTextOff="POS" change="onShowHideTables">
 				<layoutData>
 					<FlexItemData growFactor="1" />
 				</layoutData>

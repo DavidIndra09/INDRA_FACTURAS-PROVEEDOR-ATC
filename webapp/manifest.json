@@ -153,7 +153,7 @@
                     ]
                 },
                 {
-                    "pattern": "Ordenes/{moneda}/{navFrom}",
+                    "pattern": "Ordenes/{moneda}/{navFrom}/{switchstring}",
                     "name": "orden",
                     "target": [
                         "orden"

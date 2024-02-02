@@ -586,6 +586,7 @@ sap.ui.define([
                 that.onNavSolicitudes();
                 return;
             }            
+            that.onShowHideFilters(oEvent.getParameters().arguments.switchstring);
             ParamMoneda = oEvent.getParameters().arguments.moneda 
             ParamNavFrom = oEvent.getParameters().arguments.navFrom 
             MODEL.setProperty("/Ordenes", []);
@@ -666,11 +667,10 @@ sap.ui.define([
                 ordenModel.setProperty("/tableNoDataText", this.getResourceBundle().getText("solicitudesNoDataWithSearchText"));
             }
         },
-        onShowHideFilters: function (oEvent) {
-            var classType = "sapUiSmallMarginTop";
-            var state = oEvent.mParameters.state;
+        onShowHideFilters: function (SwitchString) {
+            var classType = "sapUiSmallMarginTop";           
 
-            if (oEvent.getSource().getId().includes("SwitchTableOC")) {
+            if (SwitchString.includes("SwitchTableCP")) {
                 that.byId("btnFilterBuscar").addStyleClass(classType);
                 that.byId("btnFilterLimpiar").addStyleClass(classType);
                 that.byId("idTableOrdenes").setVisible(false)
@@ -678,8 +678,8 @@ sap.ui.define([
                 that.byId("elementConformidades").setVisible(false);
                 that.byId("elementDescMaterial").setVisible(false);
                 that.byId("elementClaseCondicion").setVisible(true);
-                that.byId("SwitchTableCP").setState(true)
-                that.byId("SwitchTableOC").setState(false)
+                //that.byId("SwitchTableCP").setState(true)
+                //that.byId("SwitchTableOC").setState(false)
                 that.ongetCondPedido();
             }
             else {
@@ -690,8 +690,8 @@ sap.ui.define([
                 that.byId("elementConformidades").setVisible(true);
                 that.byId("elementDescMaterial").setVisible(true);
                 that.byId("elementClaseCondicion").setVisible(false);
-                that.byId("SwitchTableCP").setState(false)
-                that.byId("SwitchTableOC").setState(false)
+                //that.byId("SwitchTableCP").setState(false)
+                //that.byId("SwitchTableOC").setState(false)
 
             }
 

@@ -51,6 +51,11 @@
                                         <Button id="btnEliminarPosiciones" type="Reject" icon="sap-icon://delete" press="eliminarFilasSeleccionadas('idtablaFactura','¿Está seguro que desea eliminar las posiciones seleccionadas?')" text=""/>
                                         <Button id="btnAddPosiciones" type="Emphasized" text="{i18n>agregarPosiciones}" icon="{i18n>iconAgregar}" press="onNavOrdenes" />
                                         <Button tooltip="Descargar Excel" icon="sap-icon://download" press="ExportExcel('idtablaFactura')"/>
+                                        <Switch visible="false" id="SwitchTableOC" state="false" customTextOn="COND" customTextOff="POS" change="onShowHideTables">
+                                         <layoutData>
+                                             <FlexItemData growFactor="1" />
+                                         </layoutData>
+                                     </Switch>
                                     </OverflowToolbar>
                                 </headerToolbar>
                                 <columns>

@@ -299,8 +299,15 @@ sap.ui.define([
                     that.getView().byId("btnAddPosiciones").setEnabled(oCabecera.Edit);
                     that.getView().byId("AdjuntosUploader").setEnabled(oCabecera.Edit);
                     that.getView().byId("btnEliminarPosiciones").setEnabled(oCabecera.Edit);
-                    that.getView().byId("btnEliminarCondPedido").setEnabled(oCabecera.Edit);
-
+                    that.getView().byId("btnEliminarCondPedido").setEnabled(oCabecera.Edit);                    
+                    if(oCabecera.TIPDAT != "NACION"){
+                        that.getView().byId("btnAddCondPedido").setVisible(false);
+                        that.getView().byId("btnAddPosiciones").setVisible(false);
+                    }
+                    else{
+                        that.getView().byId("btnAddCondPedido").setVisible(true);
+                        that.getView().byId("btnAddPosiciones").setVisible(true);
+                    }
                     $.each(aListaDocumentos, function (i, item) {
 
                         adjuntos.push({
@@ -813,7 +820,8 @@ sap.ui.define([
                 let oCabecera = that.getOwnerComponent().getModel("oCabecera").getData();
                 this.getRouter().navTo("orden", {
                     "moneda": oCabecera.WAERS.split("-")[0].trim(),
-                    "navFrom": "detalle"
+                    "navFrom": "detalle",
+                    "switchstring": (viewModel.getProperty("/visiblepos"))?"SwitchTableOC":"SwitchTableCP"
                 }, true);
             }
             catch (error) {

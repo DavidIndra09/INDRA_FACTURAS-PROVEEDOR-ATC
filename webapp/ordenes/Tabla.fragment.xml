@@ -17,7 +17,7 @@
                         <OverflowToolbarLayoutData maxWidth="200px" priority="NeverOverflow"/>
                     </layoutData>
                 </SearchField>
-                <Switch id="SwitchTableOC" state="false" customTextOn="COND" customTextOff="POS" change="onShowHideFilters">
+                <Switch visible="false" id="SwitchTableOC" state="false" customTextOn="COND" customTextOff="POS" change="onShowHideFilters">
                     <layoutData>
                         <FlexItemData growFactor="1" />
                     </layoutData>
