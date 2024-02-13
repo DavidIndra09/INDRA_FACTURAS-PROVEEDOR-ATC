@@ -533,9 +533,9 @@ sap.ui.define([
             }
         },
 
-        onValidarEstadoParaLiberar: function(selectedFacturas) {
+        onValidarEstadoParaLiberar: function (selectedFacturas) {
             return selectedFacturas.every(item => ["01", "07"].includes(MODEL.getProperty(item).ESTADO));
-        },            
+        },
 
         onSolicitarPagoFactura: async function (oEvent) {
             const tableFacturas = that.getTable();
@@ -545,16 +545,16 @@ sap.ui.define([
                 return;
             }
             var valid = that.onValidarEstadoParaLiberar(selectedFacturas);
-             if (!valid) {
-                 MessageBox.error("No puede liberar solicitudes con un estado distinto a 'Solicitud Creada' o 'Rechazado' ");
-                 return;
-             }
+            if (!valid) {
+                MessageBox.error("No puede liberar solicitudes con un estado distinto a 'Solicitud Creada' o 'Rechazado' ");
+                return;
+            }
             MODEL.setProperty("/tituloMensaje", "¿Desea liberar para procesar?");
             selectedFacturas.map(path => {
                 messageManager.addMessages(new Message({
                     message: MODEL.getProperty(path).FACTUR,
                     additionalText: "",
-                    description: MODEL.getProperty(path).SOLFAC ,
+                    description: MODEL.getProperty(path).SOLFAC,
                     type: "Warning",
                     target: "/Dummy",
                     processor: MODEL
@@ -774,7 +774,7 @@ sap.ui.define([
             for (let i = 0; i < aLista.length; i++) {
                 let value = aLista[i];
                 let find = EstadosFactura.find(element => element.VALUE == value.ESTADO);
-                value.DescripcionEstado = (find)?find.TEXTO:"";
+                value.DescripcionEstado = (find) ? find.TEXTO : "";
                 let resultEstatus = that.getColorStatus(value.ESTADO);
                 //await that.getProveedorText(value.LIFNR);
                 //let Proveedor = that.getView().getModel("proveedorText").getData();
@@ -897,13 +897,13 @@ sap.ui.define([
 
                         //copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "03" : "02";
                         //copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "09" : "02";
-                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "12" : "09";
+                        copiedObject.ESTADO = (copiedObject.TIPDAT == "NACION") ? "12" : "02";
                         copiedObject.FCRESO = formatter.formatearFechaString(copiedObject.FCRESO);
                         copiedObject.FKDAT = formatter.formatearFechaString(copiedObject.FKDAT);
                         copiedObject.FEMISI = formatter.formatearFechaString(copiedObject.FEMISI);
                         copiedObject.IMPORT = that.convertirFormato(copiedObject.IMPORT);
                         const solicitud = { "IS_FACT_CAB": JSON.stringify(copiedObject) };
-                        
+
                         const result = await this.createEntity(ODATA_SAP, "/solPagoFactSet", solicitud);
                         results.push(result);
                     } catch (error) {
@@ -1089,7 +1089,7 @@ sap.ui.define([
                         if (Numfa != "") {
 
                             if (!grupos[Numfa]) {
-                                grupos[Numfa] = {Numcaja:Numcaja, Proveedor: Proveedor, Inco1: Inco1, Inco2: Inco2, Numfa: Numfa, Numbl: Numbl, Datbl: Datbl, Prtsl: Prtsl, Prten: Prten, Tptra: Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras, Pedido: Pedido, ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
+                                grupos[Numfa] = { Numcaja: Numcaja, Proveedor: Proveedor, Inco1: Inco1, Inco2: Inco2, Numfa: Numfa, Numbl: Numbl, Datbl: Datbl, Prtsl: Prtsl, Prten: Prten, Tptra: Tptra, GrupoCompras: GrupoCompras, OrganizacionCompras: OrganizacionCompras, Pedido: Pedido, ClaseDocumento: ClaseDocumento, TipoData: "XLSREP", Total: 0, Moneda: Moneda, Detalle: [] };
                             }
 
                             //grupos[numFc].Detalle.push(elemento);
@@ -1258,7 +1258,7 @@ sap.ui.define([
                             "NUM_FC": elemento.NUM_FC,
                             "PTO_SALIDA": elemento.PTO_SALIDA,
                             "MATERIAL": that.agregarZAlPrimerCaracter(elemento.MATERIAL),
-                            "CANTIDAD": elemento.CANTIDAD,                            
+                            "CANTIDAD": elemento.CANTIDAD,
                             "KATASHIKI": elemento.KATASHIKI,
                             "SFX_VENTA": elemento.SFX_VENTA,
                             "SFX_PROD": elemento.SFX_PROD,
@@ -1321,7 +1321,7 @@ sap.ui.define([
         },
         ongetModelCabecera: function (Data, TypeTable) {
             return {
-                "ZNUMCAJA": (Data.Numcaja!="" && Data.Numcaja!=undefined)?Data.Numcaja:"",
+                "ZNUMCAJA": (Data.Numcaja != "" && Data.Numcaja != undefined) ? Data.Numcaja : "",
                 "FACTUR": Data.Numfa, /*(TypeTable=="Repuestos")?Data.Numfa:Data.Numfa,*/
                 "INCO1": Data.Inco1,
                 "INCO2": Data.Inco2,
@@ -1373,7 +1373,12 @@ sap.ui.define([
                                     );
                                     return
                                 }
-                                let DataValida = that.buildArrayFromDataExcel(aXmlData, TypeTable);
+                                // Filtrar los elementos que tienen la propiedad PROVEEDOR no vacía
+                                const aXmlDataFiltrado = aXmlData.filter(item => item.PROVEEDOR.trim() !== '');
+
+                                // Ahora aXmlDataFiltrado contiene solo los elementos con PROVEEDOR no vacío
+
+                                let DataValida = that.buildArrayFromDataExcel(aXmlDataFiltrado, TypeTable);
                                 that.onProcesarCargaFacturasMasiva(DataValida, TypeTable);
                                 /* switch (TypeTable) {
                                      case "Repuestos":
@@ -1447,9 +1452,9 @@ sap.ui.define([
         onShowMessage: function (oEvent) {
             var oObject = oEvent.getSource().getParent().getBindingContext().getObject();
             var sMessage = that.parseJsonOrReturnStringForMessagePopup(oObject.TXTEST);
-            var MessageboxWidth = (sMessage.length>1)? "600px": "460px";
-            var typeMessageBox = (sMessage.length>1)? "information": "success";
-            var titleMessageBox = (sMessage.length>1)? "información": "Éxito";
+            var MessageboxWidth = (sMessage.length > 1) ? "600px" : "460px";
+            var typeMessageBox = (sMessage.length > 1) ? "information" : "success";
+            var titleMessageBox = (sMessage.length > 1) ? "información" : "Éxito";
             var messageFormatter = that.formatMessages(sMessage);
             if (oObject.ColorEstado == 'Error') {
                 MessageBox.error(messageFormatter, {
@@ -1459,21 +1464,21 @@ sap.ui.define([
                     contentWidth: "500px"
                 });
             }
-            else if(oObject.IconoEstado == "sap-icon://synchronize"){
+            else if (oObject.IconoEstado == "sap-icon://synchronize") {
                 MessageBox.information(messageFormatter, {
                     stitle: "Información",
                     actions: [MessageBox.Action.OK],
                     //details: "<p> " + "➢" + " " + sMessage + "</p>",
                     contentWidth: "500px"
-                }); 
+                });
             }
-            else if(oObject.ESTADO == "06" || oObject.ESTADO == "09"){
+            else if (oObject.ESTADO == "06" || oObject.ESTADO == "09") {
                 MessageBox[typeMessageBox](messageFormatter, {
                     stitle: titleMessageBox,
                     actions: [MessageBox.Action.OK],
                     //details: "<p> " + "➢" + " " + sMessage + "</p>",
                     contentWidth: MessageboxWidth
-                }); 
+                });
             }
         },
         parseJsonOrReturnStringForMessagePopup(str) {
@@ -1487,14 +1492,14 @@ sap.ui.define([
         },
         onSetColorImport: function (pValue) {
 
-            if (pValue == "05" || pValue == "08"  ) {
+            if (pValue == "05" || pValue == "08") {
                 return "red";
             }
-            else if( pValue == "10"){
+            else if (pValue == "10") {
                 return "blue";
             }
-            else if(pValue == "06" || pValue == "09"){
-                return "green"; 
+            else if (pValue == "06" || pValue == "09") {
+                return "green";
             }
             else {
                 return "gray";
@@ -1637,17 +1642,17 @@ sap.ui.define([
                 case "Solicitudes":
                     // Crear las columnas
                     aColumns = [
-                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "6rem", design: "Bold",demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
-                        { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT", path2: "ColorOrigen", width: "4rem", design: "Bold",demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { id: "SOLFAC", label: "Solicitud", path: "SOLFAC", width: "6rem", design: "Bold", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { id: "TIPDATTEXT", label: "Origen", path: "TIPDATTEXT", path2: "ColorOrigen", width: "4rem", design: "Bold", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
                         //{ id: "LIFNRTEXT", label: "Proveedor", path: "LIFNRTEXT", width: "4rem", design: "Bold", hAlign: "Begin" },
                         { id: "FACTUR", label: "Factura Cliente", path: "FACTUR", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FEMISI", label: "Fecha de Emisión", path: "FEMISI", width: "6rem", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "FKDAT", label: "Fecha de Cont.", width: "5rem", path: "FKDAT", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Center" },
                         { id: "IMPORT", label: "Importe", path: "IMPORT", path2: "WAERS", width: "5rem", demandPopin: true, minScreenWidth: "Tablet", design: "Bold", hAlign: "End" },
-                        { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },                        
-                        { width: "3rem",label: "Info. adici.", path: "btnverDetalle",demandPopin: true, minScreenWidth: "Tablet",hAlign: "Begin" },
-                        { width: "3rem",label: "Mensajes", path: "iconErrores",demandPopin: true, minScreenWidth: "Tablet",hAlign: "Begin" },
-                        { width: "3rem",label: "Editar", path: "btnEditar",demandPopin: true, minScreenWidth: "Tablet",hAlign: "Begin" },
+                        { id: "ESTADO", label: "Estado de Factura", path: "DescripcionEstado", width: "6rem", state: "ColorEstado", icon: "IconoEstado", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { width: "3rem", label: "Info. adici.", path: "btnverDetalle", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { width: "3rem", label: "Mensajes", path: "iconErrores", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
+                        { width: "3rem", label: "Editar", path: "btnEditar", demandPopin: true, minScreenWidth: "Tablet", hAlign: "Begin" },
                         //{ width: "5rem", path: "btnEliminarSolicitud" }
                     ];
 
@@ -1834,7 +1839,7 @@ sap.ui.define([
                         text: "Cargar Facturas",
                         icon: "sap-icon://enter-more",
                         press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable),
-                        visible:true
+                        visible: true
                     });
 
                     oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
@@ -1912,7 +1917,7 @@ sap.ui.define([
                         text: "Cargar Facturas",
                         icon: "sap-icon://enter-more",
                         press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable),
-                        visible:true
+                        visible: true
                     });
 
                     oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
@@ -1987,7 +1992,7 @@ sap.ui.define([
                         text: "Cargar Facturas",
                         icon: "sap-icon://enter-more",
                         press: this.onMostrarSeleccionEstructuraExcel.bind(this, TypeTable),
-                        visible:true
+                        visible: true
                     });
 
                     oHeaderToolbar.addContent(oButtonSeleccionarTipoCarga);
