@@ -462,7 +462,7 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             } catch (error) {
                 sap.ui.core.BusyIndicator.hide();
-                MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
+                MessageBox.warning("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
 
             }
         },
@@ -521,7 +521,7 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             } catch (error) {
                 sap.ui.core.BusyIndicator.hide();
-                MessageBox.error("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
+                MessageBox.warning("El proceso tardó en responder, por lo que se cortó la comunicación en línea. Actualice la búsqueda para ver los mensajes o contacte al administrador del aplicativo.")
 
             }
         },

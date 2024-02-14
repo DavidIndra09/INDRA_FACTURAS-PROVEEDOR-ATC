@@ -1338,7 +1338,7 @@ sap.ui.define([
                 "ESTADO": "01",
                 "WAERS": Data.Moneda,
                 "LIFNR": sap.ui.getCore().getModel("Lifnr").getData().Lifnr,
-                "FEMISI": that.formatDateToyyyyMMdd(new Date()),
+                "FEMISI": formatter.formatearFechaString(Data.Datbl), //that.formatDateToyyyyMMdd(new Date()), cambio a pedido de Jose
                 "IMPORT": (Data.Total).toString(),
                 "SOLFAC": "",
                 "FCRESO": "",
