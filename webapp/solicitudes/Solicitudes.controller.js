@@ -1297,7 +1297,7 @@ sap.ui.define([
             }
 
             let oReturn = that.ongetModelCabecera(Data, TypeTable);
-
+            
             let obj = {
                 "IS_CAB": JSON.stringify(oReturn),
                 "IT_DET": (TypeTable == "Repuestos") ? JSON.stringify(conformidades) : "",
