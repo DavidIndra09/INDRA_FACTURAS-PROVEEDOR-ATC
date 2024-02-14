@@ -137,7 +137,7 @@ sap.ui.define([
             else if( pValue == "10"){
                 return "blue";
             }
-            else if(pValue == "06" || pValue == "09"){
+            else if(pValue == "06" || pValue == "09" || pValue == "03"){
                 return "green"; 
             }
             else {

@@ -791,7 +791,7 @@ sap.ui.define([
                 value.FKDAT = formatter.formatearFechaString(value.FKDAT);
                 value.FCRESO = formatter.formatearFechaString(value.FCRESO);
                 value.FEMISI = formatter.formatearFechaString(value.FEMISI);
-                (value.ESTADO == "05" || value.ESTADO == "08" || value.ESTADO == "10" || value.ESTADO == "06" || value.ESTADO == "09") ? value.Tooltip = "Haz clic para obtener más detalles." : "";
+                (value.ESTADO == "05" || value.ESTADO == "08" || value.ESTADO == "10" || value.ESTADO == "06" || value.ESTADO == "09" || value.ESTADO == "03") ? value.Tooltip = "Haz clic para obtener más detalles." : "";
             }
 
 
@@ -831,7 +831,7 @@ sap.ui.define([
                     break;
 
                 case "03":
-                    object.state = "Warning";
+                    object.state = "Indication06";
                     object.icon = "sap-icon://sys-enter-2";
                     break;
 
@@ -1472,7 +1472,7 @@ sap.ui.define([
                     contentWidth: "500px"
                 });
             }
-            else if (oObject.ESTADO == "06" || oObject.ESTADO == "09") {
+            else if (oObject.ESTADO == "06" || oObject.ESTADO == "09" || oObject.ESTADO == "03") {
                 MessageBox[typeMessageBox](messageFormatter, {
                     stitle: titleMessageBox,
                     actions: [MessageBox.Action.OK],

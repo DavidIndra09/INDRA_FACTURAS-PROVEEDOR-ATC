@@ -16,7 +16,7 @@
     {
       "source": "^/sap/(.*)$",
       "target": "/sap/$1",
-      "destination": "SAP_QAS",
+      "destination": "SAP_PRINCIPAL_PRO",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
